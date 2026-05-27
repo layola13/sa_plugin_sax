@@ -1,0 +1,21 @@
+<Component name="AttrLab">
+  <state>
+    count = 1
+  </state>
+
+  <section class="attr-lab" style="display: grid; gap: 8px;">
+    <h1>Allowed attribute contract</h1>
+    <input class="field" style="padding: 4px;" value="{count}" placeholder="count" disabled="disabled" />
+    <button class="action" onclick={^bump}>Bump</button>
+  </section>
+
+  @bump:
+  L_ENTRY:
+    count = load state+AttrLab_count as i64
+    count = add count, 1
+    store state+AttrLab_count, count as i64
+    call @render()
+    ret
+
+  !count
+</Component>

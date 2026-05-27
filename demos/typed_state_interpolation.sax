@@ -1,0 +1,28 @@
+<Component name="TypedLab">
+  <state>
+    score = 7 as i32
+    active = 0 as i1
+    ratio = 0.75 as f64
+  </state>
+
+  <section class="typed-lab" style="display: grid; gap: 8px;">
+    <h1>Typed state interpolation</h1>
+    <p>Score: {score}</p>
+    <p>Active: {active}</p>
+    <p>Ratio: {ratio}</p>
+    <button class="action" onclick={^bump}>Bump</button>
+  </section>
+
+  @bump:
+  L_ENTRY:
+    score = load state+TypedLab_score as i32
+    score64 = sext score as i64
+    next64 = add score64, 1
+    next32 = trunc next64 as i32
+    store state+TypedLab_score, next32 as i32
+    store state+TypedLab_active, 1 as i1
+    call @render()
+    ret
+
+  !score !active !ratio
+</Component>

@@ -1,0 +1,56 @@
+#def SaxEvent_CTX_SIZE = 16
+#def SaxEvent_CTX_state = +0
+#def SaxEvent_STATE_SIZE = 8
+#def SaxEvent_STATE_count = +0
+
+@ffi_wrapper sax_event_init_ffi() -> ptr:
+L_ENTRY:
+    state = alloc SaxEvent_STATE_SIZE
+    store state+SaxEvent_STATE_count, 4 as i64
+    ctx = alloc SaxEvent_CTX_SIZE
+    store ctx+SaxEvent_CTX_state, state as ptr
+    return ctx
+
+@export sax_event_init() -> ptr:
+L_ENTRY:
+    ctx = call @sax_event_init_ffi()
+    return ctx
+
+@export sax_event_bump(ctx: ptr):
+L_ENTRY:
+    call @sax_event_bump_impl(ctx)
+    return
+
+@ffi_wrapper sax_event_bump_impl(ctx: ptr):
+L_ENTRY:
+    state = load ctx+SaxEvent_CTX_state as ptr
+    count = load state+SaxEvent_STATE_count as i64
+    count = add count, 1
+    store state+SaxEvent_STATE_count, count as i64
+    return
+
+@sax_event_destroy(ctx: ptr):
+L_ENTRY:
+    state = load ctx+SaxEvent_CTX_state as ptr
+    !state
+    !ctx
+    return
+
+@test "sax event handler export updates component state"():
+L_ENTRY:
+    ctx = call @sax_event_init()
+    call @sax_event_bump(ctx)
+    state = load ctx+SaxEvent_CTX_state as ptr
+    count = load state+SaxEvent_STATE_count as i64
+    ok = eq count, 5
+    br ok -> L_OK, L_ERR
+
+L_OK:
+    !state
+    !ctx
+    return
+
+L_ERR:
+    !state
+    !ctx
+    panic(1)

@@ -1,0 +1,24 @@
+<Component name="ExprLab">
+  <state>
+    count = 7
+    label = 5
+  </state>
+
+  <section class="expr-lab" style="display: grid; gap: 8px;">
+    <h1>Expression interpolation</h1>
+    <p>Total: {count + label * 2}</p>
+    <p>Adjusted: {(count + label * 2) / 3}</p>
+    <input class="field" style="padding: 4px;" value="{(count + label * 2) / 3}" placeholder="score" />
+    <button class="action" onclick={^bump}>Bump</button>
+  </section>
+
+  @bump:
+  L_ENTRY:
+    count = load state+ExprLab_count as i64
+    count = add count, 1
+    store state+ExprLab_count, count as i64
+    call @render()
+    ret
+
+  !count !label
+</Component>

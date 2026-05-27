@@ -1,0 +1,15 @@
+{
+  "name": "sa-plugin-sax-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "verify:browser": "node tools/verify_sax_browser.mjs",
+    "measure:todo-size": "node tools/measure_todo_size.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.5",
+    "playwright": "1.53.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  }
+}

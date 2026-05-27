@@ -1,0 +1,22 @@
+<Component name="BufferLab">
+  <state>
+    scratch = alloc 32
+    writes = 0
+  </state>
+
+  <section class="buffer-lab">
+    <h1>Buffer-backed state</h1>
+    <p>{writes}</p>
+    <button onclick={^recordWrite}>Record write</button>
+  </section>
+
+  @recordWrite:
+  L_ENTRY:
+    writes = load state+BufferLab_writes as i64
+    writes = add writes, 1
+    store state+BufferLab_writes, writes as i64
+    call @render()
+    ret
+
+  !scratch !writes
+</Component>

@@ -1,0 +1,41 @@
+#def SaxTest_CTX_SIZE = 16
+#def SaxTest_CTX_state = +0
+#def SaxTest_CTX_dom = +8
+
+@ffi_wrapper sax_contract_init_ffi() -> ptr:
+L_ENTRY:
+    state = alloc 8
+    dom = alloc 8
+    ctx = alloc SaxTest_CTX_SIZE
+    store ctx+SaxTest_CTX_state, state as ptr
+    store ctx+SaxTest_CTX_dom, dom as ptr
+    return ctx
+
+@export sax_contract_init() -> ptr:
+L_ENTRY:
+    ctx = call @sax_contract_init_ffi()
+    return ctx
+
+@export sax_app_init() -> ptr:
+L_ENTRY:
+    ctx = call @sax_contract_init()
+    return ctx
+
+@sax_contract_destroy(ctx: ptr):
+L_ENTRY:
+    state = load ctx+SaxTest_CTX_state as ptr
+    dom = load ctx+SaxTest_CTX_dom as ptr
+    !dom
+    !state
+    !ctx
+    return
+
+@test "sax app init returns owned context"():
+L_ENTRY:
+    ctx = call @sax_app_init()
+    state = load ctx+SaxTest_CTX_state as ptr
+    dom = load ctx+SaxTest_CTX_dom as ptr
+    !dom
+    !state
+    !ctx
+    return

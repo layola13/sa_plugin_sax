@@ -1,0 +1,57 @@
+<Component name="Dashboard">
+  <state>
+    visits = 12
+    alerts = 2
+    latency = 180
+  </state>
+
+  <main class="dashboard">
+    <header class="toolbar">
+      <h1>SAX Ops Dashboard</h1>
+      <p>Live counters rendered from owned component state</p>
+    </header>
+    <section class="metrics">
+      <article class="metric">
+        <h2>Visits</h2>
+        <p>{visits}</p>
+        <button onclick={^recordVisit}>Record visit</button>
+      </article>
+      <article class="metric">
+        <h2>Alerts</h2>
+        <p>{alerts}</p>
+        <button onclick={^ackAlert}>Ack alert</button>
+      </article>
+      <article class="metric">
+        <h2>Latency</h2>
+        <p>{latency} ms</p>
+        <button onclick={^improveLatency}>Improve</button>
+      </article>
+    </section>
+  </main>
+
+  @recordVisit:
+  L_ENTRY:
+    visits = load state+Dashboard_visits as i64
+    visits = add visits, 1
+    store state+Dashboard_visits, visits as i64
+    call @render()
+    ret
+
+  @ackAlert:
+  L_ENTRY:
+    alerts = load state+Dashboard_alerts as i64
+    alerts = sub alerts, 1
+    store state+Dashboard_alerts, alerts as i64
+    call @render()
+    ret
+
+  @improveLatency:
+  L_ENTRY:
+    latency = load state+Dashboard_latency as i64
+    latency = sub latency, 10
+    store state+Dashboard_latency, latency as i64
+    call @render()
+    ret
+
+  !visits !alerts !latency
+</Component>

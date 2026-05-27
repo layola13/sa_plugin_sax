@@ -1,0 +1,19 @@
+# Zig build cache and output
+.zig-cache/
+zig-out/
+
+# Node.js
+node_modules/
+.npm-cache/
+
+# Temp files
+.tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~

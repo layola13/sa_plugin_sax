@@ -1,0 +1,30 @@
+#def SaxTyped_STATE_SIZE = 24
+#def SaxTyped_score = +0
+#def SaxTyped_active = +8
+#def SaxTyped_ratio = +16
+
+@test "sax typed state stores narrow ints and f64 bits"():
+L_ENTRY:
+    state = alloc SaxTyped_STATE_SIZE
+    store state+SaxTyped_score, 7 as i32
+    store state+SaxTyped_active, 1 as i1
+    store state+SaxTyped_ratio, 4604930618986332160 as i64
+    score32 = load state+SaxTyped_score as i32
+    active1 = load state+SaxTyped_active as i1
+    ratio_bits = load state+SaxTyped_ratio as i64
+    score64 = sext score32 as i64
+    active64 = zext active1 as i64
+    score_ok = eq score64, 7
+    active_ok = eq active64, 1
+    ratio_ok = eq ratio_bits, 4604930618986332160
+    pair_ok = and score_ok, active_ok
+    ok = and pair_ok, ratio_ok
+    br ok -> L_OK, L_ERR
+
+L_OK:
+    !state
+    return
+
+L_ERR:
+    !state
+    panic(1)

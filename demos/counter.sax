@@ -1,0 +1,44 @@
+<Component name="Counter">
+  <state>
+    count = 0
+    last = 0
+  </state>
+
+  <section class="counter">
+    <h1>{count}</h1>
+    <p>Last updated: {last} ms ago</p>
+    <button onclick={^inc}>+1</button>
+    <button onclick={^dec}>-1</button>
+    <button onclick={^reset}>Reset</button>
+  </section>
+
+  @inc:
+  L_ENTRY:
+    count = load state+Counter_count as i64
+    count = add count, 1
+    store state+Counter_count, count as i64
+    last = call @sax_get_time()
+    store state+Counter_last, last as i64
+    call @render()
+    ret
+
+  @dec:
+  L_ENTRY:
+    count = load state+Counter_count as i64
+    count = sub count, 1
+    store state+Counter_count, count as i64
+    last = call @sax_get_time()
+    store state+Counter_last, last as i64
+    call @render()
+    ret
+
+  @reset:
+  L_ENTRY:
+    store state+Counter_count, 0 as i64
+    last = call @sax_get_time()
+    store state+Counter_last, last as i64
+    call @render()
+    ret
+
+  !count !last
+</Component>

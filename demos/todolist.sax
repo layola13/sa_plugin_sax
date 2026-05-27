@@ -1,0 +1,124 @@
+<Component name="TodoList">
+  <state>
+    item0 = alloc 32
+    item0_len = 0
+    item1 = alloc 32
+    item1_len = 0
+    item2 = alloc 32
+    item2_len = 0
+    count = 0
+  </state>
+
+  <section class="todo-list">
+    <h1>TodoList</h1>
+    <input class="field" placeholder="New item" />
+    <button onclick={^add}>Add</button>
+    <button onclick={^removeLast}>Delete last</button>
+    <p>Items: {count}</p>
+    <ul>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </section>
+
+  @add:
+  L_ENTRY:
+    count = load state+TodoList_count as i64
+    can_add = ult count, 3
+    br can_add -> L_ADD, L_ADD_DONE
+
+  L_ADD:
+    input = load dom+TodoList_node_input as ptr
+    is_zero = eq count, 0
+    br is_zero -> L_ADD_ZERO, L_ADD_CHECK_ONE
+
+  L_ADD_ZERO:
+    item0 = load state+TodoList_item0 as ptr
+    len0 = call @sax_dom_get_value(input, *item0, 32)
+    store state+TodoList_item0_len, len0 as i64
+    li0 = load dom+TodoList_node_li as ptr
+    call @sax_dom_set_text(li0, *item0, len0)
+    next0 = add count, 1
+    store state+TodoList_count, next0 as i64
+    call @sax_dom_set_value(input, *item0, 0)
+    call @render()
+    ret
+
+  L_ADD_CHECK_ONE:
+    is_one = eq count, 1
+    br is_one -> L_ADD_ONE, L_ADD_TWO
+
+  L_ADD_ONE:
+    item1 = load state+TodoList_item1 as ptr
+    len1 = call @sax_dom_get_value(input, *item1, 32)
+    store state+TodoList_item1_len, len1 as i64
+    li1 = load dom+TodoList_node_li_1 as ptr
+    call @sax_dom_set_text(li1, *item1, len1)
+    next1 = add count, 1
+    store state+TodoList_count, next1 as i64
+    call @sax_dom_set_value(input, *item1, 0)
+    call @render()
+    ret
+
+  L_ADD_TWO:
+    item2 = load state+TodoList_item2 as ptr
+    len2 = call @sax_dom_get_value(input, *item2, 32)
+    store state+TodoList_item2_len, len2 as i64
+    li2 = load dom+TodoList_node_li_2 as ptr
+    call @sax_dom_set_text(li2, *item2, len2)
+    next2 = add count, 1
+    store state+TodoList_count, next2 as i64
+    call @sax_dom_set_value(input, *item2, 0)
+    call @render()
+    ret
+
+  L_ADD_DONE:
+    ret
+
+  @removeLast:
+  L_ENTRY:
+    count = load state+TodoList_count as i64
+    is_empty = eq count, 0
+    br is_empty -> L_REMOVE_DONE, L_REMOVE_CHECK_ONE
+
+  L_REMOVE_CHECK_ONE:
+    is_one = eq count, 1
+    br is_one -> L_REMOVE_ZERO, L_REMOVE_CHECK_TWO
+
+  L_REMOVE_ZERO:
+    item0 = load state+TodoList_item0 as ptr
+    li0 = load dom+TodoList_node_li as ptr
+    call @sax_dom_set_text(li0, *item0, 0)
+    store state+TodoList_item0_len, 0 as i64
+    store state+TodoList_count, 0 as i64
+    call @render()
+    ret
+
+  L_REMOVE_CHECK_TWO:
+    is_two = eq count, 2
+    br is_two -> L_REMOVE_ONE, L_REMOVE_TWO
+
+  L_REMOVE_ONE:
+    item1 = load state+TodoList_item1 as ptr
+    li1 = load dom+TodoList_node_li_1 as ptr
+    call @sax_dom_set_text(li1, *item1, 0)
+    store state+TodoList_item1_len, 0 as i64
+    store state+TodoList_count, 1 as i64
+    call @render()
+    ret
+
+  L_REMOVE_TWO:
+    item2 = load state+TodoList_item2 as ptr
+    li2 = load dom+TodoList_node_li_2 as ptr
+    call @sax_dom_set_text(li2, *item2, 0)
+    store state+TodoList_item2_len, 0 as i64
+    store state+TodoList_count, 2 as i64
+    call @render()
+    ret
+
+  L_REMOVE_DONE:
+    ret
+
+  !item0 !item0_len !item1 !item1_len !item2 !item2_len !count
+</Component>

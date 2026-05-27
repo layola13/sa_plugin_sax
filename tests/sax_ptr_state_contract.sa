@@ -1,0 +1,43 @@
+#def SaxPtr_CTX_SIZE = 16
+#def SaxPtr_CTX_state = +0
+#def SaxPtr_STATE_SIZE = 8
+#def SaxPtr_STATE_scratch = +0
+
+@ffi_wrapper sax_ptr_state_init_ffi() -> ptr:
+L_ENTRY:
+    state = alloc SaxPtr_STATE_SIZE
+    scratch = alloc 32
+    store state+SaxPtr_STATE_scratch, scratch as ptr
+    ctx = alloc SaxPtr_CTX_SIZE
+    store ctx+SaxPtr_CTX_state, state as ptr
+    return ctx
+
+@export sax_ptr_state_init() -> ptr:
+L_ENTRY:
+    ctx = call @sax_ptr_state_init_ffi()
+    return ctx
+
+@export sax_app_init() -> ptr:
+L_ENTRY:
+    ctx = call @sax_ptr_state_init()
+    return ctx
+
+@sax_ptr_state_destroy(ctx: ptr):
+L_ENTRY:
+    state = load ctx+SaxPtr_CTX_state as ptr
+    scratch = load state+SaxPtr_STATE_scratch as ptr
+    !scratch
+    !state
+    !ctx
+    return
+
+@test "sax ptr state owns heap allocation"():
+L_ENTRY:
+    ctx = call @sax_app_init()
+    state = load ctx+SaxPtr_CTX_state as ptr
+    scratch = load state+SaxPtr_STATE_scratch as ptr
+    store scratch+0, 7 as i64
+    !scratch
+    !state
+    !ctx
+    return

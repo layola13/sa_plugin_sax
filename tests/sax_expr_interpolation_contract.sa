@@ -1,0 +1,26 @@
+#def SaxExpr_STATE_SIZE = 16
+#def SaxExpr_STATE_count = +0
+#def SaxExpr_STATE_label = +8
+
+@test "sax expression interpolation arithmetic is referee safe"():
+L_ENTRY:
+    state = alloc SaxExpr_STATE_SIZE
+    store state+SaxExpr_STATE_count, 7 as i64
+    store state+SaxExpr_STATE_label, 5 as i64
+    count = load state+SaxExpr_STATE_count as i64
+    label = load state+SaxExpr_STATE_label as i64
+    doubled = mul label, 2
+    total = add count, doubled
+    attr_value = sdiv total, 3
+    total_ok = eq total, 17
+    attr_ok = eq attr_value, 5
+    ok = and total_ok, attr_ok
+    br ok -> L_OK, L_ERR
+
+L_OK:
+    !state
+    return
+
+L_ERR:
+    !state
+    panic(1)
