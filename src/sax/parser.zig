@@ -166,6 +166,10 @@ const attr_whitelist = [_][]const u8{
     "value",
     "placeholder",
     "disabled",
+    "id",
+    "width",
+    "height",
+    "renderer",
 };
 
 const AttributeParseOptions = struct {
@@ -1153,6 +1157,7 @@ test "parser accepts whitelisted DOM attrs and route attrs" {
     const source =
         \\<Component name="HomePage">
         \\  <input class="field" style="width: 100%" value="{count}" placeholder="Count" disabled="disabled" />
+        \\  <canvas id="wgpu-canvas" width="800" height="600" renderer="wgpu"></canvas>
         \\</Component>
         \\<Component name="App">
         \\  <Router>
@@ -1166,6 +1171,7 @@ test "parser accepts whitelisted DOM attrs and route attrs" {
 
     try std.testing.expectEqual(@as(usize, 2), program.components.len);
     try std.testing.expectEqual(@as(usize, 5), program.components[0].dom_nodes[0].attrs.len);
+    try std.testing.expectEqual(@as(usize, 4), program.components[0].dom_nodes[1].attrs.len);
     try std.testing.expectEqual(@as(usize, 1), program.components[1].route_pages.len);
     try std.testing.expectEqualStrings("/", program.components[1].route_pages[0].path);
     try std.testing.expectEqualStrings("HomePage", program.components[1].route_pages[0].component);
