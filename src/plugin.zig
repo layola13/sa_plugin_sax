@@ -24,6 +24,7 @@ const SaxArtifacts = struct {
     sa_code: std.ArrayList(u8),
     airlock_js: std.ArrayList(u8),
     wgpu_airlock_js: ?std.ArrayList(u8),
+    sa3d_airlock_js: ?std.ArrayList(u8),
     index_html: std.ArrayList(u8),
 
     fn deinit(self: *SaxArtifacts, allocator: std.mem.Allocator) void {
@@ -31,20 +32,65 @@ const SaxArtifacts = struct {
         self.sa_code.deinit();
         self.airlock_js.deinit();
         if (self.wgpu_airlock_js) |*js| js.deinit();
+        if (self.sa3d_airlock_js) |*js| js.deinit();
         self.index_html.deinit();
         self.* = undefined;
     }
 };
 
-const WgpuSupport = struct {
+const SidecarSupport = struct {
     prelude: std.ArrayList(u8),
     airlock_js: std.ArrayList(u8),
 
-    fn deinit(self: *WgpuSupport) void {
+    fn deinit(self: *SidecarSupport) void {
         self.prelude.deinit();
         self.airlock_js.deinit();
         self.* = undefined;
     }
+};
+
+const SidecarSpec = struct {
+    label: []const u8,
+    error_tag: []const u8,
+    share_env: []const u8,
+    share_env_alt: ?[]const u8 = null,
+    airlock_env: []const u8,
+    installed_name: []const u8,
+    lib_name: []const u8,
+    path_token: []const u8,
+    dev_share_dir: []const u8,
+    sai_file: []const u8,
+    sal_file: []const u8,
+    airlock_file: []const u8,
+};
+
+const wgpu_sidecar = SidecarSpec{
+    .label = "WGPU",
+    .error_tag = "SA-SAX-WGPU",
+    .share_env = "SA_WGPU_SHARE_DIR",
+    .airlock_env = "SA_WGPU_AIRLOCK_JS",
+    .installed_name = "wgpu",
+    .lib_name = "libwgpu.so",
+    .path_token = "sa_plugin_wgpu",
+    .dev_share_dir = "/home/vscode/projects/sa_plugins/sa_plugin_wgpu/zig-out/share",
+    .sai_file = "wgpu.sai",
+    .sal_file = "wgpu.sal",
+    .airlock_file = "wgpu_airlock.js",
+};
+
+const sa3d_sidecar = SidecarSpec{
+    .label = "SA3D",
+    .error_tag = "SA-SAX-SA3D",
+    .share_env = "SA_3D_SHARE_DIR",
+    .share_env_alt = "SA3D_SHARE_DIR",
+    .airlock_env = "SA_3D_AIRLOCK_JS",
+    .installed_name = "3d",
+    .lib_name = "lib3d.so",
+    .path_token = "sa_plugin_3d",
+    .dev_share_dir = "/home/vscode/projects/sa_plugins/sa_plugin_3dengines/sa_plugin_3d/zig-out/share",
+    .sai_file = "sa3d.sai",
+    .sal_file = "sa3d.sal",
+    .airlock_file = "sa3d_airlock.js",
 };
 
 const ValidationError = enum {
@@ -170,6 +216,12 @@ fn sourceUsesWgpu(source: []const u8) bool {
         std.mem.containsAtLeast(u8, source, 1, "WGPU_CUBE_");
 }
 
+fn sourceUsesSa3d(source: []const u8) bool {
+    return std.mem.containsAtLeast(u8, source, 1, "renderer=\"sa3d\"") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_") or
+        std.mem.containsAtLeast(u8, source, 1, "SA3D_");
+}
+
 fn fileExists(path: []const u8) bool {
     var file = std.fs.cwd().openFile(path, .{}) catch return false;
     file.close();
@@ -195,8 +247,8 @@ fn addEnvDirCandidate(allocator: std.mem.Allocator, candidates: *std.ArrayList([
     try addOwnedCandidate(candidates, value);
 }
 
-fn addEnvAirlockDirCandidate(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8)) !void {
-    const value = std.process.getEnvVarOwned(allocator, "SA_WGPU_AIRLOCK_JS") catch |err| switch (err) {
+fn addEnvAirlockDirCandidate(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), env_name: []const u8) !void {
+    const value = std.process.getEnvVarOwned(allocator, env_name) catch |err| switch (err) {
         error.EnvironmentVariableNotFound => return,
         else => return err,
     };
@@ -205,16 +257,16 @@ fn addEnvAirlockDirCandidate(allocator: std.mem.Allocator, candidates: *std.Arra
     try addOwnedCandidate(candidates, try allocator.dupe(u8, dir));
 }
 
-fn addShareDirFromPluginLib(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), lib_path: []const u8) !void {
+fn addShareDirFromPluginLib(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), spec: SidecarSpec, lib_path: []const u8) !void {
     const basename = std.fs.path.basename(lib_path);
-    if (!std.mem.eql(u8, basename, "libwgpu.so") and !std.mem.containsAtLeast(u8, lib_path, 1, "sa_plugin_wgpu")) return;
+    if (!std.mem.eql(u8, basename, spec.lib_name) and !std.mem.containsAtLeast(u8, lib_path, 1, spec.path_token)) return;
     const lib_dir = std.fs.path.dirname(lib_path) orelse return;
     try addOwnedCandidate(candidates, try std.fs.path.join(allocator, &.{ lib_dir, "share" }));
     const prefix_dir = std.fs.path.dirname(lib_dir) orelse return;
     try addOwnedCandidate(candidates, try std.fs.path.join(allocator, &.{ prefix_dir, "share" }));
 }
 
-fn addInstalledWgpuShareCandidate(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8)) !void {
+fn addInstalledShareCandidate(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), spec: SidecarSpec) !void {
     const home = std.process.getEnvVarOwned(allocator, "SA_PLUGINS_HOME") catch |home_err| switch (home_err) {
         error.EnvironmentVariableNotFound => blk: {
             const user_home = std.process.getEnvVarOwned(allocator, "HOME") catch |err| switch (err) {
@@ -227,10 +279,10 @@ fn addInstalledWgpuShareCandidate(allocator: std.mem.Allocator, candidates: *std
         else => return home_err,
     };
     defer allocator.free(home);
-    try addOwnedCandidate(candidates, try std.fs.path.join(allocator, &.{ home, "installed", "wgpu", "current", "share" }));
+    try addOwnedCandidate(candidates, try std.fs.path.join(allocator, &.{ home, "installed", spec.installed_name, "current", "share" }));
 }
 
-fn addPluginPathCandidates(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8)) !void {
+fn addPluginPathCandidates(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), spec: SidecarSpec) !void {
     const value = std.process.getEnvVarOwned(allocator, "SA_PLUGINS_PATH") catch |err| switch (err) {
         error.EnvironmentVariableNotFound => return,
         else => return err,
@@ -240,29 +292,30 @@ fn addPluginPathCandidates(allocator: std.mem.Allocator, candidates: *std.ArrayL
     var parts = std.mem.splitScalar(u8, value, ':');
     while (parts.next()) |part| {
         if (part.len == 0) continue;
-        try addShareDirFromPluginLib(allocator, candidates, part);
+        try addShareDirFromPluginLib(allocator, candidates, spec, part);
     }
 }
 
-fn findWgpuShareDir(allocator: std.mem.Allocator) !?[]u8 {
+fn findSidecarShareDir(allocator: std.mem.Allocator, spec: SidecarSpec) !?[]u8 {
     var candidates = std.ArrayList([]u8).init(allocator);
     defer {
         for (candidates.items) |candidate| allocator.free(candidate);
         candidates.deinit();
     }
 
-    try addEnvDirCandidate(allocator, &candidates, "SA_WGPU_SHARE_DIR");
-    try addEnvAirlockDirCandidate(allocator, &candidates);
-    try addPluginPathCandidates(allocator, &candidates);
-    try addInstalledWgpuShareCandidate(allocator, &candidates);
-    try addOwnedCandidate(&candidates, try allocator.dupe(u8, "/home/vscode/projects/sa_plugins/sa_plugin_wgpu/zig-out/share"));
+    try addEnvDirCandidate(allocator, &candidates, spec.share_env);
+    if (spec.share_env_alt) |env_name| try addEnvDirCandidate(allocator, &candidates, env_name);
+    try addEnvAirlockDirCandidate(allocator, &candidates, spec.airlock_env);
+    try addPluginPathCandidates(allocator, &candidates, spec);
+    try addInstalledShareCandidate(allocator, &candidates, spec);
+    try addOwnedCandidate(&candidates, try allocator.dupe(u8, spec.dev_share_dir));
 
     for (candidates.items) |candidate| {
-        const sai_path = try std.fs.path.join(allocator, &.{ candidate, "wgpu.sai" });
+        const sai_path = try std.fs.path.join(allocator, &.{ candidate, spec.sai_file });
         defer allocator.free(sai_path);
-        const sal_path = try std.fs.path.join(allocator, &.{ candidate, "wgpu.sal" });
+        const sal_path = try std.fs.path.join(allocator, &.{ candidate, spec.sal_file });
         defer allocator.free(sal_path);
-        const airlock_path = try std.fs.path.join(allocator, &.{ candidate, "wgpu_airlock.js" });
+        const airlock_path = try std.fs.path.join(allocator, &.{ candidate, spec.airlock_file });
         defer allocator.free(airlock_path);
         if (fileExists(sai_path) and fileExists(sal_path) and fileExists(airlock_path)) {
             return try allocator.dupe(u8, candidate);
@@ -271,18 +324,24 @@ fn findWgpuShareDir(allocator: std.mem.Allocator) !?[]u8 {
     return null;
 }
 
-fn loadWgpuSupport(allocator: std.mem.Allocator, stderr: std.io.AnyWriter) !WgpuSupport {
-    const share_dir = (try findWgpuShareDir(allocator)) orelse {
-        try stderr.writeAll("error[SA-SAX-WGPU]: WGPU SAX source requires sa_plugin_wgpu sidecar files; install sa_plugin_wgpu, set SA_WGPU_SHARE_DIR, or include libwgpu.so in SA_PLUGINS_PATH\n");
+fn loadSidecarSupport(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, spec: SidecarSpec) !SidecarSupport {
+    const share_dir = (try findSidecarShareDir(allocator, spec)) orelse {
+        try stderr.print("error[{s}]: {s} SAX source requires sidecar files; install sa_plugin_{s}, set {s}, or include {s} in SA_PLUGINS_PATH\n", .{
+            spec.error_tag,
+            spec.label,
+            spec.installed_name,
+            spec.share_env,
+            spec.lib_name,
+        });
         return error.SaxCheckFailed;
     };
     defer allocator.free(share_dir);
 
-    const sai_path = try std.fs.path.join(allocator, &.{ share_dir, "wgpu.sai" });
+    const sai_path = try std.fs.path.join(allocator, &.{ share_dir, spec.sai_file });
     defer allocator.free(sai_path);
-    const sal_path = try std.fs.path.join(allocator, &.{ share_dir, "wgpu.sal" });
+    const sal_path = try std.fs.path.join(allocator, &.{ share_dir, spec.sal_file });
     defer allocator.free(sal_path);
-    const airlock_path = try std.fs.path.join(allocator, &.{ share_dir, "wgpu_airlock.js" });
+    const airlock_path = try std.fs.path.join(allocator, &.{ share_dir, spec.airlock_file });
     defer allocator.free(airlock_path);
 
     const sai = try std.fs.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
@@ -455,16 +514,25 @@ fn compileSaxArtifacts(
     }
 
     const uses_wgpu = sourceUsesWgpu(source);
+    const uses_sa3d = sourceUsesSa3d(source);
     var wgpu_airlock_js: ?std.ArrayList(u8) = null;
     errdefer if (wgpu_airlock_js) |*js| js.deinit();
+    var sa3d_airlock_js: ?std.ArrayList(u8) = null;
+    errdefer if (sa3d_airlock_js) |*js| js.deinit();
 
     var sa_code = std.ArrayList(u8).init(allocator);
     errdefer sa_code.deinit();
     if (uses_wgpu) {
-        var wgpu_support = try loadWgpuSupport(allocator, stderr);
+        var wgpu_support = try loadSidecarSupport(allocator, stderr, wgpu_sidecar);
         defer wgpu_support.prelude.deinit();
         try sa_code.appendSlice(wgpu_support.prelude.items);
         wgpu_airlock_js = wgpu_support.airlock_js;
+    }
+    if (uses_sa3d) {
+        var sa3d_support = try loadSidecarSupport(allocator, stderr, sa3d_sidecar);
+        defer sa3d_support.prelude.deinit();
+        try sa_code.appendSlice(sa3d_support.prelude.items);
+        sa3d_airlock_js = sa3d_support.airlock_js;
     }
     for (program.components, 0..) |component, idx| {
         var sax_lowerer = try lowerer.SaxLowerer.init(allocator, component);
@@ -478,7 +546,7 @@ fn compileSaxArtifacts(
     try sa_code.writer().print("@export sax_app_init() -> ptr:\nL_ENTRY:\n  ctx = call @sax_{s}_init()\n  return ctx\n\n", .{root_name});
 
     var airlock_generator = airlock_gen.AirlockGenerator.init(allocator);
-    const airlock_js = try airlock_generator.generateAirlockJSWithOptions(.{ .wgpu = uses_wgpu });
+    const airlock_js = try airlock_generator.generateAirlockJSWithOptions(.{ .wgpu = uses_wgpu, .sa3d = uses_sa3d });
     errdefer airlock_js.deinit();
 
     const index_html = try airlock_generator.generateIndexHTML(sourceStem(sax_file), "app.wasm");
@@ -490,6 +558,7 @@ fn compileSaxArtifacts(
         .sa_code = sa_code,
         .airlock_js = airlock_js,
         .wgpu_airlock_js = wgpu_airlock_js,
+        .sa3d_airlock_js = sa3d_airlock_js,
         .index_html = index_html,
     };
 }
@@ -561,6 +630,8 @@ fn executeSaxBuild(
     defer ctx.allocator.free(airlock_path);
     const wgpu_airlock_path = try std.fs.path.join(ctx.allocator, &.{ out_dir, "wgpu_airlock.js" });
     defer ctx.allocator.free(wgpu_airlock_path);
+    const sa3d_airlock_path = try std.fs.path.join(ctx.allocator, &.{ out_dir, "sa3d_airlock.js" });
+    defer ctx.allocator.free(sa3d_airlock_path);
     const html_path = try std.fs.path.join(ctx.allocator, &.{ out_dir, "index.html" });
     defer ctx.allocator.free(html_path);
     const wasm_path = try std.fs.path.join(ctx.allocator, &.{ out_dir, "app.wasm" });
@@ -584,6 +655,9 @@ fn executeSaxBuild(
     if (artifacts.wgpu_airlock_js) |*wgpu_js| {
         try writeAllFile(wgpu_airlock_path, wgpu_js.items);
     }
+    if (artifacts.sa3d_airlock_js) |*sa3d_js| {
+        try writeAllFile(sa3d_airlock_path, sa3d_js.items);
+    }
     try writeAllFile(html_path, artifacts.index_html.items);
 
     try stdout.print("SAX build successful\n", .{});
@@ -591,6 +665,7 @@ fn executeSaxBuild(
     try stdout.print("  app.wasm: {s}\n", .{wasm_path});
     try stdout.print("  airlock.js: {s}\n", .{airlock_path});
     if (artifacts.wgpu_airlock_js != null) try stdout.print("  wgpu_airlock.js: {s}\n", .{wgpu_airlock_path});
+    if (artifacts.sa3d_airlock_js != null) try stdout.print("  sa3d_airlock.js: {s}\n", .{sa3d_airlock_path});
     try stdout.print("  index.html: {s}\n", .{html_path});
     return 0;
 }
@@ -708,15 +783,18 @@ fn anyWriterFromHostStream(stream: plugin_api.HostStream, storage: *plugin_api.H
 
 fn runSaxCommandAbi(ctx: *const plugin_api.Context, argv: [*]const [*:0]const u8, argv_len: usize, stdout: plugin_api.HostStream, stderr: plugin_api.HostStream, out_code: *u8) callconv(.c) u32 {
     out_code.* = 0;
-    const args = cArgvToSlice(argv, argv_len, ctx.allocator) catch return @intFromEnum(plugin_api.AbiStatus.failed);
-    defer ctx.allocator.free(args);
+    const allocator = std.heap.page_allocator;
+    var local_ctx = ctx.*;
+    local_ctx.allocator = allocator;
+    const args = cArgvToSlice(argv, argv_len, allocator) catch return @intFromEnum(plugin_api.AbiStatus.failed);
+    defer allocator.free(args);
 
     var stdout_storage = stdout;
     var stderr_storage = stderr;
     const stdout_writer = anyWriterFromHostStream(stdout, &stdout_storage);
     const stderr_writer = anyWriterFromHostStream(stderr, &stderr_storage);
 
-    const result = runSaxCommandImpl(ctx, args, stdout_writer, stderr_writer) catch |err| {
+    const result = runSaxCommandImpl(&local_ctx, args, stdout_writer, stderr_writer) catch |err| {
         if (!isSaxCliError(err)) return @intFromEnum(plugin_api.AbiStatus.failed);
         writeSaxCliError(stderr_writer, args, err) catch return @intFromEnum(plugin_api.AbiStatus.failed);
         out_code.* = saxCliExitCode(err);

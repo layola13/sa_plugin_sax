@@ -5,6 +5,7 @@ const Allocator = std.mem.Allocator;
 
 pub const AirlockOptions = struct {
     wgpu: bool = false,
+    sa3d: bool = false,
 };
 
 pub const AirlockGenerator = struct {
@@ -19,12 +20,13 @@ pub const AirlockGenerator = struct {
         return self.generateAirlockJSWithOptions(.{});
     }
 
-    /// 生成 airlock.js 胶水层代码，可按需要求加载 WGPU sidecar。
+    /// 生成 airlock.js 胶水层代码，可按需要求加载浏览器 sidecar。
     pub fn generateAirlockJSWithOptions(self: *AirlockGenerator, options: AirlockOptions) !std.ArrayList(u8) {
         var output = std.ArrayList(u8).init(self.allocator);
         errdefer output.deinit();
 
         try output.writer().print("const SAX_WGPU_REQUIRED = {};\n", .{options.wgpu});
+        try output.writer().print("const SAX_SA3D_REQUIRED = {};\n", .{options.sa3d});
 
         const airlock_template =
             \\// airlock.js — SAX 自动生成，请勿手动修改
@@ -402,11 +404,23 @@ pub const AirlockGenerator = struct {
             \\  return mod;
             \\}
             \\
+            \\async function _load_sa3d_airlock() {
+            \\  if (!SAX_SA3D_REQUIRED) return null;
+            \\  const mod = await import("./sa3d_airlock.js");
+            \\  if (!mod.sax_sa3d_airlock || !mod.sax_sa3d_bind_wasm) {
+            \\    throw new Error("sa3d_airlock.js does not expose the SAX SA3D broker surface");
+            \\  }
+            \\  return mod;
+            \\}
+            \\
             \\// ── WASM 加载入口
             \\let _wasm_instance;
             \\export async function sax_init(wasm_url) {
             \\  const wgpu_module = await _load_wgpu_airlock();
-            \\  const imports = wgpu_module ? { ...sax_airlock, ...wgpu_module.sax_wgpu_airlock } : sax_airlock;
+            \\  const sa3d_module = await _load_sa3d_airlock();
+            \\  const imports = { ...sax_airlock };
+            \\  if (wgpu_module) Object.assign(imports, wgpu_module.sax_wgpu_airlock);
+            \\  if (sa3d_module) Object.assign(imports, sa3d_module.sax_sa3d_airlock);
             \\  const { instance } = await WebAssembly.instantiateStreaming(
             \\    fetch(wasm_url),
             \\    { env: imports }
@@ -414,6 +428,7 @@ pub const AirlockGenerator = struct {
             \\  _wasm_instance = instance;
             \\  _mem = instance.exports.memory;
             \\  if (wgpu_module) wgpu_module.sax_wgpu_bind_wasm(instance, _mem);
+            \\  if (sa3d_module) sa3d_module.sax_sa3d_bind_wasm(instance, _mem);
             \\  _malloc_next = _align_up(_heap_base(), 8);
             \\  _router_sync_path();
             \\  _router_install_listeners();
@@ -485,6 +500,7 @@ test "airlock generator emits the documented bridge surface" {
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "exit(code)"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "sax_dom_query(sel_ptr, sel_len)"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "const SAX_WGPU_REQUIRED = false;"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "const SAX_SA3D_REQUIRED = false;"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "const SAX_ALLOWED_ATTRS = new Set([\"class\", \"style\", \"value\", \"placeholder\", \"disabled\", \"id\", \"width\", \"height\", \"renderer\"]);"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "SaxInvalidAttribute"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "sax_dom_bind_event(node_h, evt_ptr, evt_len, handler_ptr, handler_len, ctx)"));
@@ -508,6 +524,17 @@ test "airlock generator can require the WGPU sidecar" {
 
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "const SAX_WGPU_REQUIRED = true;"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "await import(\"./wgpu_airlock.js\")"));
-    try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "...wgpu_module.sax_wgpu_airlock"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "Object.assign(imports, wgpu_module.sax_wgpu_airlock)"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "sax_wgpu_bind_wasm(instance, _mem)"));
+}
+
+test "airlock generator can require the SA3D sidecar" {
+    var generator = AirlockGenerator.init(std.testing.allocator);
+    const js = try generator.generateAirlockJSWithOptions(.{ .sa3d = true });
+    defer js.deinit();
+
+    try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "const SAX_SA3D_REQUIRED = true;"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "await import(\"./sa3d_airlock.js\")"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "Object.assign(imports, sa3d_module.sax_sa3d_airlock)"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "sax_sa3d_bind_wasm(instance, _mem)"));
 }

@@ -13,6 +13,13 @@ For an input such as `demos/counter.sax`, the build command generates:
 
 `app.wasm` contains the component logic, `airlock.js` is the DOM bridge, and `index.html` loads both.
 
+When a source uses a browser sidecar renderer, SAX also copies the sidecar broker into the output directory:
+
+- `renderer="wgpu"`, `sa_wgpu_`, or `WGPU_CUBE_` copies `wgpu_airlock.js`.
+- `renderer="sa3d"`, `sa3d_`, or `SA3D_` copies `sa3d_airlock.js`.
+
+The sidecar share directory is discovered from explicit env vars, `SA_PLUGINS_PATH`, an installed plugin home, or the local development checkout. The current 3D engine development fallback is `/home/vscode/projects/sa_plugins/sa_plugin_3dengines/sa_plugin_3d/zig-out/share`.
+
 ## Example
 
 ```bash
