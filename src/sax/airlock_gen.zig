@@ -148,6 +148,14 @@ pub const AirlockGenerator = struct {
             \\  free(_ptr) {
             \\  },
             \\
+            \\  write(_fd, _ptr, len) {
+            \\    return Number(len ?? 0);
+            \\  },
+            \\
+            \\  exit(code) {
+            \\    throw new Error(`SAX wasm called exit(${Number(code)})`);
+            \\  },
+            \\
             \\  // DOM 查询
             \\  sax_dom_query(sel_ptr, sel_len) {
             \\    const sel = _read_str(sel_ptr, sel_len);
@@ -473,6 +481,8 @@ test "airlock generator emits the documented bridge surface" {
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "malloc(size)"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "return _malloc(size);"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "free(_ptr)"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "write(_fd, _ptr, len)"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "exit(code)"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "sax_dom_query(sel_ptr, sel_len)"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "const SAX_WGPU_REQUIRED = false;"));
     try std.testing.expect(std.mem.containsAtLeast(u8, js.items, 1, "const SAX_ALLOWED_ATTRS = new Set([\"class\", \"style\", \"value\", \"placeholder\", \"disabled\", \"id\", \"width\", \"height\", \"renderer\"]);"));
