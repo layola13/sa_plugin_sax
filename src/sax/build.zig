@@ -1,5 +1,6 @@
 const std = @import("std");
 const builtin = @import("builtin");
+const build_options = @import("build_options");
 
 fn writeTestWasm(path: []const u8) !void {
     try ensureParentDir(path);
@@ -509,6 +510,61 @@ pub fn buildBrowserWasmFromSourceText(
         return 0;
     }
 
+    const exports = dupeWasmExports(allocator, source_text) catch |err| {
+        try stderr.print("error[SAX-CACHE-EXPORTS]: failed to extract exports: {s}\n", .{@errorName(err)});
+        return 1;
+    };
+    defer freeWasmExports(allocator, exports);
+
+    const hash = getBrowserWasmCacheKey(allocator, source_text, debug, optimization, exports) catch |err| {
+        try stderr.print("error[SAX-CACHE-HASH]: failed to compute cache key: {s}\n", .{@errorName(err)});
+        return 1;
+    };
+    var hash_hex: [64]u8 = undefined;
+    _ = std.fmt.bufPrint(&hash_hex, "{s}", .{std.fmt.fmtSliceHexLower(&hash)}) catch unreachable;
+
+    const project_root = projectRootFromSourcePath(allocator, source_path) catch |err| {
+        try stderr.print("error[SAX-CACHE-ROOT]: failed to find project root: {s}\n", .{@errorName(err)});
+        return 1;
+    };
+    defer allocator.free(project_root);
+
+    const cache_dir = std.fs.path.join(allocator, &.{ project_root, ".sa_cache", "vite-browser-wasm", &hash_hex }) catch |err| {
+        try stderr.print("error[SAX-CACHE-PATH]: failed to join cache dir path: {s}\n", .{@errorName(err)});
+        return 1;
+    };
+    defer allocator.free(cache_dir);
+
+    const cached_wasm = std.fs.path.join(allocator, &.{ cache_dir, "output.wasm" }) catch |err| {
+        try stderr.print("error[SAX-CACHE-PATH]: failed to join cached wasm path: {s}\n", .{@errorName(err)});
+        return 1;
+    };
+    defer allocator.free(cached_wasm);
+    const cached_bc = std.fs.path.join(allocator, &.{ cache_dir, "artifact.sa.bc" }) catch |err| {
+        try stderr.print("error[SAX-CACHE-PATH]: failed to join cached bc path: {s}\n", .{@errorName(err)});
+        return 1;
+    };
+    defer allocator.free(cached_bc);
+
+    const artifact_path = std.fmt.allocPrint(allocator, "{s}.sa.bc", .{out_path}) catch |err| {
+        try stderr.print("error[SAX-CACHE-PATH]: failed to format artifact path: {s}\n", .{@errorName(err)});
+        return 1;
+    };
+    defer allocator.free(artifact_path);
+
+    if (filePresentNonEmpty(cached_wasm) and filePresentNonEmpty(cached_bc)) {
+        copyFile(cached_wasm, out_path) catch |err| {
+            try stderr.print("error[SAX-CACHE-COPY]: failed to copy cached wasm: {s}\n", .{@errorName(err)});
+            return 1;
+        };
+        copyFile(cached_bc, artifact_path) catch |err| {
+            try stderr.print("error[SAX-CACHE-COPY]: failed to copy cached bc: {s}\n", .{@errorName(err)});
+            return 1;
+        };
+        try stderr.print("  [vite] browser wasm cache hit: {s}\n", .{hash_hex[0..12]});
+        return 0;
+    }
+
     const compiled = try compileSourceText(allocator, source_path, source_text, options);
     switch (compiled) {
         .trap => |report| {
@@ -519,14 +575,9 @@ pub fn buildBrowserWasmFromSourceText(
             var owned = ok;
             defer owned.deinit(allocator);
 
-            const artifact_path = try std.fmt.allocPrint(allocator, "{s}.sa.bc", .{out_path});
-            defer allocator.free(artifact_path);
-
             try ensureParentDir(artifact_path);
             try emit_llvm_llvmc.emitLlvmcToFile(allocator, owned.verified, &owned.flat.def_dict, owned.flat.loc_table, source_path, 32, .{ .debug = debug, .wasm_compat = true, .jobs = options.jobs }, artifact_path);
 
-            const exports = try dupeWasmExports(allocator, source_text);
-            defer freeWasmExports(allocator, exports);
             driver.compileWasm(
                 allocator,
                 artifact_path,
@@ -539,9 +590,126 @@ pub fn buildBrowserWasmFromSourceText(
                 error.ChildProcessFailed => return 1,
                 else => return err,
             };
+
+            if (std.fs.path.dirname(cached_wasm)) |dir| {
+                if (dir.len != 0) std.fs.cwd().makePath(dir) catch {};
+            }
+            std.fs.cwd().copyFile(out_path, std.fs.cwd(), cached_wasm, .{}) catch {};
+            std.fs.cwd().copyFile(artifact_path, std.fs.cwd(), cached_bc, .{}) catch {};
+
+            const cached_manifest = std.fs.path.join(allocator, &.{ cache_dir, "manifest.json" }) catch null;
+            if (cached_manifest) |man_path| {
+                defer allocator.free(man_path);
+                var manifest_file = std.fs.cwd().createFile(man_path, .{}) catch null;
+                if (manifest_file) |*f| {
+                    defer f.close();
+                    f.writer().print(
+                        \\{{
+                        \\  "version": 1,
+                        \\  "debug": {},
+                        \\  "optimization": "{s}",
+                        \\  "exports_count": {}
+                        \\}}
+                    , .{ debug, @tagName(optimization), exports.len }) catch {};
+                }
+            }
+
             return 0;
         },
     }
+}
+
+fn getBrowserWasmCacheKey(
+    allocator: std.mem.Allocator,
+    source_text: []const u8,
+    debug: bool,
+    optimization: anytype,
+    exports: []const []const u8,
+) ![32]u8 {
+    var hasher = std.crypto.hash.sha2.Sha256.init(.{});
+    hasher.update("sa-plugin-browser-wasm-cache-v1");
+    hasher.update(&[_]u8{0});
+    hasher.update(build_options.repo_root);
+    hasher.update(&[_]u8{0});
+    try hashSaStdTree(allocator, &hasher);
+    hasher.update(source_text);
+    hasher.update(&[_]u8{0});
+    hasher.update(if (debug) "\x01" else "\x00");
+    hasher.update(&[_]u8{0});
+    hasher.update(@tagName(optimization));
+    hasher.update(&[_]u8{0});
+    for (exports) |exp| {
+        hasher.update(exp);
+        hasher.update(&[_]u8{0});
+    }
+    var out: [32]u8 = undefined;
+    hasher.final(&out);
+    return out;
+}
+
+fn isSaStdSource(path: []const u8) bool {
+    return std.mem.endsWith(u8, path, ".sa") or
+        std.mem.endsWith(u8, path, ".sai") or
+        std.mem.endsWith(u8, path, ".sal");
+}
+
+fn hashNormalizedPath(hasher: *std.crypto.hash.sha2.Sha256, path: []const u8) void {
+    var byte: [1]u8 = undefined;
+    for (path) |c| {
+        byte[0] = if (std.fs.path.isSep(c)) '/' else c;
+        hasher.update(&byte);
+    }
+}
+
+fn hashSaStdTree(allocator: std.mem.Allocator, hasher: *std.crypto.hash.sha2.Sha256) !void {
+    const std_root = try std.fs.path.join(allocator, &.{ build_options.repo_root, "sa_std" });
+    defer allocator.free(std_root);
+
+    var entries = std.ArrayList([]u8).init(allocator);
+    defer {
+        for (entries.items) |entry| allocator.free(entry);
+        entries.deinit();
+    }
+
+    var root = try std.fs.cwd().openDir(std_root, .{ .iterate = true });
+    defer root.close();
+
+    var walker = try root.walk(allocator);
+    defer walker.deinit();
+
+    while (try walker.next()) |entry| {
+        if (entry.kind != .file or !isSaStdSource(entry.path)) continue;
+        const copied = try allocator.dupe(u8, entry.path);
+        errdefer allocator.free(copied);
+        try entries.append(copied);
+    }
+
+    std.mem.sort([]u8, entries.items, {}, struct {
+        fn lessThan(_: void, lhs: []u8, rhs: []u8) bool {
+            return std.mem.order(u8, lhs, rhs) == .lt;
+        }
+    }.lessThan);
+
+    for (entries.items) |entry_path| {
+        const file_bytes = try root.readFileAlloc(allocator, entry_path, 16 * 1024 * 1024);
+        defer allocator.free(file_bytes);
+        hashNormalizedPath(hasher, entry_path);
+        hasher.update(&[_]u8{0});
+        hasher.update(file_bytes);
+        hasher.update(&[_]u8{0});
+    }
+}
+
+fn filePresentNonEmpty(path: []const u8) bool {
+    const stat = std.fs.cwd().statFile(path) catch return false;
+    return stat.kind == .file and stat.size != 0;
+}
+
+fn copyFile(src: []const u8, dst: []const u8) !void {
+    if (std.fs.path.dirname(dst)) |dir| {
+        if (dir.len != 0) try std.fs.cwd().makePath(dir);
+    }
+    try std.fs.cwd().copyFile(src, std.fs.cwd(), dst, .{});
 }
 
 fn ensureParentDir(path: []const u8) !void {
