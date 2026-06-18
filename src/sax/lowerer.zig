@@ -1245,6 +1245,11 @@ pub const SaxLowerer = struct {
     }
 
     pub fn lower(self: *SaxLowerer, out: *std.ArrayList(u8), options: LowerOptions) !void {
+        for (self.component.orphan_lines) |line| {
+            try out.writer().print("{s}\n", .{line.text});
+        }
+        if (self.component.orphan_lines.len != 0) try out.writer().writeByte('\n');
+
         const state_size_name = try self.stateSizeConstName();
         defer self.allocator.free(state_size_name);
         const dom_size_name = try self.domSizeConstName();

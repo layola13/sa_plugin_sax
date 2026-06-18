@@ -61,7 +61,7 @@ const SidecarSpec = struct {
     dev_share_dir: []const u8,
     sai_file: []const u8,
     sal_file: []const u8,
-    airlock_file: []const u8,
+    airlock_file: ?[]const u8,
 };
 
 const wgpu_sidecar = SidecarSpec{
@@ -91,6 +91,20 @@ const sa3d_sidecar = SidecarSpec{
     .sai_file = "sa3d.sai",
     .sal_file = "sa3d.sal",
     .airlock_file = "sa3d_airlock.js",
+};
+
+const sa3d_render_wgpu_sidecar = SidecarSpec{
+    .label = "SA3D_RENDER_WGPU",
+    .error_tag = "SA-SAX-SA3D-RENDER-WGPU",
+    .share_env = "SA_3D_RENDER_WGPU_SHARE_DIR",
+    .airlock_env = "SA_3D_RENDER_WGPU_AIRLOCK_JS",
+    .installed_name = "3d_render_wgpu",
+    .lib_name = "lib3d_render_wgpu.so",
+    .path_token = "sa_plugin_3d_render_wgpu",
+    .dev_share_dir = "/home/vscode/projects/sa_plugins/sa_plugin_3dengines/sa_plugin_3d_render_wgpu/zig-out/share",
+    .sai_file = "3d_render_wgpu.sai",
+    .sal_file = "3d_render_wgpu.sal",
+    .airlock_file = null,
 };
 
 const ValidationError = enum {
@@ -216,10 +230,38 @@ fn sourceUsesWgpu(source: []const u8) bool {
         std.mem.containsAtLeast(u8, source, 1, "WGPU_CUBE_");
 }
 
-fn sourceUsesSa3d(source: []const u8) bool {
+fn sourceUsesSa3dPrelude(source: []const u8) bool {
     return std.mem.containsAtLeast(u8, source, 1, "renderer=\"sa3d\"") or
         std.mem.containsAtLeast(u8, source, 1, "sa3d_") or
         std.mem.containsAtLeast(u8, source, 1, "SA3D_");
+}
+
+fn sourceUsesSa3dAirlock(source: []const u8) bool {
+    return std.mem.containsAtLeast(u8, source, 1, "renderer=\"sa3d\"") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_request_context") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_create_shader") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_create_buffer") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_create_cube_pipeline") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_submit_cube_frame") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_request_renderer") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_configure_renderer") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_upload_mesh") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_upload_material") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_render_frame") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_request_frame") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_cancel_frame") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_last_error");
+}
+
+fn sourceUsesSa3dRenderWgpu(source: []const u8) bool {
+    return std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_request_renderer") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_configure_renderer") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_upload_mesh") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_upload_material") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_render_frame") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_request_frame") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_cancel_frame") or
+        std.mem.containsAtLeast(u8, source, 1, "sa3d_wgpu_last_error");
 }
 
 fn fileExists(path: []const u8) bool {
@@ -315,9 +357,13 @@ fn findSidecarShareDir(allocator: std.mem.Allocator, spec: SidecarSpec) !?[]u8 {
         defer allocator.free(sai_path);
         const sal_path = try std.fs.path.join(allocator, &.{ candidate, spec.sal_file });
         defer allocator.free(sal_path);
-        const airlock_path = try std.fs.path.join(allocator, &.{ candidate, spec.airlock_file });
-        defer allocator.free(airlock_path);
-        if (fileExists(sai_path) and fileExists(sal_path) and fileExists(airlock_path)) {
+        var airlock_ok = true;
+        if (spec.airlock_file) |airlock_file| {
+            const airlock_path = try std.fs.path.join(allocator, &.{ candidate, airlock_file });
+            defer allocator.free(airlock_path);
+            airlock_ok = fileExists(airlock_path);
+        }
+        if (fileExists(sai_path) and fileExists(sal_path) and airlock_ok) {
             return try allocator.dupe(u8, candidate);
         }
     }
@@ -341,7 +387,8 @@ fn loadSidecarSupport(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, sp
     defer allocator.free(sai_path);
     const sal_path = try std.fs.path.join(allocator, &.{ share_dir, spec.sal_file });
     defer allocator.free(sal_path);
-    const airlock_path = try std.fs.path.join(allocator, &.{ share_dir, spec.airlock_file });
+    const airlock_file = spec.airlock_file orelse return error.SaxCheckFailed;
+    const airlock_path = try std.fs.path.join(allocator, &.{ share_dir, airlock_file });
     defer allocator.free(airlock_path);
 
     const sai = try std.fs.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
@@ -364,6 +411,65 @@ fn loadSidecarSupport(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, sp
     try airlock_js.appendSlice(airlock_bytes);
 
     return .{ .prelude = prelude, .airlock_js = airlock_js };
+}
+
+fn loadSidecarPrelude(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, spec: SidecarSpec) !std.ArrayList(u8) {
+    const share_dir = (try findSidecarShareDir(allocator, spec)) orelse {
+        try stderr.print("error[{s}]: {s} SAX source requires sidecar files; install sa_plugin_{s}, set {s}, or include {s} in SA_PLUGINS_PATH\n", .{
+            spec.error_tag,
+            spec.label,
+            spec.installed_name,
+            spec.share_env,
+            spec.lib_name,
+        });
+        return error.SaxCheckFailed;
+    };
+    defer allocator.free(share_dir);
+
+    const sai_path = try std.fs.path.join(allocator, &.{ share_dir, spec.sai_file });
+    defer allocator.free(sai_path);
+    const sal_path = try std.fs.path.join(allocator, &.{ share_dir, spec.sal_file });
+    defer allocator.free(sal_path);
+
+    const sai = try std.fs.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
+    defer allocator.free(sai);
+    const sal = try std.fs.cwd().readFileAlloc(allocator, sal_path, 4 * 1024 * 1024);
+    defer allocator.free(sal);
+
+    var prelude = std.ArrayList(u8).init(allocator);
+    errdefer prelude.deinit();
+    try prelude.appendSlice(sai);
+    if (prelude.items.len == 0 or prelude.items[prelude.items.len - 1] != '\n') try prelude.append('\n');
+    try prelude.appendSlice(sal);
+    if (prelude.items.len == 0 or prelude.items[prelude.items.len - 1] != '\n') try prelude.append('\n');
+    try prelude.append('\n');
+    return prelude;
+}
+
+fn loadSidecarSai(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, spec: SidecarSpec) !std.ArrayList(u8) {
+    const share_dir = (try findSidecarShareDir(allocator, spec)) orelse {
+        try stderr.print("error[{s}]: {s} SAX source requires interface files; install sa_plugin_{s}, set {s}, or include {s} in SA_PLUGINS_PATH\n", .{
+            spec.error_tag,
+            spec.label,
+            spec.installed_name,
+            spec.share_env,
+            spec.lib_name,
+        });
+        return error.SaxCheckFailed;
+    };
+    defer allocator.free(share_dir);
+
+    const sai_path = try std.fs.path.join(allocator, &.{ share_dir, spec.sai_file });
+    defer allocator.free(sai_path);
+    const sai = try std.fs.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
+    defer allocator.free(sai);
+
+    var prelude = std.ArrayList(u8).init(allocator);
+    errdefer prelude.deinit();
+    try prelude.appendSlice(sai);
+    if (prelude.items.len == 0 or prelude.items[prelude.items.len - 1] != '\n') try prelude.append('\n');
+    try prelude.append('\n');
+    return prelude;
 }
 
 fn parseErrorName(err: parser.ParseError) []const u8 {
@@ -514,7 +620,9 @@ fn compileSaxArtifacts(
     }
 
     const uses_wgpu = sourceUsesWgpu(source);
-    const uses_sa3d = sourceUsesSa3d(source);
+    const uses_sa3d_prelude = sourceUsesSa3dPrelude(source);
+    const uses_sa3d_airlock = sourceUsesSa3dAirlock(source);
+    const needs_wgpu_prelude = uses_wgpu and !uses_sa3d_prelude;
     var wgpu_airlock_js: ?std.ArrayList(u8) = null;
     errdefer if (wgpu_airlock_js) |*js| js.deinit();
     var sa3d_airlock_js: ?std.ArrayList(u8) = null;
@@ -522,17 +630,52 @@ fn compileSaxArtifacts(
 
     var sa_code = std.ArrayList(u8).init(allocator);
     errdefer sa_code.deinit();
-    if (uses_wgpu) {
+    if (needs_wgpu_prelude) {
         var wgpu_support = try loadSidecarSupport(allocator, stderr, wgpu_sidecar);
         defer wgpu_support.prelude.deinit();
         try sa_code.appendSlice(wgpu_support.prelude.items);
         wgpu_airlock_js = wgpu_support.airlock_js;
     }
-    if (uses_sa3d) {
-        var sa3d_support = try loadSidecarSupport(allocator, stderr, sa3d_sidecar);
-        defer sa3d_support.prelude.deinit();
-        try sa_code.appendSlice(sa3d_support.prelude.items);
-        sa3d_airlock_js = sa3d_support.airlock_js;
+    if (uses_wgpu and !needs_wgpu_prelude) {
+        const share_dir = (try findSidecarShareDir(allocator, wgpu_sidecar)) orelse {
+            try stderr.print("error[{s}]: {s} SAX source requires sidecar files; install sa_plugin_{s}, set {s}, or include {s} in SA_PLUGINS_PATH\n", .{
+                wgpu_sidecar.error_tag,
+                wgpu_sidecar.label,
+                wgpu_sidecar.installed_name,
+                wgpu_sidecar.share_env,
+                wgpu_sidecar.lib_name,
+            });
+            return error.SaxCheckFailed;
+        };
+        defer allocator.free(share_dir);
+
+        const airlock_file = wgpu_sidecar.airlock_file orelse return error.SaxCheckFailed;
+        const airlock_path = try std.fs.path.join(allocator, &.{ share_dir, airlock_file });
+        defer allocator.free(airlock_path);
+        const airlock_bytes = try std.fs.cwd().readFileAlloc(allocator, airlock_path, 4 * 1024 * 1024);
+        defer allocator.free(airlock_bytes);
+
+        var airlock_js = std.ArrayList(u8).init(allocator);
+        errdefer airlock_js.deinit();
+        try airlock_js.appendSlice(airlock_bytes);
+        wgpu_airlock_js = airlock_js;
+    }
+    if (uses_sa3d_prelude) {
+        if (sourceUsesSa3dRenderWgpu(source)) {
+            var render_wgpu_imports = try loadSidecarSai(allocator, stderr, sa3d_render_wgpu_sidecar);
+            defer render_wgpu_imports.deinit();
+            try sa_code.appendSlice(render_wgpu_imports.items);
+        }
+        if (uses_sa3d_airlock) {
+            var sa3d_support = try loadSidecarSupport(allocator, stderr, sa3d_sidecar);
+            defer sa3d_support.prelude.deinit();
+            try sa_code.appendSlice(sa3d_support.prelude.items);
+            sa3d_airlock_js = sa3d_support.airlock_js;
+        } else {
+            var sa3d_prelude = try loadSidecarPrelude(allocator, stderr, sa3d_sidecar);
+            defer sa3d_prelude.deinit();
+            try sa_code.appendSlice(sa3d_prelude.items);
+        }
     }
     for (program.components, 0..) |component, idx| {
         var sax_lowerer = try lowerer.SaxLowerer.init(allocator, component);
@@ -546,7 +689,7 @@ fn compileSaxArtifacts(
     try sa_code.writer().print("@export sax_app_init() -> ptr:\nL_ENTRY:\n  ctx = call @sax_{s}_init()\n  return ctx\n\n", .{root_name});
 
     var airlock_generator = airlock_gen.AirlockGenerator.init(allocator);
-    const airlock_js = try airlock_generator.generateAirlockJSWithOptions(.{ .wgpu = uses_wgpu, .sa3d = uses_sa3d });
+    const airlock_js = try airlock_generator.generateAirlockJSWithOptions(.{ .wgpu = uses_wgpu, .sa3d = uses_sa3d_airlock });
     errdefer airlock_js.deinit();
 
     const index_html = try airlock_generator.generateIndexHTML(sourceStem(sax_file), "app.wasm");

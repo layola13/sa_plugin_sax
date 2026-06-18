@@ -24,8 +24,13 @@
       { "op": "create", "path": "$PROJECT/**" }
     ],
     "net": [],
-    "env": ["HOME", "SA_*"],
-    "process": { "spawn": false, "exec": [] }
+    "env": ["HOME", "PATH", "SA_*"],
+    "process": {
+      "spawn": true,
+      "exec": [
+        { "path": "/opt/zig/zig", "args": ["*"] }
+      ]
+    }
   },
   "dependencies": {}
 }

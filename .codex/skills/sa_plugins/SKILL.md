@@ -1,0 +1,3856 @@
+---
+name: "sa_plugins"
+description: "Use the optional official SA plugin catalog from Codex without assuming plugins are installed."
+when_to_use: "Use when a task mentions optional SA plugins such as deno, http-client, http-server, node, pkg, db, sax, bc2sa, or vm. Always verify installation before using plugin APIs."
+---
+
+# SA Optional Plugins
+
+## Rules
+- This file is a catalog of common official plugins, not proof that any plugin is installed.
+- Run `sa plugin list` to inspect installed plugins before using plugin commands or imports.
+- Run `sa skills --json` to inspect capability sections exported by currently loaded plugins.
+- Install a needed local official plugin with `SA_PLUGIN_DEV=1 sa plugin install --dev <plugin-dir>`; plugin dependencies may need to be installed first or declared in `sap.json`.
+- Keep these APIs out of compiler `sa_std`; plugin availability is per environment and can change.
+
+## Source
+Generated from optional plugin workspace `/home/vscode/projects/sa_plugins`.
+- common plugins listed: `9`
+- interface declarations listed: `3824`
+
+## Common Official Plugins
+- bc2sa (0.1.0) from `sa_plugin_bc2sa`: No README summary found; inspect the plugin manifest and interface files before using it. Skills: bc2sa. Interfaces: CLI-only or native descriptor only. Dependencies: none. Permissions: fs:1, net:0, env:2, process_spawn:yes. Optional plugin: install before use with `SA_PLUGIN_DEV=1 sa plugin install --dev /home/vscode/projects/sa_plugins/sa_plugin_bc2sa`, then verify availability with `sa plugin list` or `sa skills --json`.
+- db (0.1.0) from `sa_plugin_db`: `sa_plugin_db` is the native database plugin for SA. It provides a local, Skills: database. Interfaces: sai:db.sai, sal:db.sal. Dependencies: none. Permissions: fs:4, net:0, env:0, process_spawn:no. Optional plugin: install before use with `SA_PLUGIN_DEV=1 sa plugin install --dev /home/vscode/projects/sa_plugins/sa_plugin_db`, then verify availability with `sa plugin list` or `sa skills --json`.
+- deno (0.1.0) from `sa_plugin_deno`: No README summary found; inspect the plugin manifest and interface files before using it. Skills: deno.sys, deno.env, deno.fs, deno.process. Interfaces: sai:deno.sai, sal:deno.sal. Dependencies: http-client, http-server. Permissions: fs:4, net:3, env:3, process_spawn:yes. Optional plugin: install before use with `SA_PLUGIN_DEV=1 sa plugin install --dev /home/vscode/projects/sa_plugins/sa_plugin_deno`, then verify availability with `sa plugin list` or `sa skills --json`.
+- http-client (0.1.0) from `sa_plugin_http_client`: No README summary found; inspect the plugin manifest and interface files before using it. Skills: http.client. Interfaces: sai:sa_http_client.sai. Dependencies: node. Permissions: fs:5, net:3, env:13, process_spawn:no. Optional plugin: install before use with `SA_PLUGIN_DEV=1 sa plugin install --dev /home/vscode/projects/sa_plugins/sa_plugin_http_client`, then verify availability with `sa plugin list` or `sa skills --json`.
+- http-server (0.1.0) from `sa_plugin_http_server`: No README summary found; inspect the plugin manifest and interface files before using it. Skills: http.server. Interfaces: sai:sa_http_server.sai. Dependencies: none. Permissions: fs:1, net:2, env:5, process_spawn:no. Optional plugin: install before use with `SA_PLUGIN_DEV=1 sa plugin install --dev /home/vscode/projects/sa_plugins/sa_plugin_http_server`, then verify availability with `sa plugin list` or `sa skills --json`.
+- node (0.1.0) from `sa_plugin_node`: nodejs api list Skills: node.os, node.process, node.crypto, node.net, node.dns, node.http. Interfaces: sa:node_extra.sai, sa:node_extra.sal, sai:node.sai, sal:node.sal. Dependencies: none. Permissions: fs:10, net:2, env:5, process_spawn:yes. Optional plugin: install before use with `SA_PLUGIN_DEV=1 sa plugin install --dev /home/vscode/projects/sa_plugins/sa_plugin_node`, then verify availability with `sa plugin list` or `sa skills --json`.
+- pkg (0.1.0) from `sa_plugin_pkg`: > **SA 的包管理器**——对标 Rust `cargo` / `crates.io`、npm 的角色。 Skills: package.management. Interfaces: CLI-only or native descriptor only. Dependencies: none. Permissions: fs:3, net:2, env:2, process_spawn:yes. Optional plugin: install before use with `SA_PLUGIN_DEV=1 sa plugin install --dev /home/vscode/projects/sa_plugins/sa_plugin_pkg`, then verify availability with `sa plugin list` or `sa skills --json`.
+- sax (0.1.0) from `sa_plugin_sax`: SAX is the SA UI dialect plugin. It turns a `.sax` source file into a browser-ready bundle with real artifacts, not a stub. Skills: sax. Interfaces: CLI-only or native descriptor only. Dependencies: none. Permissions: fs:3, net:0, env:3, process_spawn:yes. Optional plugin: install before use with `SA_PLUGIN_DEV=1 sa plugin install --dev /home/vscode/projects/sa_plugins/sa_plugin_sax`, then verify availability with `sa plugin list` or `sa skills --json`.
+- vm (0.1.0) from `sa_plugin_vm`: This directory contains the standalone, dynamic interpreter virtual machine plugin (`sa_plugin_vm`) for SA. Skills: vm. Interfaces: CLI-only or native descriptor only. Dependencies: deno, http-client, http-server, node. Permissions: fs:12, net:7, env:5, process_spawn:yes. Optional plugin: install before use with `SA_PLUGIN_DEV=1 sa plugin install --dev /home/vscode/projects/sa_plugins/sa_plugin_vm`, then verify availability with `sa plugin list` or `sa skills --json`.
+
+## Interface Declarations
+- `db/sa_plugin_db/db.sai: @extern sa_db_blob_put(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &store_name: ptr, store_name_len: u64, &value: ptr, value_len: u64, &out_id: ptr, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_blob_value_copy(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &store_name: ptr, store_name_len: u64, id: u64, &out_buf: ptr, out_buf_len: u64, &out_found: ptr, &out_written: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_blob_value_copy_handle(handle: ptr, &store_name: ptr, store_name_len: u64, id: u64, &out_buf: ptr, out_buf_len: u64, &out_found: ptr, &out_written: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_blob_value_len(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &store_name: ptr, store_name_len: u64, id: u64, &out_found: ptr, &out_len: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_blob_value_len_handle(handle: ptr, &store_name: ptr, store_name_len: u64, id: u64, &out_found: ptr, &out_len: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_bool_decode(encoded: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_bool_encode(value: u32, &out_encoded: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_close_read_table(handle: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_column_info_handle(handle: ptr, column_index: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_column_logical_info_handle(handle: ptr, column_index: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_compact(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_bool_handle(handle: ptr, column_index: u64, expected: u32, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_f32_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: f32, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_f64_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: f64, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_i16_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: i16, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_i32_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: i32, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_i64_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: i64, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_i8_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: i8, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_u16_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: u16, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_u32_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: u32, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_u64_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: u64, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_u64_eq_handle(handle: ptr, column_index: u64, expected: u64, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_count_u8_cmp_handle(handle: ptr, column_index: u64, op: u32, expected: u8, &out_count: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_blob_eq_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, &store_name: ptr, store_name_len: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_f32_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_f64_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_i16_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_i32_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_i64_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_i8_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_u16_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_u32_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_u64_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_u64_pair_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, column_index2: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_create_u8_index(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, unique: u32, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_date_from_ymd(year: i64, month: u32, day: u32, &out_days: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_date_to_ymd(days: i64, &out_year: ptr, &out_month: ptr, &out_day: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_decimal_from_parts(negative: u32, whole: u64, fraction: u64, scale: u32, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_decimal_to_parts(value: i64, scale: u32, &out_negative: ptr, &out_whole: ptr, &out_fraction: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_delete_u64_key(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, expected: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_dict_intern(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &dict_name: ptr, dict_name_len: u64, &value: ptr, value_len: u64, &out_id: ptr, &out_inserted: ptr, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_dict_lookup(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &dict_name: ptr, dict_name_len: u64, &value: ptr, value_len: u64, &out_found: ptr, &out_id: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_dict_lookup_handle(handle: ptr, &dict_name: ptr, dict_name_len: u64, &value: ptr, value_len: u64, &out_found: ptr, &out_id: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_dict_value_copy(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &dict_name: ptr, dict_name_len: u64, id: u64, &out_buf: ptr, out_buf_len: u64, &out_found: ptr, &out_written: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_dict_value_copy_handle(handle: ptr, &dict_name: ptr, dict_name_len: u64, id: u64, &out_buf: ptr, out_buf_len: u64, &out_found: ptr, &out_written: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_dict_value_len(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &dict_name: ptr, dict_name_len: u64, id: u64, &out_found: ptr, &out_len: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_dict_value_len_handle(handle: ptr, &dict_name: ptr, dict_name_len: u64, id: u64, &out_found: ptr, &out_len: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_filter_blob_contains_handle(handle: ptr, column_index: u64, &store_name: ptr, store_name_len: u64, &value: ptr, value_len: u64, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_filter_blob_eq_handle(handle: ptr, column_index: u64, &store_name: ptr, store_name_len: u64, &value: ptr, value_len: u64, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_filter_bool_handle(handle: ptr, column_index: u64, expected: u32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_bool_handle(handle: ptr, column_index: u64, expected: u32, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_f32_handle(handle: ptr, column_index: u64, expected: f32, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_f64_handle(handle: ptr, column_index: u64, expected: f64, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_i16_handle(handle: ptr, column_index: u64, expected: i16, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_i32_handle(handle: ptr, column_index: u64, expected: i32, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_i64_handle(handle: ptr, column_index: u64, expected: i64, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_i8_handle(handle: ptr, column_index: u64, expected: i8, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_u16_handle(handle: ptr, column_index: u64, expected: u16, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_u32_handle(handle: ptr, column_index: u64, expected: u32, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_u64_handle(handle: ptr, column_index: u64, expected: u64, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_u64_pair_handle(handle: ptr, column_index: u64, column_index2: u64, key1: u64, key2: u64, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_find_u8_handle(handle: ptr, column_index: u64, expected: u8, &out_found: ptr, &out_row_index: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_bool_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_f32_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_f64_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_i16_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_i32_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_i64_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_i8_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_row_handle(handle: ptr, row_index: u64, &out_row: ptr, out_row_len: u64) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_row_u64_key_handle(handle: ptr, column_index: u64, expected: u64, &out_row: ptr, out_row_len: u64) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_u16_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_u32_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_u64_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_get_u8_handle(handle: ptr, column_index: u64, row_index: u64, &out_value: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_ingest_columns(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, row_count: u64, columns: ptr, columns_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_init_schema(&root: ptr, root_len: u64, &schema_path: ptr, schema_path_len: u64, &schema_source: ptr, schema_source_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_insert_row(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &row: ptr, row_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_lock(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_f32_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_f64_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_i16_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_i32_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_i64_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_i8_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_u16_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_u32_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_u64_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_max_u8_handle(handle: ptr, column_index: u64, &out_max: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_f32_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_f64_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_i16_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_i32_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_i64_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_i8_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_u16_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_u32_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_u64_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_min_u8_handle(handle: ptr, column_index: u64, &out_min: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_null_bitmap_clear(&bitmap: ptr, bitmap_len: u64) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_null_bitmap_get(&bitmap: ptr, bitmap_len: u64, row_index: u64, &out_is_null: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_null_bitmap_required_bytes(row_count: u64, &out_len: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_null_bitmap_set(&bitmap: ptr, bitmap_len: u64, row_index: u64, is_null: u32) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_open_read_table(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &out_handle: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_project_rows_handle(handle: ptr, &row_indices: ptr, row_indices_len: u64, &column_indices: ptr, column_indices_len: u64, &out_bytes: ptr, out_bytes_len: u64, &out_written_rows: ptr, &out_required_bytes: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_date_handle(handle: ptr, column_index: u64, min_year: i64, min_month: u32, min_day: u32, max_year: i64, max_month: u32, max_day: u32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_date_null_bitmap_handle(handle: ptr, column_index: u64, min_year: i64, min_month: u32, min_day: u32, max_year: i64, max_month: u32, max_day: u32, &null_bitmap: ptr, null_bitmap_len: u64, want_null: u32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_decimal_i64_handle(handle: ptr, column_index: u64, scale: u32, min_negative: u32, min_whole: u64, min_fraction: u64, max_negative: u32, max_whole: u64, max_fraction: u64, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_decimal_i64_null_bitmap_handle(handle: ptr, column_index: u64, scale: u32, min_negative: u32, min_whole: u64, min_fraction: u64, max_negative: u32, max_whole: u64, max_fraction: u64, &null_bitmap: ptr, null_bitmap_len: u64, want_null: u32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_f32_handle(handle: ptr, column_index: u64, min_value: f32, max_value: f32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_f64_handle(handle: ptr, column_index: u64, min_value: f64, max_value: f64, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_i16_handle(handle: ptr, column_index: u64, min_value: i16, max_value: i16, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_i32_handle(handle: ptr, column_index: u64, min_value: i32, max_value: i32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_i64_handle(handle: ptr, column_index: u64, min_value: i64, max_value: i64, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_i64_null_bitmap_handle(handle: ptr, column_index: u64, min_value: i64, max_value: i64, &null_bitmap: ptr, null_bitmap_len: u64, want_null: u32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_i8_handle(handle: ptr, column_index: u64, min_value: i8, max_value: i8, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_timestamp_ms_handle(handle: ptr, column_index: u64, min_days: i64, min_millis_of_day: u64, max_days: i64, max_millis_of_day: u64, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_timestamp_ms_null_bitmap_handle(handle: ptr, column_index: u64, min_days: i64, min_millis_of_day: u64, max_days: i64, max_millis_of_day: u64, &null_bitmap: ptr, null_bitmap_len: u64, want_null: u32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_timestamp_us_handle(handle: ptr, column_index: u64, min_days: i64, min_micros_of_day: u64, max_days: i64, max_micros_of_day: u64, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_timestamp_us_null_bitmap_handle(handle: ptr, column_index: u64, min_days: i64, min_micros_of_day: u64, max_days: i64, max_micros_of_day: u64, &null_bitmap: ptr, null_bitmap_len: u64, want_null: u32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_u16_handle(handle: ptr, column_index: u64, min_value: u16, max_value: u16, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_u32_handle(handle: ptr, column_index: u64, min_value: u32, max_value: u32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_u64_handle(handle: ptr, column_index: u64, min_value: u64, max_value: u64, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_u64_null_bitmap_handle(handle: ptr, column_index: u64, min_value: u64, max_value: u64, &null_bitmap: ptr, null_bitmap_len: u64, want_null: u32, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_u64_pair_handle(handle: ptr, column_index: u64, column_index2: u64, key1: u64, min_key2: u64, max_key2: u64, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_range_u8_handle(handle: ptr, column_index: u64, min_value: u8, max_value: u8, offset: u64, limit: u64, &out_rows: ptr, out_rows_len: u64, &out_written: ptr, &out_total: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_recover(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_remove_table(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_restore(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, epoch: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_snapshot(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_snapshot_info_handle(handle: ptr, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_sum_u64_handle(handle: ptr, column_index: u64, &out_sum: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_timestamp_ms_from_parts(days: i64, millis_of_day: u64, &out_ms: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_timestamp_ms_to_parts(value_ms: i64, &out_days: ptr, &out_millis_of_day: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_timestamp_us_from_parts(days: i64, micros_of_day: u64, &out_us: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_timestamp_us_to_parts(value_us: i64, &out_days: ptr, &out_micros_of_day: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_tx_begin(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &out_handle: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_tx_commit(handle: ptr, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_tx_delete_u64_key(handle: ptr, column_index: u64, expected: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_tx_insert_row(handle: ptr, &row: ptr, row_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_tx_rollback(handle: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_tx_upsert_row_u64_key(handle: ptr, column_index: u64, expected: u64, &row: ptr, row_len: u64, &out_inserted: ptr, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_unlock(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_update_u64_add(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, start_row: u64, update_count: u64, delta: u64, &out_updated: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_upsert_row_u64_key(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, column_index: u64, expected: u64, &row: ptr, row_len: u64, &out_inserted: ptr, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sai: @extern sa_db_verify(&root: ptr, root_len: u64, &table_name: ptr, table_name_len: u64, &out_info: ptr) -> u32`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_BLOB_PUT %out_status, %out_id, %root, %root_len, %table_name, %table_name_len, %store_name, %store_name_len, %value, %value_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_BLOB_VALUE_COPY %out_status, %out_found, %out_written, %root, %root_len, %table_name, %table_name_len, %store_name, %store_name_len, %id, %out_buf, %out_buf_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_BLOB_VALUE_COPY_HANDLE %out_status, %out_found, %out_written, %handle, %store_name, %store_name_len, %id, %out_buf, %out_buf_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_BLOB_VALUE_LEN %out_status, %out_found, %out_len, %root, %root_len, %table_name, %table_name_len, %store_name, %store_name_len, %id`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_BLOB_VALUE_LEN_HANDLE %out_status, %out_found, %out_len, %handle, %store_name, %store_name_len, %id`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_BOOL_DECODE %out_status, %out_value, %encoded`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_BOOL_ENCODE %out_status, %out_encoded, %value`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CLOSE_READ_TABLE %out_status, %handle`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_INFO_HANDLE %out_status, %handle, %column_index, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_INFO_NAME_LEN %out_name_len, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_INFO_STRIDE %out_stride, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_INFO_TYPE_CODE %out_type_code, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_INFO_TYPE_NAME_LEN %out_type_name_len, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_INPUT_SET %columns, %index, %data, %len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_LOGICAL_INFO_HANDLE %out_status, %handle, %column_index, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_LOGICAL_INFO_NULLABLE %out_nullable, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_LOGICAL_INFO_SCALE %out_logical_scale, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COLUMN_LOGICAL_INFO_TYPE %out_logical_type, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COMPACT %out_status, %root, %root_len, %table_name, %table_name_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_BOOL_HANDLE %out_status, %out_count, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_F32_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_F64_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_I16_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_I32_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_I64_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_I8_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_U16_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_U32_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_U64_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_U64_EQ_HANDLE %out_status, %out_count, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_COUNT_U8_CMP_HANDLE %out_status, %out_count, %handle, %column_index, %op, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_BLOB_EQ_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %store_name, %store_name_len, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_F32_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_F64_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_I16_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_I32_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_I64_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_I8_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_U16_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_U32_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_U64_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_U64_PAIR_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %column_index2, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_CREATE_U8_INDEX %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %unique, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DATE_FROM_YMD %out_status, %out_days, %year, %month, %day`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DATE_TO_YMD %out_status, %out_year, %out_month, %out_day, %days`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DECIMAL_FROM_PARTS %out_status, %out_value, %negative, %whole, %fraction, %scale`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DECIMAL_TO_PARTS %out_status, %out_negative, %out_whole, %out_fraction, %value, %scale`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DELETE_U64_KEY %out_status, %root, %root_len, %table_name, %table_name_len, %column_index, %expected, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DICT_INTERN %out_status, %out_id, %out_inserted, %root, %root_len, %table_name, %table_name_len, %dict_name, %dict_name_len, %value, %value_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DICT_LOOKUP %out_status, %out_found, %out_id, %root, %root_len, %table_name, %table_name_len, %dict_name, %dict_name_len, %value, %value_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DICT_LOOKUP_HANDLE %out_status, %out_found, %out_id, %handle, %dict_name, %dict_name_len, %value, %value_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DICT_VALUE_COPY %out_status, %out_found, %out_written, %root, %root_len, %table_name, %table_name_len, %dict_name, %dict_name_len, %id, %out_buf, %out_buf_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DICT_VALUE_COPY_HANDLE %out_status, %out_found, %out_written, %handle, %dict_name, %dict_name_len, %id, %out_buf, %out_buf_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DICT_VALUE_LEN %out_status, %out_found, %out_len, %root, %root_len, %table_name, %table_name_len, %dict_name, %dict_name_len, %id`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_DICT_VALUE_LEN_HANDLE %out_status, %out_found, %out_len, %handle, %dict_name, %dict_name_len, %id`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FILTER_BLOB_CONTAINS_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %store_name, %store_name_len, %value, %value_len, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FILTER_BLOB_EQ_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %store_name, %store_name_len, %value, %value_len, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FILTER_BOOL_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %expected, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_BOOL_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_F32_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_F64_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_I16_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_I32_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_I64_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_I8_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_U16_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_U32_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_U64_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_U64_PAIR_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %column_index2, %key1, %key2`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_FIND_U8_HANDLE %out_status, %out_found, %out_row_index, %handle, %column_index, %expected`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_BOOL_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_F32_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_F64_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_I16_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_I32_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_I64_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_I8_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_ROW_HANDLE %out_status, %handle, %row_index, %out_row, %out_row_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_ROW_U64_KEY_HANDLE %out_status, %handle, %column_index, %expected, %out_row, %out_row_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_U16_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_U32_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_U64_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_GET_U8_HANDLE %out_status, %out_value, %handle, %column_index, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_INFO_EPOCH %out_epoch, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_INFO_LOCKED %out_locked, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_INFO_ROW_COUNT %out_rows, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_INFO_SEGMENT_COUNT %out_segments, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_INGEST_COLUMNS %out_status, %root, %root_len, %table_name, %table_name_len, %row_count, %columns, %columns_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_INIT_SCHEMA %out_status, %root, %root_len, %schema_path, %schema_path_len, %schema_source, %schema_source_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_INSERT_ROW %out_status, %root, %root_len, %table_name, %table_name_len, %row, %row_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_LOCK %out_status, %root, %root_len, %table_name, %table_name_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_F32_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_F64_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_I16_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_I32_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_I64_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_I8_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_U16_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_U32_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_U64_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MAX_U8_HANDLE %out_status, %out_max, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_F32_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_F64_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_I16_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_I32_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_I64_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_I8_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_U16_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_U32_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_U64_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_MIN_U8_HANDLE %out_status, %out_min, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_NULL_BITMAP_CLEAR %out_status, %bitmap, %bitmap_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_NULL_BITMAP_GET %out_status, %out_is_null, %bitmap, %bitmap_len, %row_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_NULL_BITMAP_REQUIRED_BYTES %out_status, %out_len, %row_count`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_NULL_BITMAP_SET %out_status, %bitmap, %bitmap_len, %row_index, %is_null`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_OPEN_READ_TABLE %out_status, %out_handle, %root, %root_len, %table_name, %table_name_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_PROJECT_ROWS_HANDLE %out_status, %out_written_rows, %out_required_bytes, %out_bytes, %out_bytes_len, %handle, %row_indices, %row_indices_len, %column_indices, %column_indices_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_DATE_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_year, %min_month, %min_day, %max_year, %max_month, %max_day, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_DATE_NULL_BITMAP_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_year, %min_month, %min_day, %max_year, %max_month, %max_day, %null_bitmap, %null_bitmap_len, %want_null, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_DECIMAL_I64_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %scale, %min_negative, %min_whole, %min_fraction, %max_negative, %max_whole, %max_fraction, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_DECIMAL_I64_NULL_BITMAP_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %scale, %min_negative, %min_whole, %min_fraction, %max_negative, %max_whole, %max_fraction, %null_bitmap, %null_bitmap_len, %want_null, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_F32_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_F64_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_I16_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_I32_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_I64_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_I64_NULL_BITMAP_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %null_bitmap, %null_bitmap_len, %want_null, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_I8_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_TIMESTAMP_MS_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_days, %min_millis_of_day, %max_days, %max_millis_of_day, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_TIMESTAMP_MS_NULL_BITMAP_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_days, %min_millis_of_day, %max_days, %max_millis_of_day, %null_bitmap, %null_bitmap_len, %want_null, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_TIMESTAMP_US_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_days, %min_micros_of_day, %max_days, %max_micros_of_day, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_TIMESTAMP_US_NULL_BITMAP_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_days, %min_micros_of_day, %max_days, %max_micros_of_day, %null_bitmap, %null_bitmap_len, %want_null, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_U16_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_U32_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_U64_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_U64_NULL_BITMAP_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %null_bitmap, %null_bitmap_len, %want_null, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_U64_PAIR_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %column_index2, %key1, %min_key2, %max_key2, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RANGE_U8_HANDLE %out_status, %out_written, %out_total, %out_rows, %out_rows_len, %handle, %column_index, %min_value, %max_value, %offset, %limit`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RECOVER %out_status, %root, %root_len, %table_name, %table_name_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_REMOVE_TABLE %out_status, %root, %root_len, %table_name, %table_name_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_RESTORE %out_status, %root, %root_len, %table_name, %table_name_len, %epoch, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_SNAPSHOT %out_status, %root, %root_len, %table_name, %table_name_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_SNAPSHOT_INFO_COLUMN_COUNT %out_columns, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_SNAPSHOT_INFO_EPOCH %out_epoch, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_SNAPSHOT_INFO_HANDLE %out_status, %handle, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_SNAPSHOT_INFO_ROW_BYTES %out_row_bytes, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_SNAPSHOT_INFO_ROW_COUNT %out_rows, %info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_STATUS_IS_OK %out_bool, %status`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_SUM_U64_HANDLE %out_status, %out_sum, %handle, %column_index`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TIMESTAMP_MS_FROM_PARTS %out_status, %out_ms, %days, %millis_of_day`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TIMESTAMP_MS_TO_PARTS %out_status, %out_days, %out_millis_of_day, %value_ms`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TIMESTAMP_US_FROM_PARTS %out_status, %out_us, %days, %micros_of_day`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TIMESTAMP_US_TO_PARTS %out_status, %out_days, %out_micros_of_day, %value_us`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TX_BEGIN %out_status, %out_handle, %root, %root_len, %table_name, %table_name_len`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TX_COMMIT %out_status, %handle, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TX_DELETE_U64_KEY %out_status, %handle, %column_index, %expected, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TX_INSERT_ROW %out_status, %handle, %row, %row_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TX_ROLLBACK %out_status, %handle`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_TX_UPSERT_ROW_U64_KEY %out_status, %out_inserted, %handle, %column_index, %expected, %row, %row_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_UNLOCK %out_status, %root, %root_len, %table_name, %table_name_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_UPDATE_U64_ADD %out_status, %out_updated, %root, %root_len, %table_name, %table_name_len, %column_index, %start_row, %update_count, %delta`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_UPSERT_ROW_U64_KEY %out_status, %out_inserted, %root, %root_len, %table_name, %table_name_len, %column_index, %expected, %row, %row_len, %out_info`
+- `db/sa_plugin_db/db.sal: [MACRO] DB_VERIFY %out_status, %root, %root_len, %table_name, %table_name_len, %out_info`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_args_json(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_atob(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_btoa(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_build_json(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_build_os(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_build_platform_family(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_chat_json_to_responses(&chat_body: ptr, chat_body_len: u64, &req_body: ptr, req_body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_chat_sse_to_responses(&chat_body: ptr, chat_body_len: u64, &req_body: ptr, req_body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_chdir(&path: ptr, path_len: u64) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_command_exec(argv: ptr, argv_len: u64, &cwd: ptr, cwd_len: u64, &out_code: ptr, &out_stdout_ptr: ptr, &out_stdout_len: ptr, &out_stderr_ptr: ptr, &out_stderr_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_copy_file(&src: ptr, src_len: u64, &dst: ptr, dst_len: u64) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_cwd(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_date_now_iso(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_env_delete(&key: ptr, key_len: u64) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_env_get(&key: ptr, key_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_env_set(&key: ptr, key_len: u64, &value: ptr, value_len: u64) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_exec_path(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_free_buffer(ptr: ptr, len: u64) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_gid(&out_gid: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_hostname(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_infer_collaboration_mode(&body: ptr, body_len: u64, &out_mode: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_jsonrpc_params_string_literal(&body: ptr, body_len: u64, &key: ptr, key_len: u64, &fallback: ptr, fallback_len: u64, emit_null_if_missing: u8, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_loadavg(out_load: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_lstat_json(&path: ptr, path_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_make_temp_dir(&prefix: ptr, prefix_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_make_temp_file(&prefix: ptr, prefix_len: u64, &suffix: ptr, suffix_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_mcp_resource_read(&body: ptr, body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_mcp_server_status_list(&body: ptr, body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_mcp_tool_call(&body: ptr, body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_memory_usage(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_mkdir(&path: ptr, path_len: u64, recursive: u8) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_network_interfaces(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_now_ms(&out_ms: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_now_ns(&out_ns: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_os_release(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_os_uptime(&out_uptime: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_pid(&out_pid: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_ppid(&out_ppid: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_random_uuid(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_read_dir_json(&path: ptr, path_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_read_file_base64(&path: ptr, path_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_read_text_file(&path: ptr, path_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_remove(&path: ptr, path_len: u64, recursive: u8) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_responses_chat_fallback_request(&body: ptr, body_len: u64, &default_model: ptr, default_model_len: u64, plan_mode_like: u8, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_responses_json_normalize(&body: ptr, body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_responses_json_normalize_with_request(&body: ptr, body_len: u64, &req_body: ptr, req_body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_responses_request_normalize(&body: ptr, body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_responses_sse_normalize(&sse_body: ptr, sse_body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_responses_sse_normalize_with_request(&sse_body: ptr, sse_body_len: u64, &req_body: ptr, req_body_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_system_memory_info(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_text_decode(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_text_encode(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_uid(&out_uid: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_version_deno(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_version_json(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_write_file_base64(&path: ptr, path_len: u64, &base64: ptr, base64_len: u64) -> u32`
+- `deno/sa_plugin_deno/deno.sai: @extern sa_deno_plugin_write_text_file(&path: ptr, path_len: u64, &data: ptr, data_len: u64) -> u32`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_ACCEPT_TCP %out_status, %out_stream, %listener`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_ARGS_JSON %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_ATOB %out_ptr, %out_len, %out_status, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_BTOA %out_ptr, %out_len, %out_status, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_BUILD_JSON %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_BUILD_OS %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_BUILD_PLATFORM_FAMILY %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_CHAT_JSON_TO_RESPONSES %out_ptr, %out_len, %out_status, %chat_body, %chat_body_len, %req_body, %req_body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_CHAT_SSE_TO_RESPONSES %out_ptr, %out_len, %out_status, %chat_body, %chat_body_len, %req_body, %req_body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_CHDIR %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_CLOSE_TCP_LISTENER %out_status, %listener`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_CLOSE_TCP_STREAM %out_status, %stream`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_CLOSE %out_status, %process`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_EXEC %out_code, %out_stdout_ptr, %out_stdout_len, %out_stderr_ptr, %out_stderr_len, %out_status, %argv_array, %argv_len, %cwd, %cwd_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_READ_STDERR %out_status, %out_len, %process, %buf, %cap`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_READ_STDOUT %out_status, %out_len, %process, %buf, %cap`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_RUN %out_status, %out_process, %argv, %argv_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_RUN_CWD %out_status, %out_process, %argv, %argv_len, %cwd, %cwd_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_SPAWN %out_status, %out_process, %argv, %argv_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_SPAWN_CWD %out_status, %out_process, %argv, %argv_len, %cwd, %cwd_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_SPAWN_STREAM %out_status, %out_process, %out_stdout, %out_stderr, %argv, %argv_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_SPAWN_STREAM_CWD %out_status, %out_process, %out_stdout, %out_stderr, %argv, %argv_len, %cwd, %cwd_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COMMAND_WAIT %out_status, %out_code, %process`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_CONNECT_TCP %out_status, %out_stream, %host, %host_len, %port`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COPY_FILE %out_status, %src, %src_len, %dst, %dst_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_COPY_FILE_SYNC %out_status, %src, %src_len, %dst, %dst_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_CRYPTO_RANDOM_UUID %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_CWD %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_DATE_NOW_ISO %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_DATE_TO_ISO_STRING %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_ENV_DELETE %out_status, %key, %key_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_ENV_GET %out_ptr, %out_len, %out_status, %key, %key_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_ENV_SET %out_status, %key, %key_len, %value, %value_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_EXEC_PATH %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_EXIT %code`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_FETCH_CLIENT_FREE %out_status, %client`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_FETCH_CLIENT_NEW %out_status, %out_client, %use_tls`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_FETCH_REQUEST_FREE %out_status, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_FETCH_REQUEST_NEW %out_status, %out_request, %client, %method, %url, %url_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_FETCH_REQUEST_SET_BODY %out_status, %request, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_FETCH_SEND %out_status, %out_response, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_FREE_BUFFER %ptr, %len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_GID %out_gid, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HEADERS_APPEND %out_status, %request, %key, %key_len, %value, %value_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HEADERS_GET %out_status, %out_ptr, %out_len, %response, %key, %key_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HEADERS_HAS %out_has, %response, %key, %key_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HOSTNAME %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_BODY_READER_FREE %out_status, %reader`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_CLIENT_FREE %out_status, %client`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_CLIENT_NEW %out_status, %out_client, %use_tls`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_REQUEST_ADD_HEADER %out_status, %request, %key, %key_len, %value, %value_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_REQUEST_ASYNC_FREE %out_status, %operation`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_REQUEST_ASYNC_POLL %out_status, %out_ready, %operation`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_REQUEST_ASYNC_TAKE_RESPONSE %out_status, %out_response, %operation`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_REQUEST_FREE %out_status, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_REQUEST_NEW %out_status, %out_request, %client, %method, %url, %url_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_REQUEST_SEND %out_status, %out_response, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_REQUEST_SEND_ASYNC %out_status, %out_operation, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_REQUEST_SET_BODY %out_status, %request, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_RESPONSE_BODY_READER %out_status, %out_reader, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_RESPONSE_BODY_SLICE %out_status, %out_ptr, %out_len, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_RESPONSE_FREE %out_status, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_RESPONSE_GET_HEADER %out_status, %out_ptr, %out_len, %response, %key, %key_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_RESPONSE_READ_CHUNK %out_status, %out_len, %reader, %buf, %cap`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_HTTP_RESPONSE_STATUS %out_status_code, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_JSONRPC_PARAMS_STRING_LITERAL %out_ptr, %out_len, %out_status, %body, %body_len, %key, %key_len, %fallback, %fallback_len, %emit_null_if_missing`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_JSON_BUFFER_FREE %buffer`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_JSON_BUFFER_SLICE %out_ptr, %out_len, %buffer`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_JSON_FREE %node`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_JSON_PARSE %out_root, %bytes, %len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_JSON_PARSE_TEXT %out_root, %bytes, %len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_JSON_STRINGIFY %out_status, %out_buffer, %node`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_JSON_STRINGIFY_NODE %out_status, %out_buffer, %node`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_LISTEN_TCP %out_status, %out_listener, %host, %host_len, %port`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_LOADAVG %out_status, %load_buf`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_LSTAT %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_LSTAT_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_LSTAT_SYNC %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_LSTAT_SYNC_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MAKE_TEMP_DIR %out_ptr, %out_len, %out_status, %prefix, %prefix_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MAKE_TEMP_DIR_SYNC %out_ptr, %out_len, %out_status, %prefix, %prefix_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MAKE_TEMP_FILE %out_ptr, %out_len, %out_status, %prefix, %prefix_len, %suffix, %suffix_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MAKE_TEMP_FILE_SYNC %out_ptr, %out_len, %out_status, %prefix, %prefix_len, %suffix, %suffix_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MCP_RESOURCE_READ %out_ptr, %out_len, %out_status, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MCP_SERVER_STATUS_LIST %out_ptr, %out_len, %out_status, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MCP_TOOL_CALL %out_ptr, %out_len, %out_status, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MEMORY_USAGE %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MKDIR %out_status, %path, %path_len, %recursive`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_MKDIR_SYNC %out_status, %path, %path_len, %recursive`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_NETWORK_INTERFACES %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_NEW_DATE_TO_ISO_STRING %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_NEW_TEXT_DECODER_DECODE %out_ptr, %out_len, %out_status, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_NEW_TEXT_ENCODER_ENCODE %out_ptr, %out_len, %out_status, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_NOW_MS %out_ms, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_NOW_NS %out_ns, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_OS_RELEASE %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_OS_UPTIME %out_uptime, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_PID %out_pid, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_PPID %out_ppid, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RANDOM_UUID %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_READ_DIR %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_READ_DIR_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_READ_DIR_SYNC %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_READ_DIR_SYNC_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_READ_FILE %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_READ_FILE_BASE64 %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_READ_FILE_SYNC %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_READ_TEXT_FILE %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_READ_TEXT_FILE_SYNC %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_REMOVE %out_status, %path, %path_len, %recursive`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_REMOVE_SYNC %out_status, %path, %path_len, %recursive`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_REQUEST_FREE %out_status, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_REQUEST_HEADERS_APPEND %out_status, %request, %key, %key_len, %value, %value_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_REQUEST_NEW %out_status, %out_request, %client, %method, %url, %url_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_REQUEST_SEND %out_status, %out_response, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_REQUEST_SET_BODY %out_status, %request, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSES_CHAT_FALLBACK_REQUEST %out_ptr, %out_len, %out_status, %body, %body_len, %default_model, %default_model_len, %plan_mode_like`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSES_JSON_NORMALIZE %out_ptr, %out_len, %out_status, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSES_JSON_NORMALIZE_WITH_REQUEST %out_ptr, %out_len, %out_status, %body, %body_len, %req_body, %req_body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSES_REQUEST_NORMALIZE %out_ptr, %out_len, %out_status, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSES_SSE_NORMALIZE %out_ptr, %out_len, %out_status, %sse_body, %sse_body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSES_SSE_NORMALIZE_WITH_REQUEST %out_ptr, %out_len, %out_status, %sse_body, %sse_body_len, %req_body, %req_body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSE_BODY_READER %out_status, %out_reader, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSE_BODY_READER_FREE %out_status, %reader`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSE_FREE %out_status, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSE_HEADERS_GET %out_status, %out_ptr, %out_len, %response, %key, %key_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSE_JSON_PARSE %out_status, %out_root, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSE_READ_CHUNK %out_status, %out_len, %reader, %buf, %cap`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSE_STATUS %out_status_code, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_RESPONSE_TEXT %out_status, %out_ptr, %out_len, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_ACCEPT %out_status, %out_request, %server`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_FREE %out_status, %server`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_NEW %out_status, %out_server`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_REQUEST_BODY %out_status, %out_ptr, %out_len, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_REQUEST_FREE %out_status, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_REQUEST_HEADER %out_status, %out_ptr, %out_len, %request, %key, %key_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_REQUEST_METHOD %out_status, %out_ptr, %out_len, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_REQUEST_PATH %out_status, %out_ptr, %out_len, %request`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_RESPONSE_FREE %out_status, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_RESPONSE_NEW %out_status, %out_response, %request, %status_code`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_RESPONSE_SEND %out_status, %response, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_RESPONSE_SET_CONTENT_TYPE %out_status, %response, %content_type, %content_type_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_START %out_status, %server, %host, %host_len, %port`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_STREAM_END %out_status, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_STREAM_FLUSH %out_status, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_STREAM_FREE %out_status, %response`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_STREAM_NEW %out_status, %out_response, %request, %status_code`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SERVE_STREAM_WRITE %out_status, %response, %body, %body_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SLEEP_MS %out_status, %ms`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_STAT %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_STAT_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_STAT_SYNC %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_STAT_SYNC_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_STDERR %out_handle`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_STDERR_WRITE %out_status, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_STDIN %out_handle`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_STDOUT %out_handle`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_STDOUT_WRITE %out_status, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_SYSTEM_MEMORY_INFO %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_TEXT_DECODE %out_ptr, %out_len, %out_status, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_TEXT_ENCODE %out_ptr, %out_len, %out_status, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_UID %out_uid, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_VERSION_DENO %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_VERSION_JSON %out_ptr, %out_len, %out_status`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_WRITE_FILE %out_status, %path, %path_len, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_WRITE_FILE_BASE64 %out_status, %path, %path_len, %base64, %base64_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_WRITE_FILE_SYNC %out_status, %path, %path_len, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_WRITE_TEXT_FILE %out_status, %path, %path_len, %data, %data_len`
+- `deno/sa_plugin_deno/deno.sal: [MACRO] DENO_WRITE_TEXT_FILE_SYNC %out_status, %path, %path_len, %data, %data_len`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_async_free(^op: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_async_poll(op: ptr, &out_ready: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_async_take_response(op: ptr, &out_resp: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_body_reader_free(^reader: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_free(^client: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_new(use_tls: u8, &out_client: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_req_add_header(req: ptr, &key: ptr, key_len: u64, &val: ptr, val_len: u64) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_req_free(^req: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_req_new(client: ptr, method: u8, &url: ptr, url_len: u64, &out_req: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_req_send(req: ptr, &out_resp: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_req_send_async(req: ptr, &out_op: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_req_set_body(req: ptr, &body: ptr, body_len: u64) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_resp_body_reader(resp: ptr, &out_reader: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_resp_body_slice(resp: ptr, &out_body: ptr, &out_len: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_resp_free(^resp: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_resp_get_header(resp: ptr, &key: ptr, key_len: u64, &out_val: ptr, &out_len: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_resp_read_chunk(reader: ptr, &buf: ptr, cap: u64, &out_len: ptr) -> u32`
+- `http-client/sa_plugin_http_client/sa_http_client.sai: @extern sa_http_client_resp_status(resp: ptr) -> u16`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_accept(server: ptr, &out_req: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_free(^server: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_new(&out_server: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_req_free(^req: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_req_get_body(req: ptr, &out_body: ptr, &out_len: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_req_get_header(req: ptr, &key: ptr, key_len: u64, &out_val: ptr, &out_len: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_req_get_method(req: ptr, &out_method: ptr, &out_len: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_req_get_path(req: ptr, &out_path: ptr, &out_len: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_resp_free(^resp: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_resp_new(req: ptr, status: u16, &out_resp: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_resp_send(resp: ptr, &body: ptr, body_len: u64) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_resp_set_content_type(resp: ptr, &content_type: ptr, content_type_len: u64) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_resp_stream_end(resp: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_resp_stream_flush(resp: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_resp_stream_free(^resp: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_resp_stream_new(req: ptr, status: u16, &out_resp: ptr) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_resp_stream_write(resp: ptr, &body: ptr, body_len: u64) -> u32`
+- `http-server/sa_plugin_http_server/sa_http_server.sai: @extern sa_http_server_start(server: ptr, &host: ptr, host_len: u64, port: u16) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_buffer_byte_length(&data: ptr, len: u64, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_buffer_concat(buffers_argv: ptr, buffers_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_console_clear() -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_console_error(data_ptr: ptr, data_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_console_log(data_ptr: ptr, data_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_console_time(label_ptr: ptr, label_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_console_time_end(label_ptr: ptr, label_len: u64, &out_ms: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_crypto_hash(&algo: ptr, algo_len: u64, &data: ptr, data_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_crypto_hmac(&algo: ptr, algo_len: u64, &key: ptr, key_len: u64, &data: ptr, data_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_crypto_pbkdf2(&pass: ptr, pass_len: u64, &salt: ptr, salt_len: u64, iter: u64, keylen: u64, &digest: ptr, digest_len: u64, &out_ptr: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_crypto_random_bytes(size: u64, &out_ptr: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_crypto_random_uuid(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_crypto_timing_safe_equal(&a: ptr, a_len: u64, &b: ptr, b_len: u64, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_add_membership(socket: ptr, &multicast: ptr, multicast_len: u64, &iface: ptr, iface_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_add_membership6(socket: ptr, &multicast: ptr, multicast_len: u64, &iface: ptr, iface_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_add_source_specific_membership(socket: ptr, &source: ptr, source_len: u64, &multicast: ptr, multicast_len: u64, &iface: ptr, iface_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_address(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_bind(socket: ptr, &host: ptr, host_len: u64, port: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_close(socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_connect(socket: ptr, &host: ptr, host_len: u64, port: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_create() -> ptr`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_create_options(socket_type: u32, reuse_addr: u32, reuse_port: u32, ipv6_only: u32, recv_buffer_size: u32, send_buffer_size: u32, &out_socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_create_udp6() -> ptr`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_disconnect(socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_drop_membership(socket: ptr, &multicast: ptr, multicast_len: u64, &iface: ptr, iface_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_drop_membership6(socket: ptr, &multicast: ptr, multicast_len: u64, &iface: ptr, iface_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_drop_source_specific_membership(socket: ptr, &source: ptr, source_len: u64, &multicast: ptr, multicast_len: u64, &iface: ptr, iface_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_get_recv_buffer_size(socket: ptr, &out_size: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_get_send_buffer_size(socket: ptr, &out_size: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_get_send_queue_count(socket: ptr, &out_count: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_get_send_queue_size(socket: ptr, &out_size: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_has_ref(socket: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_recv(socket: ptr, max_len: u64, &out_ptr: ptr, &out_len: ptr, &out_host_ptr: ptr, &out_host_len: ptr, &out_port: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_ref(socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_remote_address(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_send(socket: ptr, &data: ptr, data_len: u64, &host: ptr, host_len: u64, port: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_send_connected(socket: ptr, &data: ptr, data_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_broadcast(socket: ptr, enable: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_multicast_hops6(socket: ptr, hops: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_multicast_interface(socket: ptr, &iface: ptr, iface_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_multicast_interface6(socket: ptr, iface_index: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_multicast_loopback(socket: ptr, enable: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_multicast_loopback6(socket: ptr, enable: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_multicast_ttl(socket: ptr, ttl: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_receive_blocklist(socket: ptr, blocklist: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_recv_buffer_size(socket: ptr, size: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_send_blocklist(socket: ptr, blocklist: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_send_buffer_size(socket: ptr, size: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_set_ttl(socket: ptr, ttl: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dgram_unref(socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dns_lookup(&hostname: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dns_lookup_service(&address: ptr, len: u64, port: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dns_resolve(&hostname: ptr, len: u64, &rrtype: ptr, rrtype_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dns_resolve_any(&hostname: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dns_resolve_caa(&hostname: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dns_resolve_naptr(&hostname: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dns_resolve_soa(&hostname: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_dns_resolve_tlsa(&hostname: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_events_create() -> ptr`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_events_emit(ee: ptr, &event_name: ptr, event_len: u64, &data: ptr, data_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_events_free(ee: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_events_listener_count(ee: ptr, &event_name: ptr, event_len: u64, &out_count: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_events_on(ee: ptr, &event_name: ptr, event_len: u64, callback: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_free_buffer(ptr: ptr, len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_access(path: ptr, len: u64, mode: u32, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_copy_file(src_ptr: ptr, src_len: u64, dst_ptr: ptr, dst_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_cp(src_ptr: ptr, src_len: u64, dst_ptr: ptr, dst_len: u64, recursive: u64, force: u64, error_on_exist: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_exists(path: ptr, len: u64, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_lstat(path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_mkdir(path_ptr: ptr, path_len: u64, recursive: u8) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_read_file(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_readdir(path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_readdir_with_types(path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_readlink(path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_realpath(path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_rename(old_ptr: ptr, old_len: u64, new_ptr: ptr, new_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_rmdir(path_ptr: ptr, path_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_stat(path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_unlink(path_ptr: ptr, path_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_fs_write_file(path_ptr: ptr, path_len: u64, data_ptr: ptr, data_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_accept(server: ptr, &out_socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_address(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_auto_select_family_attempted_addresses(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_add_address(blocklist: ptr, &address: ptr, address_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_add_address_family(blocklist: ptr, &address: ptr, address_len: u64, &family: ptr, family_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_add_address_handle(blocklist: ptr, addr: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_add_range(blocklist: ptr, &start: ptr, start_len: u64, &end: ptr, end_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_add_range_family(blocklist: ptr, &start: ptr, start_len: u64, &end: ptr, end_len: u64, &family: ptr, family_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_add_range_handle(blocklist: ptr, start: ptr, end: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_add_subnet(blocklist: ptr, &network: ptr, network_len: u64, prefix: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_add_subnet_family(blocklist: ptr, &network: ptr, network_len: u64, prefix: u32, &family: ptr, family_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_add_subnet_handle(blocklist: ptr, network: ptr, prefix: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_check(blocklist: ptr, &address: ptr, address_len: u64, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_check_family(blocklist: ptr, &address: ptr, address_len: u64, &family: ptr, family_len: u64, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_check_handle(blocklist: ptr, addr: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_free(blocklist: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_is_blocklist(blocklist: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_new(&out_blocklist: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_blocklist_rules(blocklist: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_buffer_size(socket: ptr, &out_size: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_bytes_read(socket: ptr, &out_bytes: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_bytes_written(socket: ptr, &out_bytes: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_closed(socket: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_connect(&host: ptr, host_len: u64, port: u64, &out_socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_connect_blocklist(&host: ptr, host_len: u64, port: u64, blocklist: ptr, &out_socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_connect_options(&host: ptr, host_len: u64, port: u64, family: u32, &local: ptr, local_len: u64, local_port: u64, no_delay: u32, keep_alive: u32, keep_alive_initial_delay_secs: u32, timeout_ms: u64, blocklist: ptr, &out_socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_connect_unix(&path: ptr, path_len: u64, &out_socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_connecting(socket: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_destroy(socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_destroyed(socket: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_end(socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_get_recv_buffer_size(socket: ptr, &out_size: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_get_send_buffer_size(socket: ptr, &out_size: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_get_timeout(socket: ptr, &out_timeout_ms: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_get_type_of_service(socket: ptr, &out_tos: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_has_ref(handle: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_listen(&host: ptr, host_len: u64, port: u64, &out_server: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_listen_unix(&path: ptr, path_len: u64, &out_server: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_local_address(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_local_family(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_local_port(socket: ptr, &out_port: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_pending(socket: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_read(socket: ptr, max_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_readable(socket: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_ready_state(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_ref(handle: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_remote_address(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_remote_address_value(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_remote_family(socket: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_remote_port(socket: ptr, &out_port: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_reset_and_destroy(socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_server_address(server: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_server_close(server: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_server_get_connections(server: ptr, &out_count: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_server_get_max_connections(server: ptr, &out_max_connections: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_server_listening(server: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_server_set_blocklist(server: ptr, blocklist: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_server_set_max_connections(server: ptr, max_connections: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_set_keep_alive(socket: ptr, enable: u32, initial_delay_secs: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_set_no_delay(socket: ptr, enable: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_set_recv_buffer_size(socket: ptr, size: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_set_send_buffer_size(socket: ptr, size: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_set_timeout(socket: ptr, timeout_ms: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_set_type_of_service(socket: ptr, tos: u32) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_shutdown_write(socket: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_socket_address_address(addr: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_socket_address_family(addr: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_socket_address_flowlabel(addr: ptr, &out_flowlabel: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_socket_address_free(addr: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_socket_address_is_socket_address(addr: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_socket_address_json(addr: ptr, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_socket_address_new(&address: ptr, address_len: u64, port: u64, &family: ptr, family_len: u64, flowlabel: u64, &out_addr: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_socket_address_parse(&input: ptr, input_len: u64, &out_addr: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_socket_address_port(addr: ptr, &out_port: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_unref(handle: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_writable(socket: ptr, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_net_write(socket: ptr, &data: ptr, data_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_arch(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_available_parallelism(&out_val: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_cpus(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_endianness(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_freemem(&out_mem: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_homedir(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_hostname(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_loadavg(out_load: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_machine(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_network_interfaces(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_platform(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_release(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_system_uptime(&out_uptime: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_tmpdir(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_totalmem(&out_mem: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_type(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_user_info(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_os_version(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_basename(&path: ptr, len: u64, &ext: ptr, ext_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_dirname(&path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_extname(&path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_format(&json: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_is_absolute(&path: ptr, len: u64, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_join(paths_argv: ptr, paths_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_normalize(&path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_parse(&path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_relative(&from_path: ptr, from_len: u64, &to_path: ptr, to_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_resolve(paths_argv: ptr, paths_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_path_to_namespaced_path(&path: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_argv_json(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_cpu_usage(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_cwd(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_env_delete(&key: ptr, key_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_env_get(&key: ptr, key_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_env_set(&key: ptr, key_len: u64, &value: ptr, value_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_exec(argv_ptr: ptr, argv_len: u64, cwd_ptr: ptr, cwd_len: u64, &out_code: ptr, &out_stdout_ptr: ptr, &out_stdout_len: ptr, &out_stderr_ptr: ptr, &out_stderr_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_getegid(&out_gid: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_geteuid(&out_uid: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_getgid(&out_gid: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_getuid(&out_uid: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_groups(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_hrtime_bigint(&out_ns: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_memory_usage(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_pid(&out_pid: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_ppid(&out_ppid: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_uptime(&out_uptime: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_version(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_process_versions_json(&out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_punycode_decode(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_punycode_encode(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_querystring_escape(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_querystring_parse(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_querystring_stringify(&json: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_querystring_unescape(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_readline_create() -> ptr`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_readline_free(rl: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_readline_question(rl: ptr, &query: ptr, query_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_stream_push(readable: ptr, &data: ptr, data_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_stream_readable_new() -> ptr`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_stream_writable_new() -> ptr`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_stream_write(writable: ptr, &data: ptr, data_len: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_string_decoder_create() -> ptr`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_string_decoder_end(sd: ptr, chunk_ptr: ptr, chunk_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_string_decoder_free(sd: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_string_decoder_write(sd: ptr, chunk_ptr: ptr, chunk_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_timers_sleep(ms: u64) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_url_format(&json: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_url_parse(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_url_resolve(&from_url: ptr, from_len: u64, &to_url: ptr, to_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_util_format(&format: ptr, format_len: u64, &args_json: ptr, args_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_util_format_with_options(&options_json: ptr, options_len: u64, &format: ptr, format_len: u64, &args_json: ptr, args_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_util_inspect(&json: ptr, json_len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_util_is_deep_strict_equal(&a_json: ptr, a_len: u64, &b_json: ptr, b_len: u64, &out_bool: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_util_strip_vt_control_characters(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_zlib_deflate(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_zlib_gunzip(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_zlib_gzip(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sai: @extern sa_node_plugin_zlib_inflate(&data: ptr, len: u64, &out_ptr: ptr, &out_len: ptr) -> u32`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASSERT_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASSERT_DEEP_STRICT_EQUAL %out_ptr, %out_len, %out_status, %out_ok, %actual, %actual_len, %expected, %expected_len, %message, %message_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASSERT_EQUAL %out_ptr, %out_len, %out_status, %out_ok, %actual, %actual_len, %expected, %expected_len, %strict, %message, %message_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASSERT_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASSERT_FAIL_JSON %out_ptr, %out_len, %out_status, %message, %message_len, %actual, %actual_len, %expected, %expected_len, %operator, %operator_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASSERT_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASSERT_OK %out_ptr, %out_len, %out_status, %out_ok, %value, %message, %message_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASSERT_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASSERT_STRICT_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_DEPTH %out_depth, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_ENTER %out_depth, %out_status, %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_EXECUTION_ASYNC_ID %out_id, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_EXIT %out_async_id, %out_popped, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_RESET %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_SNAPSHOT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_TRIGGER_ASYNC_ID %out_id, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_ASYNC_RESOURCE_CREATE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_ASYNC_RESOURCE_FREE %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_ASYNC_RESOURCE_SNAPSHOT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_EXECUTION_ASYNC_ID %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_SNAPSHOT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_TOP_CONFIG_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_TOP_EXPORTS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_TOP_FEATURE_SUPPORT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ASYNC_HOOKS_TRIGGER_ASYNC_ID %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_ATOB %input, %input_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_BTOA %input, %input_len, %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_BYTE_LENGTH %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_CONCAT %buffers_argv, %buffers_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_IS_ASCII %input, %input_len, %out_bool`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_IS_UTF8 %input, %input_len, %out_bool`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_RESOLVE_OBJECT_URL %url, %url_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_BUFFER_TRANSCODE %src, %src_len, %from_enc, %from_enc_len, %to_enc, %to_enc_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_EXEC %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_EXECFILE_SYNC %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_EXEC_FILE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_EXEC_SYNC_JSON %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_FORK %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_SPAWN %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_SPAWN_SYNC %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_TOP_CONFIG_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_TOP_EXPORTS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CHILD_PROCESS_TOP_FEATURE_SUPPORT_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_FORK %out_worker, %out_status, %exec, %exec_len, %args, %args_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_GET_SCHEDULING_POLICY %out_policy, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_IS_PRIMARY %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_IS_WORKER %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_PRIMARY_SNAPSHOT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_SETUP_PRIMARY %exec, %exec_len, %args, %args_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_SETUP_PRIMARY_JSON %config, %config_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_SET_SCHEDULING_POLICY %policy, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_TOP_PRIMARY_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_DISCONNECT %out_status, %worker`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_EXITED_AFTER_DISCONNECT %out_bool, %out_status, %worker`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_FREE %out_status, %worker`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_IS_ALIVE %out_bool, %out_status, %worker`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_IS_CONNECTED %out_bool, %out_status, %worker`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_KILL %out_status, %worker, %signal`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_KILL_SIGNAL %out_status, %worker, %signal_ptr, %signal_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_PID %out_pid, %out_status, %worker`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_RECEIVE_MESSAGE %out_ptr, %out_len, %out_status, %worker`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_SEND_MESSAGE %out_status, %worker, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %worker`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CLUSTER_WORKER_WAIT_JSON %out_ptr, %out_len, %out_status, %worker`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_ARGV_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_ENV_FILES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_HAS_FLAG %out_bool, %out_status, %flag, %flag_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_NODE_OPTIONS_TOKENS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_ASSERT %condition, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_CLEAR %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_COUNT %label, %label_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_COUNT_RESET %label, %label_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_DEBUG %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_DIR %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_DIRXML %data, %data_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_ERROR %out_status, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_GROUP %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_GROUP_COLLAPSED %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_GROUP_END %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_INFO %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_LOG %out_status, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_TABLE %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_TIME %out_status, %label, %label_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_TIME_END %out_status, %out_ms, %label, %label_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_TIME_LOG %label, %label_len, %data, %data_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_TIME_STAMP %data, %data_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_TRACE %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSOLE_WARN %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSTANTS_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSTANTS_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSTANTS_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CONSTANTS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_CIPHER_FINAL %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_CIPHER_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_CIPHER_UPDATE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_CREATE_CIPHER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_CREATE_DECIPHER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_CREATE_HASH %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_CREATE_HMAC %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_DECIPHER_FINAL %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_DECIPHER_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_DECIPHER_UPDATE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_GENERATE_KEY %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_GET_HASHES %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_HASH %out_ptr, %out_len, %out_status, %algo, %algo_len, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_HASH_FINAL %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_HASH_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_HASH_UPDATE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_HKDF %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8, %p_9, %p_10`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_HMAC %out_ptr, %out_len, %out_status, %algo, %algo_len, %key, %key_len, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_HMAC_FINAL %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_HMAC_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_HMAC_UPDATE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_PBKDF2 %out_ptr, %out_status, %pass, %pass_len, %salt, %salt_len, %iter, %keylen, %digest, %digest_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_RANDOM_BYTES %size, %out_ptr, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_RANDOM_FILL %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_RANDOM_INT %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_RANDOM_UUID %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_SCRYPT %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8, %p_9`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_SECURE_HEAP_USED_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_SIGN %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_TIMING_SAFE_EQUAL %out_bool, %out_status, %a_ptr, %a_len, %b_ptr, %b_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_CRYPTO_VERIFY %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8, %p_9`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DEBUGGER_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DEPRECATED_CLEAR %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DEPRECATED_FLAGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DEPRECATED_HAS %out_bool, %out_status, %code, %code_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DEPRECATED_RECORD_JSON %out_ptr, %out_len, %out_status, %code, %code_len, %message, %message_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DEPRECATED_SNAPSHOT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DEPRECATED_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_ADDRESS %out_status, %out_ptr, %out_len, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_ADD_MEMBERSHIP %out_status, %socket, %multicast, %multicast_len, %iface, %iface_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_ADD_MEMBERSHIP6 %out_status, %socket, %multicast, %multicast_len, %iface, %iface_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_ADD_SOURCE_SPECIFIC_MEMBERSHIP %out_status, %socket, %source, %source_len, %multicast, %multicast_len, %iface, %iface_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_BIND %out_status, %socket, %host, %host_len, %port`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_CLOSE %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_CONNECT %out_status, %socket, %host, %host_len, %port`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_CREATE %out_socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_CREATE_OPTIONS %out_socket, %out_status, %socket_type, %reuse_addr, %reuse_port, %ipv6_only, %recv_buffer_size, %send_buffer_size`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_CREATE_UDP6 %out_socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_DISCONNECT %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_DROP_MEMBERSHIP %out_status, %socket, %multicast, %multicast_len, %iface, %iface_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_DROP_MEMBERSHIP6 %out_status, %socket, %multicast, %multicast_len, %iface, %iface_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_DROP_SOURCE_SPECIFIC_MEMBERSHIP %out_status, %socket, %source, %source_len, %multicast, %multicast_len, %iface, %iface_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_GET_RECV_BUFFER_SIZE %out_status, %out_size, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_GET_SEND_BUFFER_SIZE %out_status, %out_size, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_GET_SEND_QUEUE_COUNT %out_status, %out_count, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_GET_SEND_QUEUE_SIZE %out_status, %out_size, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_HAS_REF %out_status, %out_bool, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_RECV %out_status, %out_ptr, %out_len, %out_host_ptr, %out_host_len, %out_port, %socket, %max_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_REF %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_REMOTE_ADDRESS %out_status, %out_ptr, %out_len, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SEND %out_status, %socket, %data, %data_len, %host, %host_len, %port`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SEND_CONNECTED %out_status, %socket, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_BROADCAST %out_status, %socket, %enable`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_MULTICAST_HOPS6 %out_status, %socket, %hops`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_MULTICAST_INTERFACE %out_status, %socket, %iface, %iface_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_MULTICAST_INTERFACE6 %out_status, %socket, %iface_index`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_MULTICAST_LOOPBACK %out_status, %socket, %enable`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_MULTICAST_LOOPBACK6 %out_status, %socket, %enable`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_MULTICAST_TTL %out_status, %socket, %ttl`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_RECEIVE_BLOCKLIST %out_status, %socket, %blocklist`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_RECV_BUFFER_SIZE %out_status, %socket, %size`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_SEND_BLOCKLIST %out_status, %socket, %blocklist`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_SEND_BUFFER_SIZE %out_status, %socket, %size`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_SET_TTL %out_status, %socket, %ttl`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DGRAM_UNREF %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_CREATE %name_ptr, %name_len, %out_channel, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_FREE %channel_ptr`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_HAS_SUBSCRIBERS %channel_ptr, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_PUBLISH %channel_ptr, %data_ptr, %data_len, %out_count, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_SNAPSHOT_JSON %channel_ptr, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_SUBSCRIBE %channel_ptr, %callback, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TOP_FACTORIES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TOP_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TRACING_CHANNEL %name_ptr, %name_len, %out_handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_UNSUBSCRIBE %channel_ptr, %callback, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_GET_DEFAULT_RESULT_ORDER %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_GET_SERVERS %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_LOOKUP %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_LOOKUP_OPTIONS %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %family, %all, %order, %order_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_LOOKUP_OPTIONS_HINTS %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %family, %all, %hints, %order, %order_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_LOOKUP_SERVICE %out_ptr, %out_len, %out_status, %address, %address_len, %port`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_GET_DEFAULT_RESULT_ORDER %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_GET_SERVERS %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_LOOKUP %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_LOOKUP_OPTIONS %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %family, %all, %order, %order_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_LOOKUP_OPTIONS_HINTS %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %family, %all, %hints, %order, %order_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_LOOKUP_SERVICE %out_ptr, %out_len, %out_status, %address, %address_len, %port`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %rrtype, %rrtype_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE4 %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE6 %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_CANCEL %out_status, %resolver`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_FREE %out_status, %resolver`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_GET_SERVERS %out_ptr, %out_len, %out_status, %resolver`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_NEW %out_resolver, %out_status, %timeout_ms, %tries`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_RESOLVE %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len, %rrtype, %rrtype_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_RESOLVE4 %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_RESOLVE6 %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_REVERSE %out_ptr, %out_len, %out_status, %resolver, %ip, %ip_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_SET_LOCAL_ADDRESS %out_status, %resolver, %ipv4, %ipv4_len, %ipv6, %ipv6_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_SET_SERVERS %out_status, %resolver, %servers, %servers_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %resolver`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_ANY %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_CAA %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_CNAME %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_MX %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_NAPTR %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_NS %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_PTR %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_SOA %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_SRV %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_TLSA %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_TXT %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_REVERSE %out_ptr, %out_len, %out_status, %ip, %ip_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_SET_DEFAULT_RESULT_ORDER %out_status, %order, %order_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_PROMISES_SET_SERVERS %out_status, %servers, %servers_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %rrtype, %rrtype_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE4 %hostname, %hostname_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE6 %hostname, %hostname_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_CANCEL %out_status, %resolver`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_FREE %out_status, %resolver`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_GET_SERVERS %out_ptr, %out_len, %out_status, %resolver`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_NEW %out_resolver, %out_status, %timeout_ms, %tries`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_RESOLVE %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len, %rrtype, %rrtype_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_RESOLVE4 %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_RESOLVE6 %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_REVERSE %out_ptr, %out_len, %out_status, %resolver, %ip, %ip_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_SET_LOCAL_ADDRESS %out_status, %resolver, %ipv4, %ipv4_len, %ipv6, %ipv6_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_SET_SERVERS %out_status, %resolver, %servers, %servers_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVER_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %resolver`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_ANY %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_CAA %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_CNAME %hostname, %hostname_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_MX %hostname, %hostname_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_NAPTR %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_NS %hostname, %hostname_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_PTR %hostname, %hostname_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_SOA %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_SRV %hostname, %hostname_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_TLSA %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_RESOLVE_TXT %hostname, %hostname_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_REVERSE %ip, %ip_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_SET_DEFAULT_RESULT_ORDER %order, %order_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_SET_SERVERS %servers, %servers_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DNS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_ADD %out_status, %domain, %member`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_CREATE %out_domain, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_DISPOSE %out_status, %domain`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_ENTER %out_status, %domain`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_EXIT %out_status, %domain`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_FREE %out_status, %domain`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_GET_ACTIVE %out_domain, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_MEMBER_COUNT %out_count, %out_status, %domain`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_REMOVE %out_status, %domain, %member`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %domain`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_TOP_ACTIVE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DOMAIN_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_CLOSE %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_CONNECT %out_endpoint, %out_status, %family, %remote_host, %remote_host_len, %remote_port, %local_host, %local_host_len, %local_port`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_ENDPOINT_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_FREE %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_LISTEN %out_endpoint, %out_status, %family, %host, %host_len, %port`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_RECV %out_ptr, %out_len, %out_host_ptr, %out_host_len, %out_port, %out_status, %endpoint, %max_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_SEND %out_status, %endpoint, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_DTLS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_GET_JSON %out_ptr, %out_len, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_HAS %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_LOAD_ENV_FILE_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_PARSE_ENV_JSON %out_ptr, %out_len, %out_status, %content, %content_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_SNAPSHOT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ERRORS_CODES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ERRORS_GET_SYSTEM_ERROR_MESSAGE %out_ptr, %out_len, %out_status, %errnum`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ERRORS_GET_SYSTEM_ERROR_NAME %out_ptr, %out_len, %out_status, %errnum`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ERRORS_INVALID_ARG_TYPE_JSON %out_ptr, %out_len, %out_status, %name, %name_len, %expected, %expected_len, %actual_type, %actual_type_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ERRORS_INVALID_ARG_VALUE_JSON %out_ptr, %out_len, %out_status, %name, %name_len, %value, %value_len, %reason, %reason_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ERRORS_OUT_OF_RANGE_JSON %out_ptr, %out_len, %out_status, %name, %name_len, %range, %range_len, %received, %received_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ERRORS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ERRORS_SYSTEM_ERROR_JSON %out_ptr, %out_len, %out_status, %errnum, %syscall, %syscall_len, %path, %path_len, %dest, %dest_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_CREATE %out_ee`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_EMIT %ee, %event_name, %event_len, %data, %data_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_EMIT_WITH_ERROR %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_FREE %ee, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_GET_EVENT_LISTENERS %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_GET_MAX_LISTENERS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_LISTENER_COUNT %ee, %event_name, %event_len, %out_count, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_LISTENER_COUNT_BY_EVENT %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_OFF %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_ON %ee, %event_name, %event_len, %callback, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_ONCE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_PREPEND_LISTENER %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_REMOVE_ALL_LISTENERS %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_SET_MAX_LISTENERS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_EVENTS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_CALL_I64_0 %out_value, %out_status, %library, %symbol, %symbol_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_CALL_I64_1 %out_value, %out_status, %library, %symbol, %symbol_len, %a0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_CALL_I64_2 %out_value, %out_status, %library, %symbol, %symbol_len, %a0, %a1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_CALL_PTR_STRING %out_ptr, %out_len, %out_status, %library, %symbol, %symbol_len, %value, %value_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_CALL_STRING_I64 %out_value, %out_status, %library, %symbol, %symbol_len, %value, %value_len, %a0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_CALL_STRLEN %out_value, %out_status, %library, %symbol, %symbol_len, %value, %value_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_CLOSE %out_status, %library`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_HAS_SYMBOL %out_bool, %out_status, %library, %symbol, %symbol_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_OPEN %out_library, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FFI_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FREE_BUFFER %ptr, %len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_ACCESS %path, %path_len, %mode, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_CHMOD %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_CHOWN %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_CLOSE_FD %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_COPY_FILE %out_status, %src, %src_len, %dst, %dst_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_CP %out_status, %src, %src_len, %dst, %dst_len, %recursive, %force, %error_on_exist`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_EXISTS %path, %path_len, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_FCHMOD %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_FCHOWN %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_FDATASYNC %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_FSTAT %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_FSYNC %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_FTRUNCATE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_FUTIMES %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_GLOB %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_LINK %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_LSTAT %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_MKDIR %out_status, %path, %path_len, %recursive`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_MKDTEMP %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_OPEN %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_OPENDIR %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_OPENDIR_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_OPENDIR_NEXT %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_ACCESS %out_bool, %out_status, %path, %path_len, %mode`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_CHMOD %out_status, %path, %path_len, %mode`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_CHOWN %out_status, %path, %path_len, %uid, %gid`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_CLOSE_FILE %out_status, %fd`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_COPY_FILE %out_status, %src, %src_len, %dst, %dst_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_CP %out_status, %src, %src_len, %dst, %dst_len, %recursive, %force, %error_on_exist`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_EXISTS %out_bool, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_FCHMOD %out_status, %fd, %mode`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_FCHOWN %out_status, %fd, %uid, %gid`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_FDATASYNC %out_status, %fd`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_FSTAT %out_ptr, %out_len, %out_status, %fd`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_FSYNC %out_status, %fd`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_FTRUNCATE %out_status, %fd, %len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_FUTIMES %out_status, %fd, %atime_ms, %mtime_ms`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_LINK %out_status, %src, %src_len, %dst, %dst_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_LSTAT %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_MKDIR %out_status, %path, %path_len, %recursive`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_MKDTEMP %out_ptr, %out_len, %out_status, %template, %template_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_OPEN %out_fd, %out_status, %path, %path_len, %flags, %mode`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_OPENDIR %out_handle, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_OPENDIR_FREE %out_status, %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_OPENDIR_NEXT %out_name_ptr, %out_name_len, %out_entry_type, %out_status, %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_READ %out_n, %out_status, %fd, %buf, %len, %offset`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_READDIR %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_READDIR_WITH_TYPES %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_READLINK %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_READV %out_n, %out_status, %fd, %iov_json, %iov_json_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_READ_FILE %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_REALPATH %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_RENAME %out_status, %old, %old_len, %new, %new_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_RM %out_status, %path, %path_len, %recursive`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_RMDIR %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_STAT %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_STATFS %out_ptr, %out_len, %out_status, %path`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_SYMLINK %out_status, %src, %src_len, %dst, %dst_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_TRUNCATE %out_status, %path, %path_len, %len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_UNLINK %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_UTIMES %out_status, %path, %path_len, %atime_ms, %mtime_ms`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_WRITE %out_n, %out_status, %fd, %data, %data_len, %offset`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_WRITEV %out_n, %out_status, %fd, %iov_json, %iov_json_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_PROMISES_WRITE_FILE %out_status, %path, %path_len, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_READDIR %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_READDIR_WITH_TYPES %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_READLINK %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_READV %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_READ_FD %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_READ_FILE %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_REALPATH %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_RENAME %out_status, %old, %old_len, %new, %new_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_RM %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_RMDIR %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_STAT %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_STATFS %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_SYMLINK %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_TRUNCATE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_UNLINK %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_UTIMES %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_WRITEV %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_WRITE_FD %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_FS_WRITE_FILE %out_status, %path, %path_len, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_CLIENT_REQUEST %out_ptr, %out_len, %out_status, %url, %url_len, %method, %method_len, %body, %body_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_GET_DEFAULT_SETTINGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_GET_PACKED_SETTINGS %out_ptr, %out_len, %out_status, %settings_json, %settings_json_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_GET_UNPACKED_SETTINGS_JSON %out_ptr, %out_len, %out_status, %buf, %buf_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_NGHTTP2_VERSION_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_PERFORM_SERVER_HANDSHAKE %out_bytes_ptr, %out_bytes_len, %out_json_ptr, %out_json_len, %out_status, %input, %input_len, %settings_json, %settings_json_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_SENSITIVE_HEADERS %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP2_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_CREATE_SESSION %out_session, %out_status, %endpoint, %authority, %authority_len, %path, %path_len, %method, %method_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_SESSION_CLOSE %out_status, %session`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_SESSION_FREE %out_status, %session`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_SESSION_RECV_DATAGRAM %out_ptr, %out_len, %out_host_ptr, %out_host_len, %out_port, %out_status, %session, %max_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_SESSION_SEND_DATAGRAM %out_status, %session, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_SESSION_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %session`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP3_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTPS_GET_JSON %out_ptr, %out_len, %out_status, %url, %url_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTPS_REQUEST_JSON %out_ptr, %out_len, %out_status, %method, %method_len, %url, %url_len, %body, %body_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTPS_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTPS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTPS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTPS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_ASYNC_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_ASYNC_POLL %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_ASYNC_TAKE_RESPONSE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_BODY_READER_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_NEW %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_REQ_ADD_HEADER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_REQ_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_REQ_NEW %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_REQ_SEND %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_REQ_SEND_ASYNC %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_REQ_SET_BODY %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_RESP_BODY_READER %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_RESP_BODY_SLICE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_RESP_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_RESP_GET_HEADER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_RESP_READ_CHUNK %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_CLIENT_RESP_STATUS %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_GET_JSON %out_ptr, %out_len, %out_status, %url, %url_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_MAX_HEADER_SIZE %out_size, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_METHODS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_REQUEST_JSON %out_ptr, %out_len, %out_status, %method, %method_len, %url, %url_len, %body, %body_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_ACCEPT %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_NEW %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_REQ_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_REQ_GET_BODY %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_REQ_GET_HEADER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_REQ_GET_METHOD %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_REQ_GET_PATH %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_RESP_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_RESP_NEW %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_RESP_SEND %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_RESP_SET_CONTENT_TYPE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_END %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_FLUSH %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_NEW %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_WRITE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_START %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_WEBSOCKET_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_WEBSOCKET_READ %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_WEBSOCKET_UPGRADE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SERVER_WEBSOCKET_WRITE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_SET_MAX_IDLE_HTTP_PARSERS %max, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_STATUS_CODES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_VALIDATE_HEADER_NAME %name, %name_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_VALIDATE_HEADER_VALUE %name, %name_len, %value, %value_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_WEBSOCKET_CONNECT %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_WEBSOCKET_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_WEBSOCKET_READ %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_HTTP_WEBSOCKET_WRITE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INSPECTOR_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INSPECTOR_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INSPECTOR_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INSPECTOR_IS_ALLOWED %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INSPECTOR_IS_ENABLED %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INSPECTOR_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INSPECTOR_URL_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INTERNATIONALIZATION_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INTERNATIONALIZATION_EFFECTIVE_LOCALE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INTERNATIONALIZATION_HAS_ENCODING %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INTERNATIONALIZATION_HAS_ICU_CONFIG %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INTERNATIONALIZATION_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_INTERNATIONALIZATION_SUPPORTED_ENCODINGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ITERABLE_STREAMS_BRIDGE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ITERABLE_STREAMS_CAPABILITIES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ITERABLE_STREAMS_HAS_CAPABILITY %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ITERABLE_STREAMS_HAS_STREAM_TYPE %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ITERABLE_STREAMS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ITERABLE_STREAMS_STREAM_TYPES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_BUILTIN_MODULES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_ENABLE_COMPILE_CACHE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_FIND_PACKAGE_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_FIND_SOURCE_MAP_JSON %out_ptr, %out_len, %out_status, %path_ptr, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_FLUSH_COMPILE_CACHE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_GET_COMPILE_CACHE_DIR_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_GET_SOURCE_MAPS_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_GLOBAL_PATHS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_IS_BUILTIN %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_SET_SOURCE_MAPS_SUPPORT %out_status, %enabled, %node_modules, %generated_code`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_MODULE_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_ACCEPT %server, %out_socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_ADDRESS %socket, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_AUTO_SELECT_FAMILY_ATTEMPTED_ADDRESSES %socket, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_ADD_ADDRESS %blocklist, %address, %address_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_ADD_ADDRESS_FAMILY %blocklist, %address, %address_len, %family, %family_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_ADD_ADDRESS_HANDLE %blocklist, %addr, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_ADD_RANGE %blocklist, %start, %start_len, %end, %end_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_ADD_RANGE_FAMILY %blocklist, %start, %start_len, %end, %end_len, %family, %family_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_ADD_RANGE_HANDLE %blocklist, %start, %end, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_ADD_SUBNET %blocklist, %network, %network_len, %prefix, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_ADD_SUBNET_FAMILY %blocklist, %network, %network_len, %prefix, %family, %family_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_ADD_SUBNET_HANDLE %blocklist, %network, %prefix, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_CHECK %blocklist, %address, %address_len, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_CHECK_FAMILY %blocklist, %address, %address_len, %family, %family_len, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_CHECK_HANDLE %blocklist, %addr, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_FREE %blocklist, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_IS_BLOCKLIST %blocklist, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_NEW %out_blocklist, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BLOCKLIST_RULES %blocklist, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BUFFER_SIZE %socket, %out_size, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BYTES_READ %socket, %out_bytes, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_BYTES_WRITTEN %socket, %out_bytes, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_CLOSED %socket, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_CONNECT %host, %host_len, %port, %out_socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_CONNECTING %socket, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_CONNECT_BLOCKLIST %host, %host_len, %port, %blocklist, %out_socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_CONNECT_OPTIONS %host, %host_len, %port, %family, %local, %local_len, %local_port, %no_delay, %keep_alive, %keep_alive_initial_delay_secs, %timeout_ms, %blocklist, %out_socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_CONNECT_UNIX %path, %path_len, %out_socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_CREATE_CONNECTION %host, %host_len, %port, %out_socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_CREATE_CONNECTION_OPTIONS %host, %host_len, %port, %options_json, %options_json_len, %out_socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_CREATE_SERVER %out_server, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_DESTROY %socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_DESTROYED %socket, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_END %socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_GET_DEFAULT_AUTO_SELECT_FAMILY %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_GET_DEFAULT_AUTO_SELECT_FAMILY_ATTEMPT_TIMEOUT %out_timeout, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_GET_RECV_BUFFER_SIZE %socket, %out_size, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_GET_SEND_BUFFER_SIZE %socket, %out_size, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_GET_TIMEOUT %socket, %out_timeout_ms, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_GET_TYPE_OF_SERVICE %socket, %out_tos, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_HAS_REF %handle, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_IS_IP %input, %input_len, %out_value`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_IS_IPV4 %input, %input_len, %out_bool`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_IS_IPV6 %input, %input_len, %out_bool`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_LISTEN %host, %host_len, %port, %out_server, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_LISTEN_OPTIONS %options_json, %options_json_len, %out_server, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_LISTEN_UNIX %path, %path_len, %out_server, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_LOCAL_ADDRESS %socket, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_LOCAL_FAMILY %socket, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_LOCAL_PORT %socket, %out_port, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_PENDING %socket, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_READ %socket, %max_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_READABLE %socket, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_READY_STATE %socket, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_REF %handle, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_REMOTE_ADDRESS %socket, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_REMOTE_ADDRESS_VALUE %socket, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_REMOTE_FAMILY %socket, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_REMOTE_PORT %socket, %out_port, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_RESET_AND_DESTROY %socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SERVER_ADDRESS %server, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SERVER_CLOSE %server, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SERVER_GET_CONNECTIONS %server, %out_count, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SERVER_GET_MAX_CONNECTIONS %server, %out_max_connections, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SERVER_LISTENING %server, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SERVER_SET_BLOCKLIST %server, %blocklist, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SERVER_SET_MAX_CONNECTIONS %server, %max_connections, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SET_DEFAULT_AUTO_SELECT_FAMILY %value, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SET_DEFAULT_AUTO_SELECT_FAMILY_ATTEMPT_TIMEOUT %value, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SET_KEEP_ALIVE %socket, %enable, %initial_delay_secs, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SET_NO_DELAY %socket, %enable, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SET_RECV_BUFFER_SIZE %socket, %size, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SET_SEND_BUFFER_SIZE %socket, %size, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SET_TIMEOUT %socket, %timeout_ms, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SET_TYPE_OF_SERVICE %socket, %tos, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SHUTDOWN_WRITE %socket, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SOCKET_ADDRESS_ADDRESS %addr, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SOCKET_ADDRESS_FAMILY %addr, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SOCKET_ADDRESS_FLOWLABEL %addr, %out_flowlabel, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SOCKET_ADDRESS_FREE %addr, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SOCKET_ADDRESS_IS_SOCKET_ADDRESS %addr, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SOCKET_ADDRESS_JSON %addr, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SOCKET_ADDRESS_NEW %out_addr, %out_status, %address, %address_len, %port, %family, %family_len, %flowlabel`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SOCKET_ADDRESS_PARSE %out_addr, %out_status, %input, %input_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_SOCKET_ADDRESS_PORT %addr, %out_port, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_UNREF %handle, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_WRITABLE %socket, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_NET_WRITE %socket, %data, %data_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_ARCH %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_AVAILABLE_PARALLELISM %out_val, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_CONSTANTS %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_CPUS %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_DEV_NULL %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_ENDIANNESS %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_EOL %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_FREEMEM %out_mem, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_GET_PRIORITY %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_HOMEDIR %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_HOSTNAME %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_LOADAVG %out_status, %load_buf`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_MACHINE %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_NETWORK_INTERFACES %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_PLATFORM %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_RELEASE %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_SET_PRIORITY %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_SYSTEM_UPTIME %out_uptime, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_TMPDIR %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_TOTALMEM %out_mem, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_TYPE %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_USER_INFO %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_OS_VERSION %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_BASENAME %out_ptr, %out_len, %out_status, %path, %path_len, %ext, %ext_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_DELIMITER %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_DIRNAME %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_EXTNAME %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_FORMAT %out_ptr, %out_len, %out_status, %in_json, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_IS_ABSOLUTE %out_bool, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_JOIN %paths_argv, %paths_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_MATCHES_GLOB %pattern, %pattern_len, %input, %input_len, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_NORMALIZE %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_PARSE %out_ptr, %out_len, %out_status, %in_path, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_RELATIVE %out_ptr, %out_len, %out_status, %from_p, %from_l, %to_p, %to_l`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_RESOLVE %paths_argv, %paths_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_SEP %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PATH_TO_NAMESPACED_PATH %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_CLEAR_MARKS %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_CLEAR_MEASURES %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_CREATE_HISTOGRAM %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_ENTRIES_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_EVENT_LOOP_UTILIZATION %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_HISTOGRAM_FREE %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_HISTOGRAM_GET_STATISTICS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_HISTOGRAM_RECORD %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_MARK %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_MEASURE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_NOW_MS %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_PERFORMANCE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_SUPPORTED_ENTRY_TYPES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_TIMERIFY %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERF_HOOKS_TIME_ORIGIN_MS %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERMISSIONS_AVAILABLE_FLAGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERMISSIONS_DECLARED_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERMISSIONS_HAS %out_bool, %out_status, %scope, %scope_len, %reference, %reference_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERMISSIONS_IS_AUDIT_MODE %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERMISSIONS_IS_ENABLED %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PERMISSIONS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_ALLOWED_NODE_ENVIRONMENT_FLAGS_HAS %out_bool, %out_status, %flag_ptr, %flag_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_ALLOWED_NODE_ENVIRONMENT_FLAGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_ARCH %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_ARGV %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_ARGV0 %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_ARGV_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_AVAILABLE_MEMORY %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_CHDIR %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_CONSTRAINED_MEMORY %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_CPU_USAGE %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_CWD %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_EMIT_WARNING_JSON %out_ptr, %out_len, %out_status, %warning_ptr, %warning_len, %type_ptr, %type_len, %code_ptr, %code_len, %detail_ptr, %detail_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_ENV_DELETE %key, %key_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_ENV_GET %key, %key_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_ENV_SET %key, %key_len, %val, %val_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_EXEC %out_code, %out_stdout_ptr, %out_stdout_len, %out_stderr_ptr, %out_stderr_len, %out_status, %p_argv, %l_argv, %p_cwd, %l_cwd`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_EXEC_ARGV_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_EXEC_PATH %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_EXIT %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_FEATURES_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_GETEGID %out_gid, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_GETEUID %out_uid, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_GETGID %out_gid, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_GETUID %out_uid, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_GROUPS %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_HRTIME_BIGINT %out_ns, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_KILL %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_KILL_SIGNAL %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_MEMORY_USAGE %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_PID %out_pid, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_PLATFORM %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_PPID %out_ppid, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_RELEASE_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_RESOURCE_USAGE_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_UMASK %out_old, %out_status, %mask, %set_mask`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_UPTIME %out_uptime, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_VERSION %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PROCESS_VERSIONS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PUNYCODE_DECODE %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PUNYCODE_ENCODE %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PUNYCODE_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PUNYCODE_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PUNYCODE_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PUNYCODE_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PUNYCODE_TO_ASCII %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PUNYCODE_TO_UNICODE %input, %input_len, %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_PUNYCODE_VERSION %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUERYSTRING_ESCAPE %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUERYSTRING_PARSE %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUERYSTRING_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUERYSTRING_STRINGIFY %out_ptr, %out_len, %out_status, %in_json, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUERYSTRING_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUERYSTRING_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUERYSTRING_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUERYSTRING_UNESCAPE %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUERYSTRING_UNESCAPE_BUFFER %input, %input_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_CAPABILITIES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_CONNECT %out_endpoint, %out_status, %family, %remote_host, %remote_host_len, %remote_port, %local_host, %local_host_len, %local_port, %alpn, %alpn_len, %cc, %cc_len, %idle_timeout_ms`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_CREATE_ENDPOINT %out_endpoint, %out_status, %family, %host, %host_len, %port, %alpn, %alpn_len, %cc, %cc_len, %idle_timeout_ms`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_ENDPOINT_ADDRESS_JSON %out_ptr, %out_len, %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_ENDPOINT_CLOSE %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_ENDPOINT_FREE %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_ENDPOINT_HAS_REF %out_status, %out_bool, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_ENDPOINT_REF %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_ENDPOINT_REMOTE_ADDRESS_JSON %out_ptr, %out_len, %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_ENDPOINT_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_ENDPOINT_UNREF %out_status, %endpoint`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_LISTEN %out_endpoint, %out_status, %family, %host, %host_len, %port, %alpn, %alpn_len, %cc, %cc_len, %idle_timeout_ms`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_QUIC_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_CLEAR_LINE %fd, %dir`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_CLEAR_SCREEN_DOWN %fd`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_CREATE %out_rl`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_CREATE_INTERFACE %out_interface, %out_status, %input, %input_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_CURSOR_TO %fd, %x, %y`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_EMIT_KEYPRESS_EVENTS %stream, %stream_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_FREE %rl, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_MOVE_CURSOR %fd, %dx, %dy, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_PROMISES_CLOSE %out_status, %interface`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_PROMISES_CREATE_INTERFACE %out_interface, %out_status, %input, %input_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_PROMISES_FREE %out_status, %interface`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_PROMISES_QUESTION %out_ptr, %out_len, %out_status, %interface, %query, %query_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_PROMISES_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %interface`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_QUESTION %rl, %query, %query_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_READLINE_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_CLOSE %session_ptr, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_CREATE_SESSION %prompt_ptr, %prompt_len, %out_session, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_DEFINE_COMMAND %session_ptr, %name_ptr, %name_len, %help_ptr, %help_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_EVAL_LINE %session_ptr, %line_ptr, %line_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_FREE %session_ptr`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_HISTORY_JSON %session_ptr, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_SET_PROMPT %session_ptr, %prompt_ptr, %prompt_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_SNAPSHOT_JSON %session_ptr, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_TOP_DEFAULT_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPL_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPORT_GET_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPORT_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPORT_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPORT_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPORT_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_REPORT_WRITE_FILE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_ASSET_KEYS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_GET_ASSET %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_GET_ASSET_AS_BLOB %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_GET_RAW_ASSET %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_IS_SEA %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SEA_TOP_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_APPLY_CHANGESET %out_applied, %out_status, %db, %changeset, %changeset_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BACKUP_FINISH %out_status, %backup`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BACKUP_INIT %out_backup, %out_status, %db, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BACKUP_REMAINING %out_remaining, %out_pagecount, %out_status, %backup`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BACKUP_STEP %out_done, %out_remaining, %out_pagecount, %out_status, %backup, %pages`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BACKUP_TO_FILE %out_pages, %out_status, %db, %path, %path_len, %pages_per_step`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BIND_BLOB %out_status, %stmt, %index, %value, %value_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BIND_DOUBLE %out_status, %stmt, %index, %value`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BIND_INT %out_status, %stmt, %index, %value`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BIND_NULL %out_status, %stmt, %index`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_BIND_TEXT %out_status, %stmt, %index, %value, %value_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_CHANGES %out_changes, %out_status, %db`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_CLEAR_BINDINGS %out_status, %stmt`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_CLOSE %out_status, %db`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_EXEC %out_status, %db, %sql, %sql_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_FINALIZE %out_status, %stmt`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_LAST_INSERT_ROWID %out_rowid, %out_status, %db`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_OPEN %out_db, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_PREPARE %out_stmt, %out_status, %db, %sql, %sql_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_QUERY_JSON %out_ptr, %out_len, %out_status, %db, %sql, %sql_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_RESET %out_status, %stmt`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_SESSION_CHANGESET %out_ptr, %out_len, %out_status, %session`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_SESSION_CLOSE %out_status, %session`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_SESSION_CREATE %out_session, %out_status, %db, %db_name, %db_name_len, %table, %table_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_SESSION_ISEMPTY %out_empty, %out_status, %session`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_SESSION_MEMORY_USED %out_bytes, %out_status, %session`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_SESSION_PATCHSET %out_ptr, %out_len, %out_status, %session`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_STEP_JSON %out_ready, %out_ptr, %out_len, %out_status, %stmt`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_TAGSTORE_ALL %out_ptr, %out_len, %out_status, %store, %sql, %sql_len, %params, %params_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_TAGSTORE_CLEAR %out_status, %store`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_TAGSTORE_FREE %out_status, %store`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_TAGSTORE_GET %out_ptr, %out_len, %out_status, %store, %sql, %sql_len, %params, %params_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_TAGSTORE_NEW %out_store, %out_status, %db, %capacity`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_TAGSTORE_RUN %out_ptr, %out_len, %out_status, %store, %sql, %sql_len, %params, %params_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_TAGSTORE_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %store`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SQLITE_VERSION_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_COMPOSE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_DESTROY %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_DUPLEX_NEW %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_DUPLEX_PAIR %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_FINISHED %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_PASSTHROUGH_NEW %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_PIPELINE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_PUSH %readable, %data, %data_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_READABLE_DESTROY %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_READABLE_NEW %out_readable`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_TOP_CONFIG_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_TOP_EXPORTS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_TOP_FEATURE_SUPPORT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_TRANSFORM_NEW %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_WRITABLE_DESTROY %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_WRITABLE_NEW %out_writable`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STREAM_WRITE %writable, %data, %data_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STRING_DECODER_CREATE %out_sd`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STRING_DECODER_END %out_status, %out_ptr, %out_len, %sd, %chunk, %chunk_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STRING_DECODER_FREE %out_status, %sd`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STRING_DECODER_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STRING_DECODER_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STRING_DECODER_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STRING_DECODER_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_STRING_DECODER_WRITE %out_status, %out_ptr, %out_len, %sd, %chunk, %chunk_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SYS_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SYS_DEBUGLOG %out_ptr, %out_len, %out_status, %section, %section_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SYS_DEPRECATION_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SYS_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SYS_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SYS_FORMAT %out_ptr, %out_len, %out_status, %format, %format_len, %args_json, %args_json_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SYS_INHERITS %child_ptr, %child_len, %super_ptr, %super_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SYS_INSPECT %out_ptr, %out_len, %out_status, %json, %json_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_SYS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_ASSERT_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_PROPERTY_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_REPORTERS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_RUNNER_BUILTIN_REPORTERS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_RUNNER_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_RUNNER_HAS_BUILTIN_REPORTER %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_RUNNER_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TEST_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_CLEAR_IMMEDIATE %id, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_CLEAR_INTERVAL %id, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_CLEAR_TIMEOUT %id, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_PROMISES_INTERVAL_FREE %out_status, %interval`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_PROMISES_INTERVAL_NEXT %out_ptr, %out_len, %out_done, %out_status, %interval`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_PROMISES_INTERVAL_RETURN %out_status, %interval`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_PROMISES_INTERVAL_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %interval`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_PROMISES_SCHEDULER_WAIT %out_status, %ms`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_PROMISES_SCHEDULER_YIELD %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_PROMISES_SET_IMMEDIATE %out_ptr, %out_len, %out_status, %value, %value_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_PROMISES_SET_INTERVAL %out_interval, %out_status, %ms, %value, %value_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_PROMISES_SET_TIMEOUT %out_ptr, %out_len, %out_status, %ms, %value, %value_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_SET_IMMEDIATE %callback, %out_id, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_SET_INTERVAL %ms, %callback, %out_id, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_SET_TIMEOUT %ms, %callback, %out_id, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_SLEEP %out_status, %ms`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TIMERS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_ADDRESS %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_ALPN_PROTOCOL %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_AUTHORIZED_JSON %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_BUFFER_SIZE %out_size, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_BYTES_READ %out_bytes, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_BYTES_WRITTEN %out_bytes, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_CHECK_SERVER_IDENTITY %out_ptr, %out_len, %out_status, %host, %host_len, %cert_json, %cert_json_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_CLOSE %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_CLOSED %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_CONNECT %out_socket, %out_status, %host, %host_len, %port, %servername, %servername_len, %reject_unauthorized`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_CONNECTING %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_CONNECT_OPTIONS %out_socket, %out_status, %host, %host_len, %port, %servername, %servername_len, %reject_unauthorized, %family, %local, %local_len, %local_port, %no_delay, %keep_alive, %keep_alive_initial_delay_secs, %timeout_ms, %blocklist`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_CONNECT_SECURE_CONTEXT %out_socket, %out_status, %context, %host, %host_len, %port, %servername, %servername_len, %reject_unauthorized`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_CONVERT_ALPN_PROTOCOLS %out_ptr, %out_len, %out_status, %protocols_json, %protocols_json_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_CREATE_SECURE_CONTEXT %out_context, %out_status, %ca, %ca_len, %cert, %cert_len, %key, %key_len, %ciphers, %ciphers_len, %min, %min_len, %max, %max_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_DEFAULT_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_DEFAULT_MAX_VERSION %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_DEFAULT_MIN_VERSION %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_DESTROY %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_DESTROYED %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_GET_CA_CERTIFICATES_JSON %out_ptr, %out_len, %out_status, %type_ptr, %type_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_GET_CIPHERS_DETAILED_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_GET_CIPHERS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_GET_CIPHER_JSON %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_GET_PROTOCOL %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_GET_TIMEOUT %out_timeout_ms, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_HAS_REF %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_LOCAL_ADDRESS %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_LOCAL_FAMILY %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_LOCAL_PORT %out_port, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_PENDING %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_READ %out_ptr, %out_len, %out_status, %socket, %max_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_READABLE %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_READY_STATE %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_REF %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_REMOTE_ADDRESS %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_REMOTE_ADDRESS_VALUE %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_REMOTE_FAMILY %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_REMOTE_PORT %out_port, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_RESET_DEFAULT_CA_CERTIFICATES %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_ROOT_CERTIFICATES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_SECURE_CONTEXT_FREE %out_status, %context`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_SECURE_CONTEXT_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %context`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_SERVERNAME %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_SET_DEFAULT_CA_CERTIFICATES %out_status, %certs_pem, %certs_pem_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_SET_TIMEOUT %out_status, %socket, %timeout_ms`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_UNREF %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_WRITABLE %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TLS_WRITE %out_status, %socket, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TRACE_EVENTS_CREATE_TRACING %categories_ptr, %categories_len, %out_handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TRACE_EVENTS_GET_ENABLED_CATEGORIES %handle, %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TRACE_EVENTS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TRACE_EVENTS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TRACE_EVENTS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TRACE_EVENTS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TRACE_EVENTS_TRACING_DISABLE %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TRACE_EVENTS_TRACING_ENABLE %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TRACE_EVENTS_TRACING_FREE %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_ISATTY %fd, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_READ_STREAM_NEW %fd, %out_handle, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_STREAM_FREE %handle, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_STREAM_GET_COLOR_DEPTH %handle, %out_depth, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_STREAM_GET_WINDOW_SIZE %handle, %out_cols, %out_rows, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_STREAM_HAS_COLORS %handle, %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_STREAM_SET_RAW_MODE %handle, %flag, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_TOP_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_TOP_STDIO_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_TTY_WRITE_STREAM_NEW %fd, %out_handle, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_CAN_PARSE %out_bool, %out_status, %url, %url_len, %base, %base_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_DOMAIN_TO_ASCII %out_ptr, %out_len, %out_status, %domain, %domain_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_DOMAIN_TO_UNICODE %out_ptr, %out_len, %out_status, %domain, %domain_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_FILE_URL_TO_PATH %out_ptr, %out_len, %out_status, %url, %url_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_FILE_URL_TO_PATH_BUFFER %out_ptr, %out_len, %out_status, %url, %url_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_FORMAT %out_ptr, %out_len, %out_status, %in_json, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_GET_HOST %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_GET_HREF %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_GET_PATHNAME %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_GET_PROTOCOL %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_NEW %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_PARSE %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_PATH_TO_FILE_URL %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_RESOLVE %out_ptr, %out_len, %out_status, %from, %from_len, %to, %to_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_URL_TO_HTTP_OPTIONS %out_ptr, %out_len, %out_status, %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_CALLBACKIFY %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_DEBUGLOG %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_DEPRECATE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_DIFF %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_FORMAT %out_ptr, %out_len, %out_status, %format, %format_len, %args_json, %args_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_FORMAT_WITH_OPTIONS %out_ptr, %out_len, %out_status, %options_json, %options_len, %format, %format_len, %args_json, %args_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_GET_SYSTEM_ERROR_MAP %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_GET_SYSTEM_ERROR_MESSAGE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_GET_SYSTEM_ERROR_NAME %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_INHERITS %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_INSPECT %out_ptr, %out_len, %out_status, %in_json, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_IS_DEEP_STRICT_EQUAL %out_bool, %out_status, %a_js, %a_len, %b_js, %b_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_MIME_TYPE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_PARSE_ARGS %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_PARSE_ENV %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_PROMISIFY %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_STRIP_VT_CONTROL_CHARACTERS %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_STYLE_TEXT %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_TEXT_DECODER_DECODE %data_ptr, %data_len, %encoding_ptr, %encoding_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_TEXT_ENCODER_ENCODE %text_ptr, %text_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_UTIL_TO_USV_STRING %input_ptr, %input_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_APPEND_FILE %out_status, %vfs, %path, %path_len, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_CHDIR %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_COPY_FILE %out_status, %vfs, %src, %src_len, %dst, %dst_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_CWD %out_ptr, %out_len, %out_status, %vfs`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_DIR_CLOSE %out_status, %dir`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_DIR_NEXT %out_name_ptr, %out_name_len, %out_entry_type, %out_status, %dir`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_DIR_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %dir`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_EXISTS %out_bool, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_FILE_CLOSE %out_status, %file`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_FILE_FSTAT_JSON %out_ptr, %out_len, %out_status, %file`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_FILE_READ %out_n, %out_status, %file, %buf, %len, %position, %use_position`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_FILE_TRUNCATE %out_status, %file, %len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_FILE_WRITE %out_n, %out_status, %file, %data, %data_len, %position, %use_position`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_FREE %out_status, %vfs`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_LSTAT_JSON %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_MKDIR %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_NEW %out_vfs, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_OPEN %out_handle, %out_status, %vfs, %path, %path_len, %mode`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_OPENDIR %out_dir, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_READDIR %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_READLINK %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_READ_FILE %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_REALPATH %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_RENAME %out_status, %vfs, %old_path, %old_len, %new_path, %new_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_RM %out_status, %vfs, %path, %path_len, %recursive`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %vfs`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_STAT_JSON %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_SYMLINK %out_status, %vfs, %target, %target_len, %link_path, %link_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_UNLINK %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_WATCH %out_watcher, %out_status, %vfs, %path, %path_len, %recursive`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_WATCHER_CLOSE %out_status, %watcher`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_WATCHER_NEXT %out_event_ptr, %out_event_len, %out_filename_ptr, %out_filename_len, %out_status, %watcher`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_WATCHER_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %watcher`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_VFS_WRITE_FILE %out_status, %vfs, %path, %path_len, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WASI_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WASI_IMPORT_MODULES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WASI_IS_ALLOWED %out_bool, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WASI_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WASI_SUPPORTED_VERSIONS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WASI_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WASI_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_DECRYPT %out_ptr, %out_len, %out_status, %key, %iv, %iv_len, %aad, %aad_len, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_DIGEST %out_ptr, %out_len, %out_status, %algo, %algo_len, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_ENCRYPT %out_ptr, %out_len, %out_status, %key, %iv, %iv_len, %aad, %aad_len, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_EXPORT_KEY_RAW %out_ptr, %out_len, %out_status, %key`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_EXPORT_PUBLIC_KEY_RAW %out_ptr, %out_len, %out_status, %key`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_GENERATE_KEY %out_key, %out_status, %algorithm, %algorithm_len, %usage, %usage_len, %bits`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_GET_RANDOM_VALUES %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_IMPORT_KEY_RAW %out_key, %out_status, %algorithm, %algorithm_len, %usage, %usage_len, %key, %key_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_KEY_FREE %out_status, %key`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_RANDOM_UUID %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_SIGN %out_sig_ptr, %out_sig_len, %out_status, %key, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_CRYPTO_VERIFY %out_bool, %out_status, %key, %data, %data_len, %sig, %sig_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_CLOSE %out_status, %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_ENQUEUE %out_status, %handle, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_FREE %out_status, %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_READ %out_ptr, %out_len, %out_status, %handle, %max_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_READABLE_NEW %out_handle, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %handle`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_TRANSFORM_NEW %out_readable, %out_writable, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_WRITABLE_NEW %out_handle, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WEB_STREAMS_WRITE %out_status, %handle, %data, %data_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_GET_ENVIRONMENT_DATA %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_IS_INTERNAL_THREAD %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_IS_MAIN_THREAD %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_CHANNEL_NEW %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_PORT_CLOSE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_PORT_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_PORT_POST_MESSAGE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_PORT_RECEIVE_MESSAGE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_PARENT_PORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_POST_MESSAGE_TO_THREAD %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_RECEIVE_MESSAGE_ON_PORT %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_RESOURCE_LIMITS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_SET_ENVIRONMENT_DATA %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_SHARE_ENV_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_THREAD_ID %p_0`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_THREAD_NAME %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_WORKER_THREADS_WORKER_DATA %p_0, %p_1`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_BROTLI_COMPRESS %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_BROTLI_DECOMPRESS %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_CODES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_CRC32 %in_data, %in_len, %out_val, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_DEFLATE %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_DEFLATE_RAW %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_GUNZIP %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_GZIP %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_INFLATE %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_INFLATE_RAW %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_UNZIP %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_ZSTD_COMPRESS %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node.sal: [MACRO] NODE_ZLIB_ZSTD_DECOMPRESS %out_ptr, %out_len, %out_status, %in_data, %in_len`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_assert_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_assert_deep_strict_equal(actual_ptr: ptr, actual_len: u64, expected_ptr: ptr, expected_len: u64, message_ptr: ptr, message_len: u64, &out_ptr: ptr, &out_len: u64, &out_ok: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_assert_equal(actual_ptr: ptr, actual_len: u64, expected_ptr: ptr, expected_len: u64, strict: u32, message_ptr: ptr, message_len: u64, &out_ptr: ptr, &out_len: u64, &out_ok: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_assert_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_assert_fail_json(message_ptr: ptr, message_len: u64, actual_ptr: ptr, actual_len: u64, expected_ptr: ptr, expected_len: u64, operator_ptr: ptr, operator_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_assert_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_assert_ok(value: u64, message_ptr: ptr, message_len: u64, &out_ptr: ptr, &out_len: u64, &out_ok: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_assert_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_assert_strict_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_context_tracking_depth(&out_depth: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_context_tracking_enter(handle_ptr: ptr, &out_depth: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_context_tracking_execution_async_id(&out_id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_context_tracking_exit(&out_async_id: u64, &out_popped: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_context_tracking_reset() -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_context_tracking_snapshot_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_context_tracking_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_context_tracking_trigger_async_id(&out_id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_async_resource_create(type_ptr: ptr, type_len: u64, trigger_async_id: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_async_resource_free(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_async_resource_snapshot_json(handle_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_execution_async_id(&out_id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_snapshot_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_async_hooks_trigger_async_id(&out_id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_atob(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_btoa(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_is_ascii(data_ptr: ptr, data_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_is_utf8(data_ptr: ptr, data_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_resolve_object_url(url_ptr: ptr, url_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_buffer_transcode(src_ptr: ptr, src_len: u64, from_enc_ptr: ptr, from_enc_len: u64, to_enc_ptr: ptr, to_enc_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_exec(command_ptr: ptr, command_len: u64, options_json_ptr: ptr, options_json_len: u64, &out_pid: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_exec_file(file_ptr: ptr, file_len: u64, args_ptr: ptr, args_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_exec_sync_json(argv_ptr: ptr, argv_len: u64, cwd_ptr: ptr, cwd_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_execfile_sync(file_ptr: ptr, file_len: u64, args_ptr: ptr, args_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_fork(module_ptr: ptr, module_len: u64, args_ptr: ptr, args_len: u64, &out_pid: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_spawn(command_ptr: ptr, command_len: u64, args_ptr: ptr, args_len: u64, &out_pid: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_spawn_sync(command_ptr: ptr, command_len: u64, args_ptr: ptr, args_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_child_process_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_fork(exec_ptr: ptr, exec_len: u64, args_ptr: ptr, args_len: u64, &out_worker: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_get_scheduling_policy(&out_policy: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_is_primary(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_is_worker(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_primary_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_primary_snapshot_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_set_scheduling_policy(policy: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_setup_primary(exec_ptr: ptr, exec_len: u64, args_ptr: ptr, args_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_setup_primary_json(config_ptr: ptr, config_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_disconnect(worker_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_exited_after_disconnect(worker_ptr: ptr, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_free(worker_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_is_alive(worker_ptr: ptr, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_is_connected(worker_ptr: ptr, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_kill(worker_ptr: ptr, signal: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_kill_signal(worker_ptr: ptr, signal_ptr: ptr, signal_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_pid(worker_ptr: ptr, &out_pid: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_receive_message(worker_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_send_message(worker_ptr: ptr, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_snapshot_json(worker_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_cluster_worker_wait_json(worker_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_command_line_options_argv_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_command_line_options_env_files_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_command_line_options_has_flag(flag_ptr: ptr, flag_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_command_line_options_node_options_tokens_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_command_line_options_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_assert(condition: u64, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_count(label_ptr: ptr, label_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_count_reset(label_ptr: ptr, label_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_debug(data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_dir(data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_dirxml(data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_group() -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_group_collapsed() -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_group_end() -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_info(data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_table(data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_time_log(label_ptr: ptr, label_len: u64, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_time_stamp(data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_trace(data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_console_warn(data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_constants_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_constants_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_constants_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_constants_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_cipher_final(state_ptr: ptr, &out_ptr: ptr, &out_len: u64, &tag_ptr: ptr, tag_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_cipher_free(state_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_cipher_update(state_ptr: ptr, data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_create_cipher(algo_ptr: ptr, algo_len: u64, key_ptr: ptr, key_len: u64, iv_ptr: ptr, iv_len: u64, &out_state_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_create_decipher(algo_ptr: ptr, algo_len: u64, key_ptr: ptr, key_len: u64, iv_ptr: ptr, iv_len: u64, &out_state_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_create_hash(algo_ptr: ptr, algo_len: u64, &out_state_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_create_hmac(algo_ptr: ptr, algo_len: u64, key_ptr: ptr, key_len: u64, &out_state_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_decipher_final(state_ptr: ptr, tag_ptr: ptr, tag_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_decipher_free(state_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_decipher_update(state_ptr: ptr, data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_generate_key(algo_ptr: ptr, algo_len: u64, bits: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_get_hashes(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_hash_final(state_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_hash_free(state_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_hash_update(state_ptr: ptr, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_hkdf(digest_ptr: ptr, digest_len: u64, ikm_ptr: ptr, ikm_len: u64, salt_ptr: ptr, salt_len: u64, info_ptr: ptr, info_len: u64, keylen: u64, &out_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_hmac_final(state_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_hmac_free(state_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_hmac_update(state_ptr: ptr, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_random_fill(buf_ptr: ptr, buf_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_random_int(min_val: u64, max_val: u64, &out_val: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_scrypt(pass_ptr: ptr, pass_len: u64, salt_ptr: ptr, salt_len: u64, n: u64, r: u64, p: u64, keylen: u64, &out_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_secure_heap_used_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_sign(algo_ptr: ptr, algo_len: u64, key_ptr: ptr, key_len: u64, data_ptr: ptr, data_len: u64, &out_sig_ptr: ptr, &out_sig_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_crypto_verify(algo_ptr: ptr, algo_len: u64, key_ptr: ptr, key_len: u64, data_ptr: ptr, data_len: u64, sig_ptr: ptr, sig_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_debugger_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_deprecated_clear() -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_deprecated_flags_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_deprecated_has(code_ptr: ptr, code_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_deprecated_record_json(code_ptr: ptr, code_len: u64, msg_ptr: ptr, msg_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_deprecated_snapshot_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_deprecated_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dgram_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dgram_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dgram_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dgram_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_create(name_ptr: ptr, name_len: u64, &out_channel: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_factories_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_free(channel_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_has_subscribers(channel_ptr: ptr, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_publish(channel_ptr: ptr, data_ptr: ptr, data_len: u64, &out_count: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_snapshot_json(channel_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_subscribe(channel_ptr: ptr, callback: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_tracing_channel(name_ptr: ptr, name_len: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_diagnostics_channel_unsubscribe(channel_ptr: ptr, callback: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_get_default_result_order(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_get_servers(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_lookup_options(hostname_ptr: ptr, hostname_len: u64, family: u32, all: u32, order_ptr: ptr, order_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_lookup_options_hints(hostname_ptr: ptr, hostname_len: u64, family: u32, all: u32, hints: u32, order_ptr: ptr, order_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_get_default_result_order(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_get_servers(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_lookup(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_lookup_options(hostname_ptr: ptr, hostname_len: u64, family: u32, all: u32, order_ptr: ptr, order_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_lookup_options_hints(hostname_ptr: ptr, hostname_len: u64, family: u32, all: u32, hints: u32, order_ptr: ptr, order_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_lookup_service(address_ptr: ptr, address_len: u64, port: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve(hostname_ptr: ptr, hostname_len: u64, rrtype_ptr: ptr, rrtype_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve4(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve6(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_any(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_caa(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_cname(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_mx(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_naptr(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_ns(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_ptr(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_soa(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_srv(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_tlsa(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolve_txt(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_cancel(resolver_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_free(resolver_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_get_servers(resolver_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_new(timeout_ms: u64, tries: u64, &out_resolver: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_resolve(resolver_ptr: ptr, hostname_ptr: ptr, hostname_len: u64, rrtype_ptr: ptr, rrtype_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_resolve4(resolver_ptr: ptr, hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_resolve6(resolver_ptr: ptr, hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_reverse(resolver_ptr: ptr, ip_ptr: ptr, ip_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_set_local_address(resolver_ptr: ptr, ipv4_ptr: ptr, ipv4_len: u64, ipv6_ptr: ptr, ipv6_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_set_servers(resolver_ptr: ptr, servers_ptr: ptr, servers_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_resolver_snapshot_json(resolver_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_reverse(ip_ptr: ptr, ip_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_set_default_result_order(order_ptr: ptr, order_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_promises_set_servers(servers_ptr: ptr, servers_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolve4(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolve6(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolve_cname(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolve_mx(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolve_ns(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolve_ptr(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolve_srv(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolve_txt(hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_cancel(resolver_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_free(resolver_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_get_servers(resolver_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_new(timeout_ms: u64, tries: u64, &out_resolver: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_resolve(resolver_ptr: ptr, hostname_ptr: ptr, hostname_len: u64, rrtype_ptr: ptr, rrtype_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_resolve4(resolver_ptr: ptr, hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_resolve6(resolver_ptr: ptr, hostname_ptr: ptr, hostname_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_reverse(resolver_ptr: ptr, ip_ptr: ptr, ip_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_set_local_address(resolver_ptr: ptr, ipv4_ptr: ptr, ipv4_len: u64, ipv6_ptr: ptr, ipv6_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_set_servers(resolver_ptr: ptr, servers_ptr: ptr, servers_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_resolver_snapshot_json(resolver_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_reverse(ip_ptr: ptr, ip_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_set_default_result_order(order_ptr: ptr, order_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_set_servers(servers_ptr: ptr, servers_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dns_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_active_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_add(domain_ptr: ptr, member_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_create(&out_domain: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_dispose(domain_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_enter(domain_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_exit(domain_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_free(domain_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_get_active(&out_domain: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_member_count(domain_ptr: ptr, &out_count: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_remove(domain_ptr: ptr, member_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_snapshot_json(domain_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_domain_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_close(endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_connect(family: u32, remote_host_ptr: ptr, remote_host_len: u64, remote_port: u64, local_host_ptr: ptr, local_host_len: u64, local_port: u64, &out_endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_endpoint_snapshot_json(endpoint: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_free(endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_listen(family: u32, host_ptr: ptr, host_len: u64, port: u64, &out_endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_recv(endpoint: ptr, max_len: u64, &out_ptr: ptr, &out_len: u64, &out_host_ptr: ptr, &out_host_len: u64, &out_port: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_send(endpoint: ptr, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_dtls_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_environment_variables_get_json(name_ptr: ptr, name_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_environment_variables_has(name_ptr: ptr, name_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_environment_variables_load_env_file_json(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_environment_variables_parse_env_json(content_ptr: ptr, content_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_environment_variables_snapshot_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_environment_variables_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_errors_codes_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_errors_get_system_error_message(errnum: i64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_errors_get_system_error_name(errnum: i64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_errors_invalid_arg_type_json(name_ptr: ptr, name_len: u64, expected_ptr: ptr, expected_len: u64, actual_type_ptr: ptr, actual_type_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_errors_invalid_arg_value_json(name_ptr: ptr, name_len: u64, value_ptr: ptr, value_len: u64, reason_ptr: ptr, reason_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_errors_out_of_range_json(name_ptr: ptr, name_len: u64, range_ptr: ptr, range_len: u64, received_ptr: ptr, received_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_errors_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_errors_system_error_json(errnum: i64, syscall_ptr: ptr, syscall_len: u64, path_ptr: ptr, path_len: u64, dest_ptr: ptr, dest_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_emit_with_error(ee_ptr: ptr, event_ptr: ptr, event_len: u64, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_get_event_listeners(ee_ptr: ptr, event_ptr: ptr, event_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_get_max_listeners(ee_ptr: ptr, &out_max: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_listener_count_by_event(ee_ptr: ptr, event_ptr: ptr, event_len: u64, &out_count: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_off(ee_ptr: ptr, event_ptr: ptr, event_len: u64, callback: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_once(ee_ptr: ptr, event_ptr: ptr, event_len: u64, callback: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_prepend_listener(ee_ptr: ptr, event_ptr: ptr, event_len: u64, callback: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_remove_all_listeners(ee_ptr: ptr, event_ptr: ptr, event_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_set_max_listeners(ee_ptr: ptr, max: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_events_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_call_i64_0(library_ptr: ptr, symbol_ptr: ptr, symbol_len: u64, &out_value: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_call_i64_1(library_ptr: ptr, symbol_ptr: ptr, symbol_len: u64, a0: u64, &out_value: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_call_i64_2(library_ptr: ptr, symbol_ptr: ptr, symbol_len: u64, a0: u64, a1: u64, &out_value: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_call_ptr_string(library_ptr: ptr, symbol_ptr: ptr, symbol_len: u64, value_ptr: ptr, value_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_call_string_i64(library_ptr: ptr, symbol_ptr: ptr, symbol_len: u64, value_ptr: ptr, value_len: u64, a0: u64, &out_value: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_call_strlen(library_ptr: ptr, symbol_ptr: ptr, symbol_len: u64, value_ptr: ptr, value_len: u64, &out_value: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_close(library_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_has_symbol(library_ptr: ptr, symbol_ptr: ptr, symbol_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_open(path_ptr: ptr, path_len: u64, &out_library: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_ffi_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_chmod(path_ptr: ptr, path_len: u64, mode: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_chown(path_ptr: ptr, path_len: u64, uid: u64, gid: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_close_fd(fd: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_fchmod(fd: u64, mode: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_fchown(fd: u64, uid: u64, gid: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_fdatasync(fd: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_fstat(fd: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_fsync(fd: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_ftruncate(fd: u64, len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_futimes(fd: u64, atime_ms: u64, mtime_ms: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_glob(pattern_ptr: ptr, pattern_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_link(src_ptr: ptr, src_len: u64, dst_ptr: ptr, dst_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_mkdtemp(template_ptr: ptr, template_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_open(path_ptr: ptr, path_len: u64, flags: u64, mode: u64, &out_fd: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_opendir(path_ptr: ptr, path_len: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_opendir_free(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_opendir_next(handle_ptr: ptr, &out_name_ptr: ptr, &out_name_len: u64, &out_entry_type: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_access(path_ptr: ptr, path_len: u64, mode: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_chmod(path_ptr: ptr, path_len: u64, mode: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_chown(path_ptr: ptr, path_len: u64, uid: u64, gid: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_close_file(fd: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_copy_file(src_ptr: ptr, src_len: u64, dst_ptr: ptr, dst_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_cp(src_ptr: ptr, src_len: u64, dst_ptr: ptr, dst_len: u64, recursive: u64, force: u64, error_on_exist: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_exists(path_ptr: ptr, path_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_fchmod(fd: u64, mode: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_fchown(fd: u64, uid: u64, gid: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_fdatasync(fd: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_fstat(fd: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_fsync(fd: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_ftruncate(fd: u64, len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_futimes(fd: u64, atime_ms: u64, mtime_ms: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_link(src_ptr: ptr, src_len: u64, dst_ptr: ptr, dst_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_lstat(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_mkdir(path_ptr: ptr, path_len: u64, recursive: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_mkdtemp(template_ptr: ptr, template_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_open(path_ptr: ptr, path_len: u64, flags: u64, mode: u64, &out_fd: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_opendir(path_ptr: ptr, path_len: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_opendir_free(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_opendir_next(handle_ptr: ptr, &out_name_ptr: ptr, &out_name_len: u64, &out_entry_type: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_read(fd: u64, buf_ptr: ptr, len: u64, offset: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_read_file(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_readdir(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_readdir_with_types(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_readlink(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_readv(fd: u64, iov_json_ptr: ptr, iov_json_len: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_realpath(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_rename(old_ptr: ptr, old_len: u64, new_ptr: ptr, new_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_rm(path_ptr: ptr, path_len: u64, recursive: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_rmdir(path_ptr: ptr, path_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_stat(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_statfs(path_ptr: ptr, &out_json_ptr: ptr, &out_json_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_symlink(src_ptr: ptr, src_len: u64, dst_ptr: ptr, dst_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_truncate(path_ptr: ptr, path_len: u64, len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_unlink(path_ptr: ptr, path_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_utimes(path_ptr: ptr, path_len: u64, atime_ms: u64, mtime_ms: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_write(fd: u64, data_ptr: ptr, data_len: u64, offset: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_write_file(path_ptr: ptr, path_len: u64, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_promises_writev(fd: u64, iov_json_ptr: ptr, iov_json_len: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_read_fd(fd: u64, buf_ptr: ptr, len: u64, offset: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_readv(fd: u64, iov_json_ptr: ptr, iov_json_len: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_rm(path_ptr: ptr, path_len: u64, recursive: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_statfs(path_ptr: ptr, &out_json_ptr: ptr, &out_json_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_symlink(src_ptr: ptr, src_len: u64, dst_ptr: ptr, dst_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_truncate(path_ptr: ptr, path_len: u64, len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_utimes(path_ptr: ptr, path_len: u64, atime_ms: u64, mtime_ms: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_write_fd(fd: u64, data_ptr: ptr, data_len: u64, offset: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_fs_writev(fd: u64, iov_json_ptr: ptr, iov_json_len: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_client_request(url_ptr: ptr, url_len: u64, method_ptr: ptr, method_len: u64, body_ptr: ptr, body_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_get_default_settings_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_get_packed_settings(settings_json_ptr: ptr, settings_json_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_get_unpacked_settings_json(buf_ptr: ptr, buf_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_nghttp2_version_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_perform_server_handshake(input_ptr: ptr, input_len: u64, settings_json_ptr: ptr, settings_json_len: u64, &out_bytes_ptr: ptr, &out_bytes_len: u64, &out_json_ptr: ptr, &out_json_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_sensitive_headers(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http2_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_create_session(endpoint: ptr, authority_ptr: ptr, authority_len: u64, path_ptr: ptr, path_len: u64, method_ptr: ptr, method_len: u64, &out_session: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_session_close(session: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_session_free(session: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_session_recv_datagram(session: ptr, max_len: u64, &out_ptr: ptr, &out_len: u64, &out_host_ptr: ptr, &out_host_len: u64, &out_port: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_session_send_datagram(session: ptr, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_session_snapshot_json(session: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http3_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_async_free(op: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_async_poll(op: ptr, &out_ready: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_async_take_response(op: ptr, &out_resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_body_reader_free(reader: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_free(client: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_new(use_tls: u64, &out_client: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_req_add_header(req: ptr, key_ptr: ptr, key_len: u64, val_ptr: ptr, val_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_req_free(req: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_req_new(client: ptr, method: u64, url_ptr: ptr, url_len: u64, &out_req: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_req_send(req: ptr, &out_resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_req_send_async(req: ptr, &out_op: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_req_set_body(req: ptr, body_ptr: ptr, body_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_resp_body_reader(resp: ptr, &out_reader: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_resp_body_slice(resp: ptr, &out_body_ptr: ptr, &out_body_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_resp_free(resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_resp_get_header(resp: ptr, key_ptr: ptr, key_len: u64, &out_val_ptr: ptr, &out_val_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_resp_read_chunk(reader: ptr, buf_ptr: ptr, cap: u64, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_client_resp_status(resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_get_json(url_ptr: ptr, url_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_max_header_size(&out_size: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_methods_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_request_json(method_ptr: ptr, method_len: u64, url_ptr: ptr, url_len: u64, body_ptr: ptr, body_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_accept(server: ptr, &out_req: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_free(server: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_new(&out_server: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_req_free(req: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_req_get_body(req: ptr, &out_body_ptr: ptr, &out_body_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_req_get_header(req: ptr, key_ptr: ptr, key_len: u64, &out_val_ptr: ptr, &out_val_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_req_get_method(req: ptr, &out_method_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_req_get_path(req: ptr, &out_path_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_resp_free(resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_resp_new(req: ptr, status: u64, &out_resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_resp_send(resp: ptr, body_ptr: ptr, body_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_resp_set_content_type(resp: ptr, content_type_ptr: ptr, content_type_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_resp_stream_end(resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_resp_stream_flush(resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_resp_stream_free(resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_resp_stream_new(req: ptr, status: u64, &out_resp: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_resp_stream_write(resp: ptr, body_ptr: ptr, body_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_start(server: ptr, host_ptr: ptr, host_len: u64, port: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_websocket_free(ws: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_websocket_read(ws: ptr, max_len: u64, &out_opcode: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_websocket_upgrade(req: ptr, &out_ws: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_server_websocket_write(ws: ptr, opcode: u64, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_set_max_idle_http_parsers(max: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_status_codes_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_validate_header_name(name_ptr: ptr, name_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_validate_header_value(name_ptr: ptr, name_len: u64, value_ptr: ptr, value_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_websocket_connect(client: ptr, url_ptr: ptr, url_len: u64, &out_ws: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_websocket_free(ws: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_websocket_read(ws: ptr, max_len: u64, &out_opcode: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_http_websocket_write(ws: ptr, opcode: u64, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_https_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_https_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_https_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_https_get_json(url_ptr: ptr, url_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_https_request_json(method_ptr: ptr, method_len: u64, url_ptr: ptr, url_len: u64, body_ptr: ptr, body_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_https_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_inspector_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_inspector_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_inspector_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_inspector_is_allowed(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_inspector_is_enabled(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_inspector_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_inspector_url_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_internationalization_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_internationalization_effective_locale_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_internationalization_has_encoding(name_ptr: ptr, name_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_internationalization_has_icu_config(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_internationalization_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_internationalization_supported_encodings_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_iterable_streams_bridge_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_iterable_streams_capabilities_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_iterable_streams_has_capability(name_ptr: ptr, name_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_iterable_streams_has_stream_type(name_ptr: ptr, name_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_iterable_streams_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_iterable_streams_stream_types_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_builtin_modules_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_enable_compile_cache_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_find_package_json(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_find_source_map_json(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_flush_compile_cache_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_get_compile_cache_dir_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_get_source_maps_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_global_paths_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_is_builtin(name_ptr: ptr, name_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_set_source_maps_support(enabled: u64, node_modules: u64, generated_code: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_module_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_create_connection(host_ptr: ptr, host_len: u64, port: u64, &out_socket: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_create_connection_options(host_ptr: ptr, host_len: u64, port: u64, options_json_ptr: ptr, options_json_len: u64, &out_socket: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_create_server(&out_server: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_get_default_auto_select_family(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_get_default_auto_select_family_attempt_timeout(&out_timeout: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_is_ip(str_ptr: ptr, str_len: u64, &out_version: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_is_ipv4(str_ptr: ptr, str_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_is_ipv6(str_ptr: ptr, str_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_listen_options(options_json_ptr: ptr, options_json_len: u64, &out_server: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_set_default_auto_select_family(value: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_set_default_auto_select_family_attempt_timeout(value: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_net_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_os_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_os_constants(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_os_dev_null(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_os_eol(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_os_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_os_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_os_get_priority(pid: u64, &out_priority: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_os_set_priority(pid: u64, priority: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_os_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_path_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_path_delimiter(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_path_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_path_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_path_matches_glob(pattern_ptr: ptr, pattern_len: u64, str_ptr: ptr, str_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_path_sep(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_path_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_clear_marks() -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_clear_measures() -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_create_histogram(&out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_entries_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_event_loop_utilization(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_histogram_free(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_histogram_get_statistics(handle_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_histogram_record(handle_ptr: ptr, value: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_mark(name_ptr: ptr, name_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_measure(name_ptr: ptr, name_len: u64, start_ptr: ptr, start_len: u64, end_ptr: ptr, end_len: u64, &out_ms: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_now_ms(&out_ms: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_performance_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_supported_entry_types_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_time_origin_ms(&out_ms: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_perf_hooks_timerify(name_ptr: ptr, name_len: u64, &out_id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_permissions_available_flags_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_permissions_declared_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_permissions_has(scope_ptr: ptr, scope_len: u64, reference_ptr: ptr, reference_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_permissions_is_audit_mode(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_permissions_is_enabled(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_permissions_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_allowed_node_environment_flags_has(flag_ptr: ptr, flag_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_allowed_node_environment_flags_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_arch(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_argv0(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_available_memory(&out_bytes: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_chdir(path_ptr: ptr, path_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_constrained_memory(&out_bytes: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_emit_warning_json(warning_ptr: ptr, warning_len: u64, type_ptr: ptr, type_len: u64, code_ptr: ptr, code_len: u64, detail_ptr: ptr, detail_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_exec_argv_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_exec_path(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_exit(code: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_features_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_kill(pid: u64, signal: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_kill_signal(pid: u64, signal_ptr: ptr, signal_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_platform(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_release_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_resource_usage_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_process_umask(mask: u64, set_mask: u64, &out_old: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_punycode_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_punycode_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_punycode_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_punycode_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_punycode_to_ascii(domain_ptr: ptr, domain_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_punycode_to_unicode(domain_ptr: ptr, domain_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_punycode_version(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_querystring_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_querystring_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_querystring_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_querystring_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_querystring_unescape_buffer(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_capabilities_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_connect(family: u32, remote_host_ptr: ptr, remote_host_len: u64, remote_port: u64, local_host_ptr: ptr, local_host_len: u64, local_port: u64, alpn_ptr: ptr, alpn_len: u64, cc_ptr: ptr, cc_len: u64, idle_timeout_ms: u64, &out_endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_create_endpoint(family: u32, host_ptr: ptr, host_len: u64, port: u64, alpn_ptr: ptr, alpn_len: u64, cc_ptr: ptr, cc_len: u64, idle_timeout_ms: u64, &out_endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_endpoint_address_json(endpoint: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_endpoint_close(endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_endpoint_free(endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_endpoint_has_ref(endpoint: ptr, &out_bool: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_endpoint_ref(endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_endpoint_remote_address_json(endpoint: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_endpoint_snapshot_json(endpoint: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_endpoint_unref(endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_listen(family: u32, host_ptr: ptr, host_len: u64, port: u64, alpn_ptr: ptr, alpn_len: u64, cc_ptr: ptr, cc_len: u64, idle_timeout_ms: u64, &out_endpoint: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_quic_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_clear_line(fd: u64, dir: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_clear_screen_down(fd: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_create_interface(input_ptr: ptr, input_len: u64, &out_interface: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_cursor_to(fd: u64, x: u64, y: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_emit_keypress_events(stream_ptr: ptr, stream_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_move_cursor(fd: u64, dx: u64, dy: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_promises_close(interface_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_promises_create_interface(input_ptr: ptr, input_len: u64, &out_interface: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_promises_free(interface_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_promises_question(interface_ptr: ptr, query_ptr: ptr, query_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_promises_snapshot_json(interface_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_readline_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_close(session_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_create_session(prompt_ptr: ptr, prompt_len: u64, &out_session: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_default_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_define_command(session_ptr: ptr, name_ptr: ptr, name_len: u64, help_ptr: ptr, help_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_eval_line(session_ptr: ptr, line_ptr: ptr, line_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_free(session_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_history_json(session_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_set_prompt(session_ptr: ptr, prompt_ptr: ptr, prompt_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_snapshot_json(session_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_repl_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_report_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_report_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_report_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_report_get_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_report_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_report_write_file(filename_ptr: ptr, filename_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sea_asset_keys_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sea_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sea_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sea_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sea_get_asset(key_ptr: ptr, key_len: u64, encoding_ptr: ptr, encoding_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sea_get_asset_as_blob(key_ptr: ptr, key_len: u64, &out_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sea_get_raw_asset(key_ptr: ptr, key_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sea_is_sea(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sea_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_apply_changeset(db_ptr: ptr, changeset_ptr: ptr, changeset_len: u64, &out_applied: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_backup_finish(backup_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_backup_init(db_ptr: ptr, path_ptr: ptr, path_len: u64, &out_backup: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_backup_remaining(backup_ptr: ptr, &out_remaining: u64, &out_pagecount: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_backup_step(backup_ptr: ptr, pages: u64, &out_done: u64, &out_remaining: u64, &out_pagecount: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_backup_to_file(db_ptr: ptr, path_ptr: ptr, path_len: u64, pages_per_step: u64, &out_pages: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_bind_blob(stmt_ptr: ptr, index: u64, value_ptr: ptr, value_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_bind_double(stmt_ptr: ptr, index: u64, value: f64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_bind_int(stmt_ptr: ptr, index: u64, value: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_bind_null(stmt_ptr: ptr, index: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_bind_text(stmt_ptr: ptr, index: u64, value_ptr: ptr, value_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_changes(db_ptr: ptr, &out_changes: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_clear_bindings(stmt_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_close(db_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_exec(db_ptr: ptr, sql_ptr: ptr, sql_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_finalize(stmt_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_last_insert_rowid(db_ptr: ptr, &out_rowid: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_open(path_ptr: ptr, path_len: u64, &out_db: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_prepare(db_ptr: ptr, sql_ptr: ptr, sql_len: u64, &out_stmt: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_query_json(db_ptr: ptr, sql_ptr: ptr, sql_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_reset(stmt_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_session_changeset(session_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_session_close(session_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_session_create(db_ptr: ptr, db_name_ptr: ptr, db_name_len: u64, table_ptr: ptr, table_len: u64, &out_session: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_session_isempty(session_ptr: ptr, &out_empty: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_session_memory_used(session_ptr: ptr, &out_bytes: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_session_patchset(session_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_step_json(stmt_ptr: ptr, &out_ready: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_tagstore_all(store_ptr: ptr, sql_ptr: ptr, sql_len: u64, params_ptr: ptr, params_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_tagstore_clear(store_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_tagstore_free(store_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_tagstore_get(store_ptr: ptr, sql_ptr: ptr, sql_len: u64, params_ptr: ptr, params_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_tagstore_new(db_ptr: ptr, capacity: u64, &out_store: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_tagstore_run(store_ptr: ptr, sql_ptr: ptr, sql_len: u64, params_ptr: ptr, params_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_tagstore_snapshot_json(store_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sqlite_version_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_compose(streams_ptr: ptr, streams_len: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_destroy(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_duplex_new(&out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_duplex_pair(&out_h1: ptr, &out_h2: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_finished(handle_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_passthrough_new(&out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_pipeline(steps_ptr: ptr, steps_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_readable_destroy(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_transform_new(&out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_stream_writable_destroy(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_string_decoder_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_string_decoder_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_string_decoder_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_string_decoder_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sys_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sys_debuglog(section_ptr: ptr, section_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sys_deprecation_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sys_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sys_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sys_format(format_ptr: ptr, format_len: u64, args_json_ptr: ptr, args_json_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sys_inherits(child_ptr: ptr, child_len: u64, super_ptr: ptr, super_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sys_inspect(json_ptr: ptr, json_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_sys_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_assert_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_property_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_reporters_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_runner_builtin_reporters_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_runner_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_runner_has_builtin_reporter(name_ptr: ptr, name_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_runner_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_test_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_clear_immediate(id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_clear_interval(id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_clear_timeout(id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_promises_interval_free(interval_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_promises_interval_next(interval_ptr: ptr, &out_ptr: ptr, &out_len: u64, &out_done: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_promises_interval_return(interval_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_promises_interval_snapshot_json(interval_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_promises_scheduler_wait(ms: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_promises_scheduler_yield() -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_promises_set_immediate(value_ptr: ptr, value_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_promises_set_interval(ms: u64, value_ptr: ptr, value_len: u64, &out_interval: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_promises_set_timeout(ms: u64, value_ptr: ptr, value_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_set_immediate(callback: ptr, &out_id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_set_interval(ms: u64, callback: ptr, &out_id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_set_timeout(ms: u64, callback: ptr, &out_id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_timers_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_address(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_alpn_protocol(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_authorized_json(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_buffer_size(socket: ptr, &out_size: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_bytes_read(socket: ptr, &out_bytes: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_bytes_written(socket: ptr, &out_bytes: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_check_server_identity(host_ptr: ptr, host_len: u64, cert_json_ptr: ptr, cert_json_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_close(socket: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_closed(socket: ptr, &out_bool: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_connect(host_ptr: ptr, host_len: u64, port: u64, servername_ptr: ptr, servername_len: u64, reject_unauthorized: u64, &out_socket: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_connect_options(host_ptr: ptr, host_len: u64, port: u64, servername_ptr: ptr, servername_len: u64, reject_unauthorized: u64, family: u32, local_ptr: ptr, local_len: u64, local_port: u64, no_delay: u32, keep_alive: u32, keep_alive_initial_delay_secs: u32, timeout_ms: u64, blocklist: ptr, &out_socket: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_connect_secure_context(context: ptr, host_ptr: ptr, host_len: u64, port: u64, servername_ptr: ptr, servername_len: u64, reject_unauthorized: u64, &out_socket: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_connecting(socket: ptr, &out_bool: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_convert_alpn_protocols(protocols_json_ptr: ptr, protocols_json_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_create_secure_context(ca_ptr: ptr, ca_len: u64, cert_ptr: ptr, cert_len: u64, key_ptr: ptr, key_len: u64, ciphers_ptr: ptr, ciphers_len: u64, min_ptr: ptr, min_len: u64, max_ptr: ptr, max_len: u64, &out_context: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_default_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_default_max_version(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_default_min_version(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_destroy(socket: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_destroyed(socket: ptr, &out_bool: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_get_ca_certificates_json(type_ptr: ptr, type_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_get_cipher_json(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_get_ciphers_detailed_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_get_ciphers_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_get_protocol(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_get_timeout(socket: ptr, &out_timeout_ms: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_has_ref(socket: ptr, &out_bool: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_local_address(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_local_family(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_local_port(socket: ptr, &out_port: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_pending(socket: ptr, &out_bool: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_read(socket: ptr, max_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_readable(socket: ptr, &out_bool: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_ready_state(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_ref(socket: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_remote_address(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_remote_address_value(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_remote_family(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_remote_port(socket: ptr, &out_port: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_reset_default_ca_certificates() -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_root_certificates_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_secure_context_free(context: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_secure_context_snapshot_json(context: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_servername(socket: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_set_default_ca_certificates(certs_pem_ptr: ptr, certs_pem_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_set_timeout(socket: ptr, timeout_ms: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_unref(socket: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_writable(socket: ptr, &out_bool: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tls_write(socket: ptr, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_trace_events_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_trace_events_create_tracing(categories_ptr: ptr, categories_len: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_trace_events_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_trace_events_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_trace_events_get_enabled_categories(handle_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_trace_events_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_trace_events_tracing_disable(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_trace_events_tracing_enable(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_trace_events_tracing_free(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_isatty(fd: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_read_stream_new(fd: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_stdio_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_stream_free(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_stream_get_color_depth(handle_ptr: ptr, &out_depth: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_stream_get_window_size(handle_ptr: ptr, &out_cols: u64, &out_rows: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_stream_has_colors(handle_ptr: ptr, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_stream_set_raw_mode(handle_ptr: ptr, flag: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_tty_write_stream_new(fd: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_can_parse(url_ptr: ptr, url_len: u64, base_ptr: ptr, base_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_domain_to_ascii(domain_ptr: ptr, domain_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_domain_to_unicode(domain_ptr: ptr, domain_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_file_url_to_path(url_ptr: ptr, url_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_file_url_to_path_buffer(url_ptr: ptr, url_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_free(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_get_host(h: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_get_href(h: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_get_pathname(h: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_get_protocol(h: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_new(href_ptr: ptr, href_len: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_path_to_file_url(path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_url_to_http_options(h: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_callbackify(fn_ptr: ptr, fn_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_debuglog(section_ptr: ptr, section_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_deprecate(fn_ptr: ptr, fn_len: u64, msg_ptr: ptr, msg_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_diff(actual_ptr: ptr, actual_len: u64, expected_ptr: ptr, expected_len: u64, operator_ptr: ptr, operator_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_get_system_error_map(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_get_system_error_message(errnum: i64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_get_system_error_name(errnum: i64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_inherits(c: ptr, c_len: u64, s: ptr, s_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_mime_type(str_ptr: ptr, str_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_parse_args(config_ptr: ptr, config_len: u64, args_ptr: ptr, args_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_parse_env(content_ptr: ptr, content_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_promisify(fn_ptr: ptr, fn_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_style_text(style_ptr: ptr, style_len: u64, text_ptr: ptr, text_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_text_decoder_decode(data_ptr: ptr, data_len: u64, encoding_ptr: ptr, encoding_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_text_encoder_encode(text_ptr: ptr, text_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_util_to_usv_string(input_ptr: ptr, input_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_append_file(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_chdir(vfs_ptr: ptr, path_ptr: ptr, path_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_copy_file(vfs_ptr: ptr, src_ptr: ptr, src_len: u64, dst_ptr: ptr, dst_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_cwd(vfs_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_dir_close(dir_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_dir_next(dir_ptr: ptr, &out_name_ptr: ptr, &out_name_len: u64, &out_entry_type: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_dir_snapshot_json(dir_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_exists(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_file_close(file_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_file_fstat_json(file_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_file_read(file_ptr: ptr, buf_ptr: ptr, len: u64, position: u64, use_position: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_file_truncate(file_ptr: ptr, len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_file_write(file_ptr: ptr, data_ptr: ptr, data_len: u64, position: u64, use_position: u64, &out_n: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_free(vfs_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_lstat_json(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_mkdir(vfs_ptr: ptr, path_ptr: ptr, path_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_new(&out_vfs: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_open(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, mode: u64, &out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_opendir(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, &out_dir: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_read_file(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_readdir(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_readlink(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_realpath(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_rename(vfs_ptr: ptr, old_ptr: ptr, old_len: u64, new_ptr: ptr, new_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_rm(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, recursive: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_snapshot_json(vfs_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_stat_json(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_symlink(vfs_ptr: ptr, target_ptr: ptr, target_len: u64, link_ptr: ptr, link_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_unlink(vfs_ptr: ptr, path_ptr: ptr, path_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_watch(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, recursive: u64, &out_watcher: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_watcher_close(watcher_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_watcher_next(watcher_ptr: ptr, &out_event_ptr: ptr, &out_event_len: u64, &out_filename_ptr: ptr, &out_filename_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_watcher_snapshot_json(watcher_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_vfs_write_file(vfs_ptr: ptr, path_ptr: ptr, path_len: u64, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_wasi_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_wasi_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_wasi_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_wasi_import_modules_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_wasi_is_allowed(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_wasi_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_wasi_supported_versions_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_decrypt(key_ptr: ptr, iv_ptr: ptr, iv_len: u64, aad_ptr: ptr, aad_len: u64, data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_digest(algo_ptr: ptr, algo_len: u64, data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_encrypt(key_ptr: ptr, iv_ptr: ptr, iv_len: u64, aad_ptr: ptr, aad_len: u64, data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_export_key_raw(key_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_export_public_key_raw(key_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_generate_key(algorithm_ptr: ptr, algorithm_len: u64, usage_ptr: ptr, usage_len: u64, bits: u64, &out_key: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_get_random_values(buf_ptr: ptr, buf_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_import_key_raw(algorithm_ptr: ptr, algorithm_len: u64, usage_ptr: ptr, usage_len: u64, key_ptr: ptr, key_len: u64, &out_key: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_key_free(key_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_random_uuid(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_sign(key_ptr: ptr, data_ptr: ptr, data_len: u64, &out_sig_ptr: ptr, &out_sig_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_crypto_verify(key_ptr: ptr, data_ptr: ptr, data_len: u64, sig_ptr: ptr, sig_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_close(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_enqueue(handle_ptr: ptr, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_free(handle_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_read(handle_ptr: ptr, max_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_readable_new(&out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_snapshot_json(handle_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_transform_new(&out_readable: ptr, &out_writable: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_writable_new(&out_handle: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_web_streams_write(handle_ptr: ptr, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_get_environment_data(key_ptr: ptr, key_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_is_internal_thread(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_is_main_thread(&out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_message_channel_new(&out_port1: ptr, &out_port2: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_message_port_close(port_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_message_port_free(port_ptr: ptr) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_message_port_post_message(port_ptr: ptr, data_ptr: ptr, data_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_message_port_receive_message(port_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_parent_port_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_post_message_to_thread(thread_id: u64, data_ptr: ptr, data_len: u64, &out_bool: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_receive_message_on_port(port_ptr: ptr, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_resource_limits_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_set_environment_data(key_ptr: ptr, key_len: u64, value_ptr: ptr, value_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_share_env_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_thread_id(&out_id: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_thread_name(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_worker_threads_worker_data(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_brotli_compress(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_brotli_decompress(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_codes_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_config_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_constants_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_crc32(data_ptr: ptr, data_len: u64, &out_val: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_deflate_raw(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_exports_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_feature_support_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_inflate_raw(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_status_json(&out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_unzip(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_zstd_compress(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sai: @extern sa_node_plugin_zlib_zstd_decompress(data_ptr: ptr, data_len: u64, &out_ptr: ptr, &out_len: u64) -> u64`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASSERT_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASSERT_DEEP_STRICT_EQUAL %out_ptr, %out_len, %out_status, %out_ok, %actual, %actual_len, %expected, %expected_len, %message, %message_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASSERT_EQUAL %out_ptr, %out_len, %out_status, %out_ok, %actual, %actual_len, %expected, %expected_len, %strict, %message, %message_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASSERT_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASSERT_FAIL_JSON %out_ptr, %out_len, %out_status, %message, %message_len, %actual, %actual_len, %expected, %expected_len, %operator, %operator_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASSERT_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASSERT_OK %out_ptr, %out_len, %out_status, %out_ok, %value, %message, %message_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASSERT_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASSERT_STRICT_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_DEPTH %out_depth, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_ENTER %out_depth, %out_status, %handle`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_EXECUTION_ASYNC_ID %out_id, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_EXIT %out_async_id, %out_popped, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_RESET %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_SNAPSHOT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_CONTEXT_TRACKING_TRIGGER_ASYNC_ID %out_id, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_ASYNC_RESOURCE_CREATE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_ASYNC_RESOURCE_FREE %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_ASYNC_RESOURCE_SNAPSHOT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_EXECUTION_ASYNC_ID %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_SNAPSHOT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_TOP_CONFIG_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_TOP_EXPORTS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_TOP_FEATURE_SUPPORT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ASYNC_HOOKS_TRIGGER_ASYNC_ID %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_ATOB %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_BTOA %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_IS_ASCII %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_IS_UTF8 %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_RESOLVE_OBJECT_URL %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_BUFFER_TRANSCODE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_EXEC %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_EXECFILE_SYNC %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_EXEC_FILE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_EXEC_SYNC_JSON %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_FORK %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_SPAWN %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_SPAWN_SYNC %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_TOP_CONFIG_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_TOP_EXPORTS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CHILD_PROCESS_TOP_FEATURE_SUPPORT_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_FORK %out_worker, %out_status, %exec, %exec_len, %args, %args_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_GET_SCHEDULING_POLICY %out_policy, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_IS_PRIMARY %out_bool, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_IS_WORKER %out_bool, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_PRIMARY_SNAPSHOT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_SETUP_PRIMARY %exec, %exec_len, %args, %args_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_SETUP_PRIMARY_JSON %config, %config_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_SET_SCHEDULING_POLICY %policy, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_TOP_PRIMARY_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_DISCONNECT %out_status, %worker`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_EXITED_AFTER_DISCONNECT %out_bool, %out_status, %worker`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_FREE %out_status, %worker`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_IS_ALIVE %out_bool, %out_status, %worker`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_IS_CONNECTED %out_bool, %out_status, %worker`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_KILL %out_status, %worker, %signal`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_KILL_SIGNAL %out_status, %worker, %signal_ptr, %signal_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_PID %out_pid, %out_status, %worker`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_RECEIVE_MESSAGE %out_ptr, %out_len, %out_status, %worker`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_SEND_MESSAGE %out_status, %worker, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %worker`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CLUSTER_WORKER_WAIT_JSON %out_ptr, %out_len, %out_status, %worker`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_ARGV_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_ENV_FILES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_HAS_FLAG %out_bool, %out_status, %flag, %flag_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_NODE_OPTIONS_TOKENS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_COMMAND_LINE_OPTIONS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_ASSERT %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_COUNT %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_COUNT_RESET %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_DEBUG %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_DIR %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_DIRXML %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_GROUP %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_GROUP_COLLAPSED %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_GROUP_END %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_INFO %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_TABLE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_TIME_LOG %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_TIME_STAMP %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_TRACE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSOLE_WARN %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSTANTS_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSTANTS_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSTANTS_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CONSTANTS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_CIPHER_FINAL %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_CIPHER_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_CIPHER_UPDATE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_CREATE_CIPHER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_CREATE_DECIPHER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_CREATE_HASH %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_CREATE_HMAC %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_DECIPHER_FINAL %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_DECIPHER_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_DECIPHER_UPDATE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_GENERATE_KEY %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_GET_HASHES %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_HASH_FINAL %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_HASH_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_HASH_UPDATE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_HKDF %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8, %p_9, %p_10`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_HMAC_FINAL %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_HMAC_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_HMAC_UPDATE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_RANDOM_FILL %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_RANDOM_INT %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_SCRYPT %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8, %p_9`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_SECURE_HEAP_USED_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_SIGN %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_CRYPTO_VERIFY %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8, %p_9`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DEBUGGER_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DEPRECATED_CLEAR %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DEPRECATED_FLAGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DEPRECATED_HAS %out_bool, %out_status, %code, %code_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DEPRECATED_RECORD_JSON %out_ptr, %out_len, %out_status, %code, %code_len, %message, %message_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DEPRECATED_SNAPSHOT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DEPRECATED_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DGRAM_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DGRAM_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DGRAM_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DGRAM_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_CREATE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_FREE %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_HAS_SUBSCRIBERS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_PUBLISH %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_SNAPSHOT_JSON %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_SUBSCRIBE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TOP_FACTORIES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TOP_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_TRACING_CHANNEL %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DIAGNOSTICS_CHANNEL_UNSUBSCRIBE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_GET_DEFAULT_RESULT_ORDER %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_GET_SERVERS %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_LOOKUP_OPTIONS %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %family, %all, %order, %order_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_LOOKUP_OPTIONS_HINTS %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %family, %all, %hints, %order, %order_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_GET_DEFAULT_RESULT_ORDER %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_GET_SERVERS %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_LOOKUP %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_LOOKUP_OPTIONS %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %family, %all, %order, %order_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_LOOKUP_OPTIONS_HINTS %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %family, %all, %hints, %order, %order_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_LOOKUP_SERVICE %out_ptr, %out_len, %out_status, %address, %address_len, %port`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE %out_ptr, %out_len, %out_status, %hostname, %hostname_len, %rrtype, %rrtype_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE4 %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE6 %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_CANCEL %out_status, %resolver`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_FREE %out_status, %resolver`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_GET_SERVERS %out_ptr, %out_len, %out_status, %resolver`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_NEW %out_resolver, %out_status, %timeout_ms, %tries`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_RESOLVE %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len, %rrtype, %rrtype_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_RESOLVE4 %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_RESOLVE6 %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_REVERSE %out_ptr, %out_len, %out_status, %resolver, %ip, %ip_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_SET_LOCAL_ADDRESS %out_status, %resolver, %ipv4, %ipv4_len, %ipv6, %ipv6_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_SET_SERVERS %out_status, %resolver, %servers, %servers_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVER_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %resolver`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_ANY %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_CAA %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_CNAME %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_MX %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_NAPTR %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_NS %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_PTR %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_SOA %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_SRV %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_TLSA %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_RESOLVE_TXT %out_ptr, %out_len, %out_status, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_REVERSE %out_ptr, %out_len, %out_status, %ip, %ip_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_SET_DEFAULT_RESULT_ORDER %out_status, %order, %order_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_PROMISES_SET_SERVERS %out_status, %servers, %servers_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVE4 %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVE6 %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_CANCEL %out_status, %resolver`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_FREE %out_status, %resolver`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_GET_SERVERS %out_ptr, %out_len, %out_status, %resolver`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_NEW %out_resolver, %out_status, %timeout_ms, %tries`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_RESOLVE %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len, %rrtype, %rrtype_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_RESOLVE4 %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_RESOLVE6 %out_ptr, %out_len, %out_status, %resolver, %hostname, %hostname_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_REVERSE %out_ptr, %out_len, %out_status, %resolver, %ip, %ip_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_SET_LOCAL_ADDRESS %out_status, %resolver, %ipv4, %ipv4_len, %ipv6, %ipv6_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_SET_SERVERS %out_status, %resolver, %servers, %servers_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVER_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %resolver`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVE_CNAME %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVE_MX %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVE_NS %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVE_PTR %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVE_SRV %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_RESOLVE_TXT %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_REVERSE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_SET_DEFAULT_RESULT_ORDER %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_SET_SERVERS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DNS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_ADD %out_status, %domain, %member`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_CREATE %out_domain, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_DISPOSE %out_status, %domain`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_ENTER %out_status, %domain`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_EXIT %out_status, %domain`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_FREE %out_status, %domain`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_GET_ACTIVE %out_domain, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_MEMBER_COUNT %out_count, %out_status, %domain`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_REMOVE %out_status, %domain, %member`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %domain`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_TOP_ACTIVE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DOMAIN_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_CLOSE %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_CONNECT %out_endpoint, %out_status, %family, %remote_host, %remote_host_len, %remote_port, %local_host, %local_host_len, %local_port`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_ENDPOINT_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_FREE %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_LISTEN %out_endpoint, %out_status, %family, %host, %host_len, %port`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_RECV %out_ptr, %out_len, %out_host_ptr, %out_host_len, %out_port, %out_status, %endpoint, %max_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_SEND %out_status, %endpoint, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_DTLS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_GET_JSON %out_ptr, %out_len, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_HAS %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_LOAD_ENV_FILE_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_PARSE_ENV_JSON %out_ptr, %out_len, %out_status, %content, %content_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_SNAPSHOT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ENVIRONMENT_VARIABLES_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ERRORS_CODES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ERRORS_GET_SYSTEM_ERROR_MESSAGE %out_ptr, %out_len, %out_status, %errnum`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ERRORS_GET_SYSTEM_ERROR_NAME %out_ptr, %out_len, %out_status, %errnum`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ERRORS_INVALID_ARG_TYPE_JSON %out_ptr, %out_len, %out_status, %name, %name_len, %expected, %expected_len, %actual_type, %actual_type_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ERRORS_INVALID_ARG_VALUE_JSON %out_ptr, %out_len, %out_status, %name, %name_len, %value, %value_len, %reason, %reason_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ERRORS_OUT_OF_RANGE_JSON %out_ptr, %out_len, %out_status, %name, %name_len, %range, %range_len, %received, %received_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ERRORS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ERRORS_SYSTEM_ERROR_JSON %out_ptr, %out_len, %out_status, %errnum, %syscall, %syscall_len, %path, %path_len, %dest, %dest_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_EMIT_WITH_ERROR %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_GET_EVENT_LISTENERS %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_GET_MAX_LISTENERS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_LISTENER_COUNT_BY_EVENT %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_OFF %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_ONCE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_PREPEND_LISTENER %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_REMOVE_ALL_LISTENERS %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_SET_MAX_LISTENERS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_EVENTS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_CALL_I64_0 %out_value, %out_status, %library, %symbol, %symbol_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_CALL_I64_1 %out_value, %out_status, %library, %symbol, %symbol_len, %a0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_CALL_I64_2 %out_value, %out_status, %library, %symbol, %symbol_len, %a0, %a1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_CALL_PTR_STRING %out_ptr, %out_len, %out_status, %library, %symbol, %symbol_len, %value, %value_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_CALL_STRING_I64 %out_value, %out_status, %library, %symbol, %symbol_len, %value, %value_len, %a0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_CALL_STRLEN %out_value, %out_status, %library, %symbol, %symbol_len, %value, %value_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_CLOSE %out_status, %library`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_HAS_SYMBOL %out_bool, %out_status, %library, %symbol, %symbol_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_OPEN %out_library, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FFI_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_CHMOD %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_CHOWN %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_CLOSE_FD %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_FCHMOD %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_FCHOWN %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_FDATASYNC %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_FSTAT %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_FSYNC %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_FTRUNCATE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_FUTIMES %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_GLOB %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_LINK %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_MKDTEMP %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_OPEN %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_OPENDIR %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_OPENDIR_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_OPENDIR_NEXT %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_ACCESS %out_bool, %out_status, %path, %path_len, %mode`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_CHMOD %out_status, %path, %path_len, %mode`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_CHOWN %out_status, %path, %path_len, %uid, %gid`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_CLOSE_FILE %out_status, %fd`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_COPY_FILE %out_status, %src, %src_len, %dst, %dst_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_CP %out_status, %src, %src_len, %dst, %dst_len, %recursive, %force, %error_on_exist`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_EXISTS %out_bool, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_FCHMOD %out_status, %fd, %mode`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_FCHOWN %out_status, %fd, %uid, %gid`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_FDATASYNC %out_status, %fd`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_FSTAT %out_ptr, %out_len, %out_status, %fd`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_FSYNC %out_status, %fd`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_FTRUNCATE %out_status, %fd, %len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_FUTIMES %out_status, %fd, %atime_ms, %mtime_ms`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_LINK %out_status, %src, %src_len, %dst, %dst_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_LSTAT %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_MKDIR %out_status, %path, %path_len, %recursive`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_MKDTEMP %out_ptr, %out_len, %out_status, %template, %template_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_OPEN %out_fd, %out_status, %path, %path_len, %flags, %mode`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_OPENDIR %out_handle, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_OPENDIR_FREE %out_status, %handle`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_OPENDIR_NEXT %out_name_ptr, %out_name_len, %out_entry_type, %out_status, %handle`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_READ %out_n, %out_status, %fd, %buf, %len, %offset`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_READDIR %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_READDIR_WITH_TYPES %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_READLINK %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_READV %out_n, %out_status, %fd, %iov_json, %iov_json_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_READ_FILE %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_REALPATH %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_RENAME %out_status, %old, %old_len, %new, %new_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_RM %out_status, %path, %path_len, %recursive`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_RMDIR %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_STAT %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_STATFS %out_ptr, %out_len, %out_status, %path`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_SYMLINK %out_status, %src, %src_len, %dst, %dst_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_TRUNCATE %out_status, %path, %path_len, %len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_UNLINK %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_UTIMES %out_status, %path, %path_len, %atime_ms, %mtime_ms`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_WRITE %out_n, %out_status, %fd, %data, %data_len, %offset`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_WRITEV %out_n, %out_status, %fd, %iov_json, %iov_json_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_PROMISES_WRITE_FILE %out_status, %path, %path_len, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_READV %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_READ_FD %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_RM %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_STATFS %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_SYMLINK %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_TRUNCATE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_UTIMES %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_WRITEV %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_FS_WRITE_FD %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_CLIENT_REQUEST %out_ptr, %out_len, %out_status, %url, %url_len, %method, %method_len, %body, %body_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_GET_DEFAULT_SETTINGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_GET_PACKED_SETTINGS %out_ptr, %out_len, %out_status, %settings_json, %settings_json_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_GET_UNPACKED_SETTINGS_JSON %out_ptr, %out_len, %out_status, %buf, %buf_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_NGHTTP2_VERSION_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_PERFORM_SERVER_HANDSHAKE %out_bytes_ptr, %out_bytes_len, %out_json_ptr, %out_json_len, %out_status, %input, %input_len, %settings_json, %settings_json_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_SENSITIVE_HEADERS %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP2_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_CREATE_SESSION %out_session, %out_status, %endpoint, %authority, %authority_len, %path, %path_len, %method, %method_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_SESSION_CLOSE %out_status, %session`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_SESSION_FREE %out_status, %session`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_SESSION_RECV_DATAGRAM %out_ptr, %out_len, %out_host_ptr, %out_host_len, %out_port, %out_status, %session, %max_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_SESSION_SEND_DATAGRAM %out_status, %session, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_SESSION_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %session`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP3_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTPS_GET_JSON %out_ptr, %out_len, %out_status, %url, %url_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTPS_REQUEST_JSON %out_ptr, %out_len, %out_status, %method, %method_len, %url, %url_len, %body, %body_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTPS_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTPS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTPS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTPS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_ASYNC_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_ASYNC_POLL %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_ASYNC_TAKE_RESPONSE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_BODY_READER_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_NEW %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_REQ_ADD_HEADER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_REQ_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_REQ_NEW %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_REQ_SEND %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_REQ_SEND_ASYNC %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_REQ_SET_BODY %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_RESP_BODY_READER %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_RESP_BODY_SLICE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_RESP_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_RESP_GET_HEADER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_RESP_READ_CHUNK %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_CLIENT_RESP_STATUS %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_GET_JSON %out_ptr, %out_len, %out_status, %url, %url_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_MAX_HEADER_SIZE %out_size, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_METHODS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_REQUEST_JSON %out_ptr, %out_len, %out_status, %method, %method_len, %url, %url_len, %body, %body_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_ACCEPT %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_NEW %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_REQ_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_REQ_GET_BODY %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_REQ_GET_HEADER %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_REQ_GET_METHOD %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_REQ_GET_PATH %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_RESP_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_RESP_NEW %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_RESP_SEND %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_RESP_SET_CONTENT_TYPE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_END %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_FLUSH %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_NEW %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_RESP_STREAM_WRITE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_START %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_WEBSOCKET_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_WEBSOCKET_READ %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_WEBSOCKET_UPGRADE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SERVER_WEBSOCKET_WRITE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_SET_MAX_IDLE_HTTP_PARSERS %max, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_STATUS_CODES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_VALIDATE_HEADER_NAME %name, %name_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_VALIDATE_HEADER_VALUE %name, %name_len, %value, %value_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_WEBSOCKET_CONNECT %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_WEBSOCKET_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_WEBSOCKET_READ %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_HTTP_WEBSOCKET_WRITE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INSPECTOR_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INSPECTOR_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INSPECTOR_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INSPECTOR_IS_ALLOWED %out_bool, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INSPECTOR_IS_ENABLED %out_bool, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INSPECTOR_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INSPECTOR_URL_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INTERNATIONALIZATION_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INTERNATIONALIZATION_EFFECTIVE_LOCALE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INTERNATIONALIZATION_HAS_ENCODING %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INTERNATIONALIZATION_HAS_ICU_CONFIG %out_bool, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INTERNATIONALIZATION_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_INTERNATIONALIZATION_SUPPORTED_ENCODINGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ITERABLE_STREAMS_BRIDGE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ITERABLE_STREAMS_CAPABILITIES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ITERABLE_STREAMS_HAS_CAPABILITY %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ITERABLE_STREAMS_HAS_STREAM_TYPE %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ITERABLE_STREAMS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ITERABLE_STREAMS_STREAM_TYPES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_BUILTIN_MODULES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_ENABLE_COMPILE_CACHE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_FIND_PACKAGE_JSON %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_FIND_SOURCE_MAP_JSON %out_ptr, %out_len, %out_status, %path_ptr, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_FLUSH_COMPILE_CACHE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_GET_COMPILE_CACHE_DIR_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_GET_SOURCE_MAPS_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_GLOBAL_PATHS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_IS_BUILTIN %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_SET_SOURCE_MAPS_SUPPORT %out_status, %enabled, %node_modules, %generated_code`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_MODULE_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_CREATE_CONNECTION %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_CREATE_CONNECTION_OPTIONS %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_CREATE_SERVER %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_GET_DEFAULT_AUTO_SELECT_FAMILY %out_bool, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_GET_DEFAULT_AUTO_SELECT_FAMILY_ATTEMPT_TIMEOUT %out_timeout, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_IS_IP %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_IS_IPV4 %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_IS_IPV6 %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_LISTEN_OPTIONS %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_SET_DEFAULT_AUTO_SELECT_FAMILY %value, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_SET_DEFAULT_AUTO_SELECT_FAMILY_ATTEMPT_TIMEOUT %value, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_NET_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_OS_CONSTANTS %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_OS_DEV_NULL %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_OS_EOL %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_OS_GET_PRIORITY %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_OS_SET_PRIORITY %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_OS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_OS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_OS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_OS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PATH_DELIMITER %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PATH_MATCHES_GLOB %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PATH_SEP %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PATH_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PATH_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PATH_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PATH_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_CLEAR_MARKS %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_CLEAR_MEASURES %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_CREATE_HISTOGRAM %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_ENTRIES_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_EVENT_LOOP_UTILIZATION %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_HISTOGRAM_FREE %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_HISTOGRAM_GET_STATISTICS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_HISTOGRAM_RECORD %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_MARK %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_MEASURE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_NOW_MS %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_PERFORMANCE_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_SUPPORTED_ENTRY_TYPES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_TIMERIFY %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERF_HOOKS_TIME_ORIGIN_MS %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERMISSIONS_AVAILABLE_FLAGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERMISSIONS_DECLARED_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERMISSIONS_HAS %out_bool, %out_status, %scope, %scope_len, %reference, %reference_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERMISSIONS_IS_AUDIT_MODE %out_bool, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERMISSIONS_IS_ENABLED %out_bool, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PERMISSIONS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_ALLOWED_NODE_ENVIRONMENT_FLAGS_HAS %out_bool, %out_status, %flag_ptr, %flag_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_ALLOWED_NODE_ENVIRONMENT_FLAGS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_ARCH %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_ARGV0 %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_ARGV_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_AVAILABLE_MEMORY %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_CHDIR %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_CONSTRAINED_MEMORY %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_EMIT_WARNING_JSON %out_ptr, %out_len, %out_status, %warning_ptr, %warning_len, %type_ptr, %type_len, %code_ptr, %code_len, %detail_ptr, %detail_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_EXEC_ARGV_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_EXEC_PATH %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_EXIT %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_FEATURES_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_KILL %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_KILL_SIGNAL %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_PLATFORM %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_RELEASE_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_RESOURCE_USAGE_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PROCESS_UMASK %out_old, %out_status, %mask, %set_mask`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PUNYCODE_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PUNYCODE_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PUNYCODE_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PUNYCODE_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PUNYCODE_TO_ASCII %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PUNYCODE_TO_UNICODE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_PUNYCODE_VERSION %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUERYSTRING_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUERYSTRING_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUERYSTRING_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUERYSTRING_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUERYSTRING_UNESCAPE_BUFFER %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_CAPABILITIES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_CONNECT %out_endpoint, %out_status, %family, %remote_host, %remote_host_len, %remote_port, %local_host, %local_host_len, %local_port, %alpn, %alpn_len, %cc, %cc_len, %idle_timeout_ms`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_CREATE_ENDPOINT %out_endpoint, %out_status, %family, %host, %host_len, %port, %alpn, %alpn_len, %cc, %cc_len, %idle_timeout_ms`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_ENDPOINT_ADDRESS_JSON %out_ptr, %out_len, %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_ENDPOINT_CLOSE %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_ENDPOINT_FREE %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_ENDPOINT_HAS_REF %out_status, %out_bool, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_ENDPOINT_REF %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_ENDPOINT_REMOTE_ADDRESS_JSON %out_ptr, %out_len, %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_ENDPOINT_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_ENDPOINT_UNREF %out_status, %endpoint`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_LISTEN %out_endpoint, %out_status, %family, %host, %host_len, %port, %alpn, %alpn_len, %cc, %cc_len, %idle_timeout_ms`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_STATUS_JSON %out_ptr, %out_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_QUIC_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_CLEAR_LINE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_CLEAR_SCREEN_DOWN %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_CREATE_INTERFACE %out_interface, %out_status, %input, %input_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_CURSOR_TO %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_EMIT_KEYPRESS_EVENTS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_MOVE_CURSOR %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_PROMISES_CLOSE %out_status, %interface`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_PROMISES_CREATE_INTERFACE %out_interface, %out_status, %input, %input_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_PROMISES_FREE %out_status, %interface`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_PROMISES_QUESTION %out_ptr, %out_len, %out_status, %interface, %query, %query_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_PROMISES_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %interface`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_TOP_CONFIG_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_TOP_EXPORTS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_READLINE_TOP_FEATURE_SUPPORT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_CLOSE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_CREATE_SESSION %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_DEFINE_COMMAND %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_EVAL_LINE %p_0, %p_1, %p_2, %p_3, %p_4, %p_5`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_FREE %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_HISTORY_JSON %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_SET_PROMPT %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_SNAPSHOT_JSON %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_TOP_DEFAULT_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPL_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPORT_GET_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPORT_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPORT_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPORT_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPORT_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_REPORT_WRITE_FILE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_ASSET_KEYS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_GET_ASSET %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_GET_ASSET_AS_BLOB %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_GET_RAW_ASSET %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_IS_SEA %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SEA_TOP_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_APPLY_CHANGESET %out_applied, %out_status, %db, %changeset, %changeset_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BACKUP_FINISH %out_status, %backup`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BACKUP_INIT %out_backup, %out_status, %db, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BACKUP_REMAINING %out_remaining, %out_pagecount, %out_status, %backup`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BACKUP_STEP %out_done, %out_remaining, %out_pagecount, %out_status, %backup, %pages`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BACKUP_TO_FILE %out_pages, %out_status, %db, %path, %path_len, %pages_per_step`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BIND_BLOB %out_status, %stmt, %index, %value, %value_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BIND_DOUBLE %out_status, %stmt, %index, %value`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BIND_INT %out_status, %stmt, %index, %value`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BIND_NULL %out_status, %stmt, %index`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_BIND_TEXT %out_status, %stmt, %index, %value, %value_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_CHANGES %out_changes, %out_status, %db`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_CLEAR_BINDINGS %out_status, %stmt`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_CLOSE %out_status, %db`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_EXEC %out_status, %db, %sql, %sql_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_FINALIZE %out_status, %stmt`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_LAST_INSERT_ROWID %out_rowid, %out_status, %db`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_OPEN %out_db, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_PREPARE %out_stmt, %out_status, %db, %sql, %sql_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_QUERY_JSON %out_ptr, %out_len, %out_status, %db, %sql, %sql_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_RESET %out_status, %stmt`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_SESSION_CHANGESET %out_ptr, %out_len, %out_status, %session`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_SESSION_CLOSE %out_status, %session`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_SESSION_CREATE %out_session, %out_status, %db, %db_name, %db_name_len, %table, %table_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_SESSION_ISEMPTY %out_empty, %out_status, %session`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_SESSION_MEMORY_USED %out_bytes, %out_status, %session`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_SESSION_PATCHSET %out_ptr, %out_len, %out_status, %session`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_STEP_JSON %out_ready, %out_ptr, %out_len, %out_status, %stmt`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_TAGSTORE_ALL %out_ptr, %out_len, %out_status, %store, %sql, %sql_len, %params, %params_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_TAGSTORE_CLEAR %out_status, %store`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_TAGSTORE_FREE %out_status, %store`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_TAGSTORE_GET %out_ptr, %out_len, %out_status, %store, %sql, %sql_len, %params, %params_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_TAGSTORE_NEW %out_store, %out_status, %db, %capacity`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_TAGSTORE_RUN %out_ptr, %out_len, %out_status, %store, %sql, %sql_len, %params, %params_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_TAGSTORE_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %store`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SQLITE_VERSION_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_COMPOSE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_DESTROY %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_DUPLEX_NEW %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_DUPLEX_PAIR %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_FINISHED %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_PASSTHROUGH_NEW %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_PIPELINE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_READABLE_DESTROY %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_TOP_CONFIG_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_TOP_EXPORTS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_TOP_FEATURE_SUPPORT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_TRANSFORM_NEW %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STREAM_WRITABLE_DESTROY %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STRING_DECODER_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STRING_DECODER_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STRING_DECODER_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_STRING_DECODER_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SYS_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SYS_DEBUGLOG %out_ptr, %out_len, %out_status, %section, %section_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SYS_DEPRECATION_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SYS_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SYS_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SYS_FORMAT %out_ptr, %out_len, %out_status, %format, %format_len, %args_json, %args_json_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SYS_INHERITS %child_ptr, %child_len, %super_ptr, %super_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SYS_INSPECT %out_ptr, %out_len, %out_status, %json, %json_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_SYS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_ASSERT_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_PROPERTY_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_REPORTERS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_RUNNER_BUILTIN_REPORTERS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_RUNNER_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_RUNNER_HAS_BUILTIN_REPORTER %out_bool, %out_status, %name, %name_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_RUNNER_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TEST_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_CLEAR_IMMEDIATE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_CLEAR_INTERVAL %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_CLEAR_TIMEOUT %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_PROMISES_INTERVAL_FREE %out_status, %interval`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_PROMISES_INTERVAL_NEXT %out_ptr, %out_len, %out_done, %out_status, %interval`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_PROMISES_INTERVAL_RETURN %out_status, %interval`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_PROMISES_INTERVAL_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %interval`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_PROMISES_SCHEDULER_WAIT %out_status, %ms`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_PROMISES_SCHEDULER_YIELD %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_PROMISES_SET_IMMEDIATE %out_ptr, %out_len, %out_status, %value, %value_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_PROMISES_SET_INTERVAL %out_interval, %out_status, %ms, %value, %value_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_PROMISES_SET_TIMEOUT %out_ptr, %out_len, %out_status, %ms, %value, %value_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_SET_IMMEDIATE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_SET_INTERVAL %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_SET_TIMEOUT %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_TOP_CONFIG_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_TOP_EXPORTS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TIMERS_TOP_FEATURE_SUPPORT_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_ADDRESS %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_ALPN_PROTOCOL %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_AUTHORIZED_JSON %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_BUFFER_SIZE %out_size, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_BYTES_READ %out_bytes, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_BYTES_WRITTEN %out_bytes, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_CHECK_SERVER_IDENTITY %out_ptr, %out_len, %out_status, %host, %host_len, %cert_json, %cert_json_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_CLOSE %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_CLOSED %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_CONNECT %out_socket, %out_status, %host, %host_len, %port, %servername, %servername_len, %reject_unauthorized`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_CONNECTING %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_CONNECT_OPTIONS %out_socket, %out_status, %host, %host_len, %port, %servername, %servername_len, %reject_unauthorized, %family, %local, %local_len, %local_port, %no_delay, %keep_alive, %keep_alive_initial_delay_secs, %timeout_ms, %blocklist`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_CONNECT_SECURE_CONTEXT %out_socket, %out_status, %context, %host, %host_len, %port, %servername, %servername_len, %reject_unauthorized`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_CONVERT_ALPN_PROTOCOLS %out_ptr, %out_len, %out_status, %protocols_json, %protocols_json_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_CREATE_SECURE_CONTEXT %out_context, %out_status, %ca, %ca_len, %cert, %cert_len, %key, %key_len, %ciphers, %ciphers_len, %min, %min_len, %max, %max_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_DEFAULT_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_DEFAULT_MAX_VERSION %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_DEFAULT_MIN_VERSION %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_DESTROY %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_DESTROYED %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_GET_CA_CERTIFICATES_JSON %out_ptr, %out_len, %out_status, %type_ptr, %type_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_GET_CIPHERS_DETAILED_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_GET_CIPHERS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_GET_CIPHER_JSON %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_GET_PROTOCOL %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_GET_TIMEOUT %out_timeout_ms, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_HAS_REF %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_LOCAL_ADDRESS %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_LOCAL_FAMILY %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_LOCAL_PORT %out_port, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_PENDING %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_READ %out_ptr, %out_len, %out_status, %socket, %max_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_READABLE %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_READY_STATE %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_REF %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_REMOTE_ADDRESS %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_REMOTE_ADDRESS_VALUE %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_REMOTE_FAMILY %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_REMOTE_PORT %out_port, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_RESET_DEFAULT_CA_CERTIFICATES %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_ROOT_CERTIFICATES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_SECURE_CONTEXT_FREE %out_status, %context`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_SECURE_CONTEXT_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %context`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_SERVERNAME %out_ptr, %out_len, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_SET_DEFAULT_CA_CERTIFICATES %out_status, %certs_pem, %certs_pem_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_SET_TIMEOUT %out_status, %socket, %timeout_ms`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_UNREF %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_WRITABLE %out_bool, %out_status, %socket`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TLS_WRITE %out_status, %socket, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TRACE_EVENTS_CREATE_TRACING %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TRACE_EVENTS_GET_ENABLED_CATEGORIES %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TRACE_EVENTS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TRACE_EVENTS_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TRACE_EVENTS_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TRACE_EVENTS_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TRACE_EVENTS_TRACING_DISABLE %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TRACE_EVENTS_TRACING_ENABLE %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TRACE_EVENTS_TRACING_FREE %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_ISATTY %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_READ_STREAM_NEW %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_STREAM_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_STREAM_GET_COLOR_DEPTH %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_STREAM_GET_WINDOW_SIZE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_STREAM_HAS_COLORS %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_STREAM_SET_RAW_MODE %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_TOP_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_TOP_STDIO_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_TTY_WRITE_STREAM_NEW %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_CAN_PARSE %out_bool, %out_status, %url, %url_len, %base, %base_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_DOMAIN_TO_ASCII %out_ptr, %out_len, %out_status, %domain, %domain_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_DOMAIN_TO_UNICODE %out_ptr, %out_len, %out_status, %domain, %domain_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_FILE_URL_TO_PATH %out_ptr, %out_len, %out_status, %url, %url_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_FILE_URL_TO_PATH_BUFFER %out_ptr, %out_len, %out_status, %url, %url_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_GET_HOST %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_GET_HREF %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_GET_PATHNAME %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_GET_PROTOCOL %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_NEW %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_PATH_TO_FILE_URL %out_ptr, %out_len, %out_status, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_URL_TO_HTTP_OPTIONS %out_ptr, %out_len, %out_status, %handle`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_CALLBACKIFY %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_DEBUGLOG %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_DEPRECATE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_DIFF %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6, %p_7, %p_8`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_GET_SYSTEM_ERROR_MAP %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_GET_SYSTEM_ERROR_MESSAGE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_GET_SYSTEM_ERROR_NAME %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_INHERITS %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_MIME_TYPE %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_PARSE_ARGS %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_PARSE_ENV %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_PROMISIFY %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_STYLE_TEXT %p_0, %p_1, %p_2, %p_3, %p_4, %p_5, %p_6`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_TEXT_DECODER_DECODE %data_ptr, %data_len, %encoding_ptr, %encoding_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_TEXT_ENCODER_ENCODE %text_ptr, %text_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_UTIL_TO_USV_STRING %input_ptr, %input_len, %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_APPEND_FILE %out_status, %vfs, %path, %path_len, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_CHDIR %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_COPY_FILE %out_status, %vfs, %src, %src_len, %dst, %dst_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_CWD %out_ptr, %out_len, %out_status, %vfs`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_DIR_CLOSE %out_status, %dir`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_DIR_NEXT %out_name_ptr, %out_name_len, %out_entry_type, %out_status, %dir`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_DIR_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %dir`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_EXISTS %out_bool, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_FILE_CLOSE %out_status, %file`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_FILE_FSTAT_JSON %out_ptr, %out_len, %out_status, %file`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_FILE_READ %out_n, %out_status, %file, %buf, %len, %position, %use_position`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_FILE_TRUNCATE %out_status, %file, %len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_FILE_WRITE %out_n, %out_status, %file, %data, %data_len, %position, %use_position`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_FREE %out_status, %vfs`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_LSTAT_JSON %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_MKDIR %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_NEW %out_vfs, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_OPEN %out_handle, %out_status, %vfs, %path, %path_len, %mode`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_OPENDIR %out_dir, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_READDIR %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_READLINK %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_READ_FILE %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_REALPATH %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_RENAME %out_status, %vfs, %old_path, %old_len, %new_path, %new_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_RM %out_status, %vfs, %path, %path_len, %recursive`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %vfs`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_STAT_JSON %out_ptr, %out_len, %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_SYMLINK %out_status, %vfs, %target, %target_len, %link_path, %link_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_UNLINK %out_status, %vfs, %path, %path_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_WATCH %out_watcher, %out_status, %vfs, %path, %path_len, %recursive`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_WATCHER_CLOSE %out_status, %watcher`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_WATCHER_NEXT %out_event_ptr, %out_event_len, %out_filename_ptr, %out_filename_len, %out_status, %watcher`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_WATCHER_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %watcher`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_VFS_WRITE_FILE %out_status, %vfs, %path, %path_len, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WASI_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WASI_IMPORT_MODULES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WASI_IS_ALLOWED %out_bool, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WASI_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WASI_SUPPORTED_VERSIONS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WASI_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WASI_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_DECRYPT %out_ptr, %out_len, %out_status, %key, %iv, %iv_len, %aad, %aad_len, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_DIGEST %out_ptr, %out_len, %out_status, %algo, %algo_len, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_ENCRYPT %out_ptr, %out_len, %out_status, %key, %iv, %iv_len, %aad, %aad_len, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_EXPORT_KEY_RAW %out_ptr, %out_len, %out_status, %key`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_EXPORT_PUBLIC_KEY_RAW %out_ptr, %out_len, %out_status, %key`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_GENERATE_KEY %out_key, %out_status, %algorithm, %algorithm_len, %usage, %usage_len, %bits`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_GET_RANDOM_VALUES %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_IMPORT_KEY_RAW %out_key, %out_status, %algorithm, %algorithm_len, %usage, %usage_len, %key, %key_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_KEY_FREE %out_status, %key`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_RANDOM_UUID %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_SIGN %out_sig_ptr, %out_sig_len, %out_status, %key, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_CRYPTO_VERIFY %out_bool, %out_status, %key, %data, %data_len, %sig, %sig_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_CLOSE %out_status, %handle`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_ENQUEUE %out_status, %handle, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_FREE %out_status, %handle`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_READ %out_ptr, %out_len, %out_status, %handle, %max_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_READABLE_NEW %out_handle, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_SNAPSHOT_JSON %out_ptr, %out_len, %out_status, %handle`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_STATUS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_TRANSFORM_NEW %out_readable, %out_writable, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_WRITABLE_NEW %out_handle, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WEB_STREAMS_WRITE %out_status, %handle, %data, %data_len`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_GET_ENVIRONMENT_DATA %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_IS_INTERNAL_THREAD %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_IS_MAIN_THREAD %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_CHANNEL_NEW %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_PORT_CLOSE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_PORT_FREE %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_PORT_POST_MESSAGE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_MESSAGE_PORT_RECEIVE_MESSAGE %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_PARENT_PORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_POST_MESSAGE_TO_THREAD %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_RECEIVE_MESSAGE_ON_PORT %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_RESOURCE_LIMITS_JSON %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_SET_ENVIRONMENT_DATA %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_SHARE_ENV_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_STATUS_JSON %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_THREAD_ID %p_0`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_THREAD_NAME %p_0, %p_1, %p_2`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_WORKER_THREADS_WORKER_DATA %p_0, %p_1`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_BROTLI_COMPRESS %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_BROTLI_DECOMPRESS %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_CODES_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_CONSTANTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_CRC32 %p_0, %p_1, %p_2, %p_3`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_DEFLATE_RAW %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_INFLATE_RAW %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_STATUS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_TOP_CONFIG_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_TOP_EXPORTS_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_TOP_FEATURE_SUPPORT_JSON %out_ptr, %out_len, %out_status`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_UNZIP %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_ZSTD_COMPRESS %p_0, %p_1, %p_2, %p_3, %p_4`
+- `node/sa_plugin_node/node_extra.sal: [MACRO] NODE_ZLIB_ZSTD_DECOMPRESS %p_0, %p_1, %p_2, %p_3, %p_4`

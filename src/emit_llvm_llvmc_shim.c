@@ -8,12 +8,17 @@
 #include <llvm-c/DebugInfo.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/TargetMachine.h>
+#include <llvm-c/Transforms/IPO.h>
+#include <llvm-c/Transforms/PassManagerBuilder.h>
+#include <llvm-c/Transforms/Scalar.h>
+#include <llvm-c/Transforms/Utils.h>
+#include <llvm-c/Transforms/Vectorize.h>
 
 typedef enum { SA_T_VOID=0, SA_T_I1=1, SA_T_I8=2, SA_T_I16=3, SA_T_I32=4, SA_T_I64=5, SA_T_F32=6, SA_T_F64=7, SA_T_PTR=8, SA_T_U8=9, SA_T_U16=10, SA_T_U32=11, SA_T_U64=12 } SaType;
 typedef enum { SA_F_NORMAL=0, SA_F_EXTERNAL=1, SA_F_EXPORTED=2, SA_F_TEST=3 } SaFuncKind;
 typedef enum { SA_OP_NONE=0, SA_OP_LABEL=1, SA_OP_ALLOC=2, SA_OP_STACK_ALLOC=3, SA_OP_LOAD=4, SA_OP_STORE=5, SA_OP_BINOP=6, SA_OP_PTR_ADD=7, SA_OP_JMP=8, SA_OP_BR=9, SA_OP_CALL=10, SA_OP_RET=11, SA_OP_PANIC=12, SA_OP_PANIC_MSG=13, SA_OP_ATOMIC_LOAD=14, SA_OP_ATOMIC_STORE=15, SA_OP_ATOMIC_RMW=16, SA_OP_CMPXCHG=17, SA_OP_FENCE=18, SA_OP_TRY=19, SA_OP_CALL_INDIRECT=20, SA_OP_ASSIGN=21 } SaOp;
-typedef enum { SA_OPER_NONE=0, SA_OPER_REG=1, SA_OPER_IMM_I64=2, SA_OPER_IMM_U64=3, SA_OPER_CONST_PTR=4 } SaOperandKind;
-typedef enum { SA_BIN_ADD=0, SA_BIN_SUB=1, SA_BIN_MUL=2, SA_BIN_SDIV=3, SA_BIN_UDIV=4, SA_BIN_SREM=5, SA_BIN_UREM=6, SA_BIN_AND=7, SA_BIN_OR=8, SA_BIN_XOR=9, SA_BIN_SHL=10, SA_BIN_LSHR=11, SA_BIN_ASHR=12, SA_BIN_EQ=13, SA_BIN_NE=14, SA_BIN_SLT=15, SA_BIN_SLE=16, SA_BIN_SGT=17, SA_BIN_SGE=18, SA_BIN_ULT=19, SA_BIN_ULE=20, SA_BIN_UGT=21, SA_BIN_UGE=22 } SaBinaryOp;
+typedef enum { SA_OPER_NONE=0, SA_OPER_REG=1, SA_OPER_IMM_I64=2, SA_OPER_IMM_U64=3, SA_OPER_CONST_PTR=4, SA_OPER_IMM_F64=5 } SaOperandKind;
+typedef enum { SA_BIN_ADD=0, SA_BIN_SUB=1, SA_BIN_MUL=2, SA_BIN_SDIV=3, SA_BIN_UDIV=4, SA_BIN_SREM=5, SA_BIN_UREM=6, SA_BIN_AND=7, SA_BIN_OR=8, SA_BIN_XOR=9, SA_BIN_SHL=10, SA_BIN_LSHR=11, SA_BIN_ASHR=12, SA_BIN_EQ=13, SA_BIN_NE=14, SA_BIN_SLT=15, SA_BIN_SLE=16, SA_BIN_SGT=17, SA_BIN_SGE=18, SA_BIN_ULT=19, SA_BIN_ULE=20, SA_BIN_UGT=21, SA_BIN_UGE=22, SA_BIN_FADD=23, SA_BIN_FSUB=24, SA_BIN_FMUL=25, SA_BIN_FDIV=26, SA_BIN_FCMP_EQ=27, SA_BIN_FCMP_NE=28, SA_BIN_FCMP_LT=29, SA_BIN_FCMP_LE=30, SA_BIN_FCMP_GT=31, SA_BIN_FCMP_GE=32 } SaBinaryOp;
 typedef enum { SA_ATOMIC_RELAXED=0, SA_ATOMIC_ACQUIRE=1, SA_ATOMIC_RELEASE=2, SA_ATOMIC_ACQ_REL=3, SA_ATOMIC_SEQ_CST=4 } SaAtomicOrdering;
 typedef enum { SA_RMW_ADD=0, SA_RMW_SUB=1, SA_RMW_AND=2, SA_RMW_OR=3, SA_RMW_XOR=4, SA_RMW_XCHG=5, SA_RMW_MIN=6, SA_RMW_MAX=7, SA_RMW_UMIN=8, SA_RMW_UMAX=9 } SaAtomicRmwOp;
 
@@ -22,7 +27,7 @@ typedef struct { const char *name; const char *const *funcs; size_t func_count; 
 typedef struct { const char *name; SaType ty; unsigned int slot; } SaParam;
 typedef struct { unsigned int line; unsigned int col; } SaDebugLoc;
 typedef struct { const char *name; SaType ty; unsigned int slot; unsigned char is_param; unsigned int line; unsigned int col; } SaDebugVar;
-typedef struct { SaOperandKind kind; unsigned int reg; long long i64_value; unsigned long long u64_value; SaType ty; const char *name; } SaOperand;
+typedef struct { SaOperandKind kind; unsigned int reg; long long i64_value; unsigned long long u64_value; double f64_value; SaType ty; const char *name; } SaOperand;
 typedef struct {
     SaOp op;
     unsigned int dst;
@@ -88,6 +93,7 @@ typedef struct {
     LLVMBuilderRef builder;
     unsigned short size_bits;
     unsigned char is_cgu;
+    unsigned char wasm_compat;
     LLVMTypeRef i8_ty;
     LLVMTypeRef i32_ty;
     LLVMTypeRef i64_ty;
@@ -156,6 +162,106 @@ static int module_bitcode_to_heap(LLVMModuleRef module, unsigned char **out_byte
     *out_bytes = bytes;
     *out_len = len;
     return 0;
+}
+
+static unsigned normalize_opt_level(int opt_level) {
+    if (opt_level <= 0) return 0;
+    if (opt_level == 1) return 1;
+    if (opt_level == 2) return 2;
+    return 3;
+}
+
+static void add_enum_function_attr(EmitCtx *e, LLVMValueRef fn, const char *name) {
+    unsigned kind = LLVMGetEnumAttributeKindForName(name, strlen(name));
+    if (kind == 0) return;
+    LLVMAttributeRef attr = LLVMCreateEnumAttribute(e->ctx, kind, 0);
+    LLVMAddAttributeAtIndex(fn, LLVMAttributeFunctionIndex, attr);
+}
+
+static void add_inline_hint(EmitCtx *e, LLVMValueRef fn) {
+    add_enum_function_attr(e, fn, "inlinehint");
+}
+
+static void add_always_inline(EmitCtx *e, LLVMValueRef fn) {
+    add_enum_function_attr(e, fn, "alwaysinline");
+}
+
+static int verify_emit_module(EmitCtx *e, char **out_error) {
+    char *verify_error = NULL;
+    if (LLVMVerifyModule(e->module, LLVMReturnStatusAction, &verify_error) != 0) {
+        if (verify_error != NULL) {
+            int status = set_error(out_error, verify_error);
+            LLVMDisposeMessage(verify_error);
+            return status;
+        }
+        return set_error(out_error, "LLVMVerifyModule failed");
+    }
+    return 0;
+}
+
+static void optimize_module_ir(EmitCtx *e, int opt_level) {
+    unsigned level = normalize_opt_level(opt_level);
+    if (level == 0 || e == NULL || e->module == NULL) return;
+    if (e->wasm_compat) return;
+
+    LLVMPassManagerBuilderRef pmb = LLVMPassManagerBuilderCreate();
+    if (pmb == NULL) return;
+    LLVMPassManagerBuilderSetOptLevel(pmb, level);
+    LLVMPassManagerBuilderSetSizeLevel(pmb, 0);
+    LLVMPassManagerBuilderUseInlinerWithThreshold(pmb, level >= 3 ? 900 : 225);
+
+    LLVMPassManagerRef fpm = LLVMCreateFunctionPassManagerForModule(e->module);
+    if (fpm != NULL) {
+        LLVMAddScalarReplAggregatesPassSSA(fpm);
+        LLVMAddPromoteMemoryToRegisterPass(fpm);
+        LLVMAddInstructionCombiningPass(fpm);
+        LLVMAddReassociatePass(fpm);
+        LLVMAddGVNPass(fpm);
+        LLVMAddCFGSimplificationPass(fpm);
+        LLVMPassManagerBuilderPopulateFunctionPassManager(pmb, fpm);
+        LLVMInitializeFunctionPassManager(fpm);
+        for (LLVMValueRef fn = LLVMGetFirstFunction(e->module); fn != NULL; fn = LLVMGetNextFunction(fn)) {
+            if (LLVMCountBasicBlocks(fn) != 0) LLVMRunFunctionPassManager(fpm, fn);
+        }
+        LLVMFinalizeFunctionPassManager(fpm);
+        LLVMDisposePassManager(fpm);
+    }
+
+    LLVMPassManagerRef mpm = LLVMCreatePassManager();
+    if (mpm != NULL) {
+        LLVMAddFunctionAttrsPass(mpm);
+        LLVMAddAlwaysInlinerPass(mpm);
+        LLVMAddGlobalOptimizerPass(mpm);
+        if (level >= 2) LLVMAddIPSCCPPass(mpm);
+        LLVMPassManagerBuilderPopulateModulePassManager(pmb, mpm);
+        LLVMAddScalarReplAggregatesPassSSA(mpm);
+        LLVMAddPromoteMemoryToRegisterPass(mpm);
+        LLVMAddInstructionCombiningPass(mpm);
+        LLVMAddReassociatePass(mpm);
+        LLVMAddGVNPass(mpm);
+        LLVMAddSCCPPass(mpm);
+        LLVMAddDeadStoreEliminationPass(mpm);
+        LLVMAddTailCallEliminationPass(mpm);
+        LLVMAddLoopRotatePass(mpm);
+        LLVMAddLICMPass(mpm);
+        LLVMAddLoopDeletionPass(mpm);
+        LLVMAddLoopIdiomPass(mpm);
+        LLVMAddIndVarSimplifyPass(mpm);
+        LLVMAddMemCpyOptPass(mpm);
+        if (level >= 3) {
+            LLVMAddLoopUnrollPass(mpm);
+            LLVMAddLoopVectorizePass(mpm);
+            LLVMAddSLPVectorizePass(mpm);
+        }
+        LLVMAddCFGSimplificationPass(mpm);
+        LLVMAddAggressiveDCEPass(mpm);
+        LLVMAddGlobalDCEPass(mpm);
+        LLVMAddStripDeadPrototypesPass(mpm);
+        LLVMRunPassManager(mpm, e->module);
+        LLVMDisposePassManager(mpm);
+    }
+
+    LLVMPassManagerBuilderDispose(pmb);
 }
 
 static LLVMTypeRef type_of(EmitCtx *e, SaType ty) {
@@ -237,6 +343,44 @@ static LLVMTypeRef return_type_for(EmitCtx *e, const SaFunction *f) {
     return type_of(e, f->ret_ty);
 }
 
+static int apply_native_target_layout(EmitCtx *e, char **out_error) {
+    if (e == NULL || e->module == NULL || e->wasm_compat) return 0;
+
+    LLVMInitializeNativeTarget();
+    LLVMInitializeNativeAsmPrinter();
+
+    char *triple = LLVMGetDefaultTargetTriple();
+    if (triple == NULL) return set_error(out_error, "LLVMGetDefaultTargetTriple failed");
+
+    LLVMTargetRef target;
+    char *err_msg = NULL;
+    if (LLVMGetTargetFromTriple(triple, &target, &err_msg)) {
+        int status = set_error(out_error, err_msg ? err_msg : "target lookup failed");
+        if (err_msg) LLVMDisposeMessage(err_msg);
+        LLVMDisposeMessage(triple);
+        return status;
+    }
+
+    LLVMTargetMachineRef tm = LLVMCreateTargetMachine(
+        target, triple, "", "",
+        LLVMCodeGenLevelDefault, LLVMRelocDefault, LLVMCodeModelDefault
+    );
+    if (tm == NULL) {
+        LLVMDisposeMessage(triple);
+        return set_error(out_error, "TargetMachine creation failed");
+    }
+
+    LLVMSetTarget(e->module, triple);
+    LLVMTargetDataRef dl = LLVMCreateTargetDataLayout(tm);
+    char *dl_str = LLVMCopyStringRepOfTargetData(dl);
+    LLVMSetDataLayout(e->module, dl_str);
+    LLVMDisposeMessage(dl_str);
+    LLVMDisposeTargetData(dl);
+    LLVMDisposeTargetMachine(tm);
+    LLVMDisposeMessage(triple);
+    return 0;
+}
+
 static LLVMValueRef find_function(EmitCtx *e, const char *name) { return LLVMGetNamedFunction(e->module, name); }
 static LLVMValueRef find_global(EmitCtx *e, const char *name) { return LLVMGetNamedGlobal(e->module, name); }
 
@@ -296,6 +440,7 @@ static int type_is_signed_int(SaType ty) {
 }
 
 static LLVMTypeRef fn_type_for(EmitCtx *e, const SaFunction *f) {
+    if (f->param_count > UINT_MAX) return NULL;
     LLVMTypeRef *params = NULL;
     if (f->param_count != 0) {
         params = (LLVMTypeRef *)malloc(sizeof(LLVMTypeRef) * f->param_count);
@@ -348,6 +493,7 @@ static unsigned int infer_indirect_sig_index(EmitCtx *e, const SaInstruction *in
 
 static LLVMTypeRef indirect_fn_type_for(EmitCtx *e, const SaFunction *sig, const SaInstruction *in) {
     size_t param_count = in->indirect_param_count != 0 ? in->indirect_param_count : sig->param_count;
+    if (param_count > UINT_MAX) return NULL;
     LLVMTypeRef *params = NULL;
     if (param_count != 0) {
         params = (LLVMTypeRef *)malloc(sizeof(LLVMTypeRef) * param_count);
@@ -368,6 +514,15 @@ static LLVMValueRef coerce(EmitCtx *e, LLVMValueRef v, SaType from, SaType to) {
     LLVMTypeRef dst = type_of(e, to);
     if (to == SA_T_PTR) return LLVMBuildIntToPtr(e->builder, v, dst, "cast_ptr");
     if (from == SA_T_PTR) return LLVMBuildPtrToInt(e->builder, v, dst, "cast_int");
+    if ((from == SA_T_F32 || from == SA_T_F64) && (to == SA_T_F32 || to == SA_T_F64)) {
+        return from == SA_T_F32 ? LLVMBuildFPExt(e->builder, v, dst, "fpext") : LLVMBuildFPTrunc(e->builder, v, dst, "fptrunc");
+    }
+    if (from == SA_T_F32 || from == SA_T_F64) {
+        return LLVMBuildFPToSI(e->builder, v, dst, "fptosi");
+    }
+    if (to == SA_T_F32 || to == SA_T_F64) {
+        return type_is_signed_int(from) ? LLVMBuildSIToFP(e->builder, v, dst, "sitofp") : LLVMBuildUIToFP(e->builder, v, dst, "uitofp");
+    }
     unsigned from_bits = type_bits(from);
     unsigned to_bits = type_bits(to);
     if (from_bits < to_bits) return type_is_signed_int(from) ? LLVMBuildSExt(e->builder, v, dst, "sext") : LLVMBuildZExt(e->builder, v, dst, "zext");
@@ -464,6 +619,16 @@ static LLVMValueRef reg_encode(EmitCtx *e, LLVMValueRef value, SaType ty) {
         LLVMValueRef bits32 = LLVMBuildBitCast(e->builder, value, e->i32_ty, "slot_f32_bits");
         return LLVMBuildZExt(e->builder, bits32, e->i64_ty, "slot_f32_ext");
     }
+    if (LLVMGetTypeKind(LLVMTypeOf(value)) == LLVMDoubleTypeKind) {
+        return LLVMBuildBitCast(e->builder, value, e->i64_ty, "slot_f64_bits");
+    }
+    if (LLVMGetTypeKind(LLVMTypeOf(value)) == LLVMFloatTypeKind) {
+        LLVMValueRef bits32 = LLVMBuildBitCast(e->builder, value, e->i32_ty, "slot_f32_bits");
+        return LLVMBuildZExt(e->builder, bits32, e->i64_ty, "slot_f32_ext");
+    }
+    if (LLVMGetTypeKind(LLVMTypeOf(value)) == LLVMIntegerTypeKind) {
+        return coerce_int_to(e, value, e->i64_ty, "slot_int_bits");
+    }
     return coerce(e, value, ty, SA_T_I64);
 }
 
@@ -484,13 +649,17 @@ static int reg_store(EmitCtx *e, RegValue *regs, size_t reg_count, unsigned int 
     regs[slot].initialized = 1;
     regs[slot].indirect_sig_index = indirect_sig_index;
     regs[slot].fallible_slot = NULL;
+    regs[slot].value = value;
     if (fallible) {
-        regs[slot].value = value;
         return 0;
     }
-    if (regs[slot].slot == NULL) return 1;
-    LLVMValueRef bits = reg_encode(e, value, ty);
-    LLVMBuildStore(e->builder, bits, regs[slot].slot);
+    if (ty == SA_T_VOID || value == NULL) {
+        return 0;
+    }
+    if (regs[slot].slot != NULL) {
+        LLVMValueRef bits = reg_encode(e, value, ty);
+        LLVMBuildStore(e->builder, bits, regs[slot].slot);
+    }
     return 0;
 }
 
@@ -511,13 +680,17 @@ static int operand_value(EmitCtx *e, const SaOperand *op, RegValue *regs, size_t
         case SA_OPER_REG:
             if (op->reg >= reg_count || !regs[op->reg].initialized) return 1;
             *out_ty = regs[op->reg].ty;
-            if (regs[op->reg].fallible) {
-                if (regs[op->reg].value == NULL) return 1;
+            if (regs[op->reg].ty == SA_T_VOID || regs[op->reg].fallible) {
                 *out = regs[op->reg].value;
-            } else {
-                if (regs[op->reg].slot == NULL) return 1;
+                return 0;
+            }
+            if (regs[op->reg].slot != NULL) {
                 LLVMValueRef bits = LLVMBuildLoad2(e->builder, e->i64_ty, regs[op->reg].slot, "slot_load");
                 *out = reg_decode(e, bits, *out_ty);
+            } else if (regs[op->reg].value != NULL) {
+                *out = regs[op->reg].value;
+            } else {
+                return 1;
             }
             return 0;
         case SA_OPER_IMM_I64:
@@ -527,6 +700,10 @@ static int operand_value(EmitCtx *e, const SaOperand *op, RegValue *regs, size_t
         case SA_OPER_IMM_U64:
             *out = LLVMConstInt(e->i64_ty, op->u64_value, 0);
             *out_ty = SA_T_I64;
+            return 0;
+        case SA_OPER_IMM_F64:
+            *out_ty = op->ty == SA_T_F32 ? SA_T_F32 : SA_T_F64;
+            *out = LLVMConstReal(type_of(e, *out_ty), op->f64_value);
             return 0;
         case SA_OPER_CONST_PTR:
             *out = find_global(e, op->name);
@@ -555,6 +732,25 @@ static LLVMBasicBlockRef label_block(LabelEntry *labels, size_t label_count, con
 static int current_has_terminator(EmitCtx *e) {
     LLVMBasicBlockRef bb = LLVMGetInsertBlock(e->builder);
     return bb != NULL && LLVMGetBasicBlockTerminator(bb) != NULL;
+}
+
+static int self_call_is_immediate_tail_return(const SaFunction *f, size_t index) {
+    if (f == NULL || f->return_fallible || index + 1 >= f->instruction_count) return 0;
+
+    const SaInstruction *call = &f->instructions[index];
+    const SaInstruction *ret = &f->instructions[index + 1];
+    if (call->op != SA_OP_CALL || ret->op != SA_OP_RET) return 0;
+    if (call->callee == NULL || strcmp(call->callee, f->name) != 0) return 0;
+    if (call->return_fallible) return 0;
+
+    if (f->ret_ty == SA_T_VOID) {
+        return !call->has_dst && !ret->has_dst;
+    }
+
+    return call->has_dst &&
+           ret->has_dst &&
+           ret->operand0.kind == SA_OPER_REG &&
+           ret->operand0.reg == call->dst;
 }
 
 static int fail_body(EmitCtx *e, const SaFunction *f, const SaInstruction *in, size_t index, const char *message) {
@@ -597,8 +793,32 @@ static LLVMValueRef build_binop(EmitCtx *e, SaBinaryOp op, LLVMValueRef lhs, LLV
         case SA_BIN_ULE: return LLVMBuildZExt(e->builder, LLVMBuildICmp(e->builder, LLVMIntULE, lhs, rhs, "cmp"), e->i64_ty, "bool64");
         case SA_BIN_UGT: return LLVMBuildZExt(e->builder, LLVMBuildICmp(e->builder, LLVMIntUGT, lhs, rhs, "cmp"), e->i64_ty, "bool64");
         case SA_BIN_UGE: return LLVMBuildZExt(e->builder, LLVMBuildICmp(e->builder, LLVMIntUGE, lhs, rhs, "cmp"), e->i64_ty, "bool64");
+        case SA_BIN_FADD: return LLVMBuildFAdd(e->builder, lhs, rhs, "fop");
+        case SA_BIN_FSUB: return LLVMBuildFSub(e->builder, lhs, rhs, "fop");
+        case SA_BIN_FMUL: return LLVMBuildFMul(e->builder, lhs, rhs, "fop");
+        case SA_BIN_FDIV: return LLVMBuildFDiv(e->builder, lhs, rhs, "fop");
+        case SA_BIN_FCMP_EQ: return LLVMBuildZExt(e->builder, LLVMBuildFCmp(e->builder, LLVMRealOEQ, lhs, rhs, "fcmp"), e->i64_ty, "bool64");
+        case SA_BIN_FCMP_NE: return LLVMBuildZExt(e->builder, LLVMBuildFCmp(e->builder, LLVMRealUNE, lhs, rhs, "fcmp"), e->i64_ty, "bool64");
+        case SA_BIN_FCMP_LT: return LLVMBuildZExt(e->builder, LLVMBuildFCmp(e->builder, LLVMRealOLT, lhs, rhs, "fcmp"), e->i64_ty, "bool64");
+        case SA_BIN_FCMP_LE: return LLVMBuildZExt(e->builder, LLVMBuildFCmp(e->builder, LLVMRealOLE, lhs, rhs, "fcmp"), e->i64_ty, "bool64");
+        case SA_BIN_FCMP_GT: return LLVMBuildZExt(e->builder, LLVMBuildFCmp(e->builder, LLVMRealOGT, lhs, rhs, "fcmp"), e->i64_ty, "bool64");
+        case SA_BIN_FCMP_GE: return LLVMBuildZExt(e->builder, LLVMBuildFCmp(e->builder, LLVMRealOGE, lhs, rhs, "fcmp"), e->i64_ty, "bool64");
     }
     return NULL;
+}
+
+static int binop_is_float(SaBinaryOp op) {
+    return op >= SA_BIN_FADD && op <= SA_BIN_FCMP_GE;
+}
+
+static int binop_is_float_cmp(SaBinaryOp op) {
+    return op >= SA_BIN_FCMP_EQ && op <= SA_BIN_FCMP_GE;
+}
+
+static SaType float_binop_operand_type(SaType lhs, SaType rhs, SaType fallback) {
+    if (lhs == SA_T_F64 || rhs == SA_T_F64 || fallback == SA_T_F64) return SA_T_F64;
+    if (lhs == SA_T_F32 || rhs == SA_T_F32 || fallback == SA_T_F32) return SA_T_F32;
+    return SA_T_F64;
 }
 
 static void debug_init(EmitCtx *e, const SaModule *m) {
@@ -882,8 +1102,16 @@ static int emit_function_body(EmitCtx *e, const SaFunction *f) {
                 break;
             case SA_OP_BINOP:
                 if (operand_value(e, &in->operand0, regs, reg_count, &v0, &t0) || operand_value(e, &in->operand1, regs, reg_count, &v1, &t1)) { free(regs); free(labels); return 1; }
-                v0 = coerce(e, v0, t0, SA_T_I64); v1 = coerce(e, v1, t1, SA_T_I64);
-                if (reg_store(e, regs, reg_count, in->dst, build_binop(e, in->binary_op, v0, v1), SA_T_I64, 0, UINT_MAX)) { free(regs); free(labels); return 1; }
+                if (binop_is_float(in->binary_op)) {
+                    SaType op_ty = float_binop_operand_type(t0, t1, in->ty);
+                    v0 = coerce(e, v0, t0, op_ty);
+                    v1 = coerce(e, v1, t1, op_ty);
+                    SaType result_ty = binop_is_float_cmp(in->binary_op) ? SA_T_I64 : op_ty;
+                    if (reg_store(e, regs, reg_count, in->dst, build_binop(e, in->binary_op, v0, v1), result_ty, 0, UINT_MAX)) { free(regs); free(labels); return 1; }
+                } else {
+                    v0 = coerce(e, v0, t0, SA_T_I64); v1 = coerce(e, v1, t1, SA_T_I64);
+                    if (reg_store(e, regs, reg_count, in->dst, build_binop(e, in->binary_op, v0, v1), SA_T_I64, 0, UINT_MAX)) { free(regs); free(labels); return 1; }
+                }
                 break;
             case SA_OP_PTR_ADD:
                 if (operand_addressable_value(e, &in->operand0, regs, reg_count, &v0, &t0) || operand_value(e, &in->operand1, regs, reg_count, &v1, &t1)) { free(regs); free(labels); return 1; }
@@ -942,6 +1170,17 @@ static int emit_function_body(EmitCtx *e, const SaFunction *f) {
                 }
                 free(param_types);
                 LLVMValueRef callv = LLVMBuildCall2(e->builder, fn_ty, callee, args, (unsigned)in->arg_count, in->has_dst ? "call" : "");
+                if (self_call_is_immediate_tail_return(f, i)) {
+                    LLVMSetTailCall(callv, 1);
+                    if (f->ret_ty == SA_T_VOID) {
+                        LLVMBuildRetVoid(e->builder);
+                    } else {
+                        LLVMBuildRet(e->builder, coerce(e, callv, in->ty, f->ret_ty));
+                    }
+                    free(args);
+                    i += 1;
+                    break;
+                }
                 if (in->has_dst) {
                     if (reg_store(e, regs, reg_count, in->dst, callv, in->ty, in->return_fallible, UINT_MAX)) { free(args); free(regs); free(labels); return 1; }
                 }
@@ -1144,6 +1383,7 @@ static void emit_sa_print_bytes(EmitCtx *e) {
     if (fn == NULL) {
         fn = LLVMAddFunction(e->module, "sa_print_bytes", LLVMFunctionType(LLVMVoidTypeInContext(e->ctx), params, 2, 0));
     }
+    LLVMSetLinkage(fn, LLVMWeakODRLinkage);
     if (LLVMCountBasicBlocks(fn) != 0) return;
     LLVMBasicBlockRef bb = LLVMAppendBasicBlockInContext(e->ctx, fn, "entry");
     LLVMPositionBuilderAtEnd(e->builder, bb);
@@ -1188,83 +1428,43 @@ static void emit_panic_msg(EmitCtx *e) {
     LLVMValueRef msg_len = coerce_to_size(e, LLVMGetParam(fn, 2), "panic_msg_len");
     LLVMTypeRef sz_ty = size_type(e);
 
-    // Dynamic formatting of 'code' on the stack
-    LLVMValueRef zero = LLVMConstInt(e->i64_ty, 0, 0);
-    LLVMValueRef one = LLVMConstInt(e->i64_ty, 1, 0);
-    LLVMValueRef two = LLVMConstInt(e->i64_ty, 2, 0);
+    // Dynamic decimal formatting of 'code' on the stack. i32 needs at most 10 unsigned digits.
+    const unsigned max_panic_code_digits = 10;
+    LLVMValueRef zero32 = LLVMConstInt(e->i32_ty, 0, 0);
+    LLVMValueRef one32 = LLVMConstInt(e->i32_ty, 1, 0);
+    LLVMValueRef ten32 = LLVMConstInt(e->i32_ty, 10, 0);
 
-    LLVMValueRef buf = LLVMBuildAlloca(e->builder, LLVMArrayType(e->i8_ty, 4), "buf");
+    LLVMValueRef buf = LLVMBuildAlloca(e->builder, LLVMArrayType(e->i8_ty, max_panic_code_digits), "buf");
     LLVMValueRef buf_ptr = LLVMBuildPointerCast(e->builder, buf, e->ptr_ty, "buf_ptr");
 
-    LLVMBasicBlockRef ge_100_bb = LLVMAppendBasicBlockInContext(e->ctx, fn, "ge_100");
-    LLVMBasicBlockRef lt_100_bb = LLVMAppendBasicBlockInContext(e->ctx, fn, "lt_100");
-    LLVMBasicBlockRef ge_10_bb = LLVMAppendBasicBlockInContext(e->ctx, fn, "ge_10");
-    LLVMBasicBlockRef lt_10_bb = LLVMAppendBasicBlockInContext(e->ctx, fn, "lt_10");
-    LLVMBasicBlockRef merge_bb = LLVMAppendBasicBlockInContext(e->ctx, fn, "merge");
+    LLVMValueRef tmp_slot = LLVMBuildAlloca(e->builder, e->i32_ty, "panic_code_tmp");
+    LLVMValueRef idx_slot = LLVMBuildAlloca(e->builder, e->i32_ty, "panic_code_idx");
+    LLVMBuildStore(e->builder, code, tmp_slot);
+    LLVMBuildStore(e->builder, LLVMConstInt(e->i32_ty, max_panic_code_digits, 0), idx_slot);
 
-    LLVMValueRef cond_100 = LLVMBuildICmp(e->builder, LLVMIntSGE, code, LLVMConstInt(e->i32_ty, 100, 0), "cond_100");
-    LLVMBuildCondBr(e->builder, cond_100, ge_100_bb, lt_100_bb);
+    LLVMBasicBlockRef digits_loop_bb = LLVMAppendBasicBlockInContext(e->ctx, fn, "digits_loop");
+    LLVMBasicBlockRef digits_done_bb = LLVMAppendBasicBlockInContext(e->ctx, fn, "digits_done");
+    LLVMBuildBr(e->builder, digits_loop_bb);
 
-    // Block: ge_100
-    LLVMPositionBuilderAtEnd(e->builder, ge_100_bb);
-    LLVMValueRef d0_100 = LLVMBuildSDiv(e->builder, code, LLVMConstInt(e->i32_ty, 100, 0), "d0");
-    LLVMValueRef c0_100 = LLVMBuildAdd(e->builder, d0_100, LLVMConstInt(e->i32_ty, '0', 0), "c0");
-    LLVMValueRef rem_100 = LLVMBuildSRem(e->builder, code, LLVMConstInt(e->i32_ty, 100, 0), "rem");
-    LLVMValueRef d1_100 = LLVMBuildSDiv(e->builder, rem_100, LLVMConstInt(e->i32_ty, 10, 0), "d1");
-    LLVMValueRef c1_100 = LLVMBuildAdd(e->builder, d1_100, LLVMConstInt(e->i32_ty, '0', 0), "c1");
-    LLVMValueRef d2_100 = LLVMBuildSRem(e->builder, rem_100, LLVMConstInt(e->i32_ty, 10, 0), "d2");
-    LLVMValueRef c2_100 = LLVMBuildAdd(e->builder, d2_100, LLVMConstInt(e->i32_ty, '0', 0), "c2");
+    LLVMPositionBuilderAtEnd(e->builder, digits_loop_bb);
+    LLVMValueRef tmp_value = LLVMBuildLoad2(e->builder, e->i32_ty, tmp_slot, "tmp");
+    LLVMValueRef digit = LLVMBuildURem(e->builder, tmp_value, ten32, "digit");
+    LLVMValueRef next_tmp = LLVMBuildUDiv(e->builder, tmp_value, ten32, "next_tmp");
+    LLVMValueRef idx_value = LLVMBuildLoad2(e->builder, e->i32_ty, idx_slot, "idx");
+    LLVMValueRef next_idx = LLVMBuildSub(e->builder, idx_value, one32, "next_idx");
+    LLVMBuildStore(e->builder, next_idx, idx_slot);
+    LLVMValueRef digit_char = LLVMBuildAdd(e->builder, digit, LLVMConstInt(e->i32_ty, '0', 0), "digit_char");
+    LLVMValueRef digit_ptr = LLVMBuildGEP2(e->builder, e->i8_ty, buf_ptr, &next_idx, 1, "digit_ptr");
+    LLVMBuildStore(e->builder, LLVMBuildTrunc(e->builder, digit_char, e->i8_ty, ""), digit_ptr);
+    LLVMBuildStore(e->builder, next_tmp, tmp_slot);
+    LLVMValueRef more_digits = LLVMBuildICmp(e->builder, LLVMIntNE, next_tmp, zero32, "more_digits");
+    LLVMBuildCondBr(e->builder, more_digits, digits_loop_bb, digits_done_bb);
 
-    LLVMValueRef p0_100 = LLVMBuildGEP2(e->builder, e->i8_ty, buf_ptr, &zero, 1, "p0");
-    LLVMBuildStore(e->builder, LLVMBuildTrunc(e->builder, c0_100, e->i8_ty, ""), p0_100);
-    LLVMValueRef p1_100 = LLVMBuildGEP2(e->builder, e->i8_ty, buf_ptr, &one, 1, "p1");
-    LLVMBuildStore(e->builder, LLVMBuildTrunc(e->builder, c1_100, e->i8_ty, ""), p1_100);
-    LLVMValueRef p2_100 = LLVMBuildGEP2(e->builder, e->i8_ty, buf_ptr, &two, 1, "p2");
-    LLVMBuildStore(e->builder, LLVMBuildTrunc(e->builder, c2_100, e->i8_ty, ""), p2_100);
-
-    LLVMBuildBr(e->builder, merge_bb);
-
-    // Block: lt_100
-    LLVMPositionBuilderAtEnd(e->builder, lt_100_bb);
-    LLVMValueRef cond_10 = LLVMBuildICmp(e->builder, LLVMIntSGE, code, LLVMConstInt(e->i32_ty, 10, 0), "cond_10");
-    LLVMBuildCondBr(e->builder, cond_10, ge_10_bb, lt_10_bb);
-
-    // Block: ge_10
-    LLVMPositionBuilderAtEnd(e->builder, ge_10_bb);
-    LLVMValueRef d0_10 = LLVMBuildSDiv(e->builder, code, LLVMConstInt(e->i32_ty, 10, 0), "d0");
-    LLVMValueRef c0_10 = LLVMBuildAdd(e->builder, d0_10, LLVMConstInt(e->i32_ty, '0', 0), "c0");
-    LLVMValueRef d1_10 = LLVMBuildSRem(e->builder, code, LLVMConstInt(e->i32_ty, 10, 0), "d1");
-    LLVMValueRef c1_10 = LLVMBuildAdd(e->builder, d1_10, LLVMConstInt(e->i32_ty, '0', 0), "c1");
-
-    LLVMValueRef p0_10 = LLVMBuildGEP2(e->builder, e->i8_ty, buf_ptr, &zero, 1, "p0");
-    LLVMBuildStore(e->builder, LLVMBuildTrunc(e->builder, c0_10, e->i8_ty, ""), p0_10);
-    LLVMValueRef p1_10 = LLVMBuildGEP2(e->builder, e->i8_ty, buf_ptr, &one, 1, "p1");
-    LLVMBuildStore(e->builder, LLVMBuildTrunc(e->builder, c1_10, e->i8_ty, ""), p1_10);
-
-    LLVMBuildBr(e->builder, merge_bb);
-
-    // Block: lt_10
-    LLVMPositionBuilderAtEnd(e->builder, lt_10_bb);
-    LLVMValueRef c0_1 = LLVMBuildAdd(e->builder, code, LLVMConstInt(e->i32_ty, '0', 0), "c0");
-    LLVMValueRef p0_1 = LLVMBuildGEP2(e->builder, e->i8_ty, buf_ptr, &zero, 1, "p0");
-    LLVMBuildStore(e->builder, LLVMBuildTrunc(e->builder, c0_1, e->i8_ty, ""), p0_1);
-
-    LLVMBuildBr(e->builder, merge_bb);
-
-    // Block: merge
-    LLVMPositionBuilderAtEnd(e->builder, merge_bb);
-    LLVMValueRef formatted_len = LLVMBuildPhi(e->builder, sz_ty, "formatted_len");
-    LLVMValueRef incoming_values[3] = {
-        LLVMConstInt(sz_ty, 3, 0),
-        LLVMConstInt(sz_ty, 2, 0),
-        LLVMConstInt(sz_ty, 1, 0)
-    };
-    LLVMBasicBlockRef incoming_blocks[3] = {
-        ge_100_bb,
-        ge_10_bb,
-        lt_10_bb
-    };
-    LLVMAddIncoming(formatted_len, incoming_values, incoming_blocks, 3);
+    LLVMPositionBuilderAtEnd(e->builder, digits_done_bb);
+    LLVMValueRef start_idx32 = LLVMBuildLoad2(e->builder, e->i32_ty, idx_slot, "start_idx");
+    LLVMValueRef start_idx = coerce_to_size(e, start_idx32, "start_idx_size");
+    LLVMValueRef formatted_ptr = LLVMBuildGEP2(e->builder, e->i8_ty, buf_ptr, &start_idx, 1, "formatted_ptr");
+    LLVMValueRef formatted_len = LLVMBuildSub(e->builder, LLVMConstInt(sz_ty, max_panic_code_digits, 0), start_idx, "formatted_len");
 
     // Branch on msg_len == 0 to determine layout
     LLVMValueRef is_zero_len = LLVMBuildICmp(e->builder, LLVMIntEQ, msg_len, LLVMConstInt(sz_ty, 0, 0), "is_zero_len");
@@ -1285,7 +1485,7 @@ static void emit_panic_msg(EmitCtx *e) {
 
     LLVMValueRef write_args_simple2[3] = {
         LLVMConstInt(e->i32_ty, 2, 0),
-        buf_ptr,
+        formatted_ptr,
         formatted_len
     };
     LLVMBuildCall2(e->builder, LLVMGlobalGetValueType(e->write_fn), e->write_fn, write_args_simple2, 3, "");
@@ -1304,7 +1504,7 @@ static void emit_panic_msg(EmitCtx *e) {
 
     LLVMValueRef write_args_msg2[3] = {
         LLVMConstInt(e->i32_ty, 2, 0),
-        buf_ptr,
+        formatted_ptr,
         formatted_len
     };
     LLVMBuildCall2(e->builder, LLVMGlobalGetValueType(e->write_fn), e->write_fn, write_args_msg2, 3, "");
@@ -1475,6 +1675,12 @@ int sa_llvmc_make_minimal_module_bitcode(unsigned char **out_bytes, size_t *out_
     if (context == NULL) return set_error(out_error, "LLVMContextCreate failed");
     LLVMModuleRef module = LLVMModuleCreateWithNameInContext("sa_llvmc_test", context);
     LLVMBuilderRef builder = LLVMCreateBuilderInContext(context);
+    if (module == NULL || builder == NULL) {
+        if (builder != NULL) LLVMDisposeBuilder(builder);
+        if (module != NULL) LLVMDisposeModule(module);
+        LLVMContextDispose(context);
+        return set_error(out_error, "LLVM module or builder creation failed");
+    }
     LLVMTypeRef i32_ty = LLVMInt32TypeInContext(context);
     LLVMTypeRef fn_ty = LLVMFunctionType(i32_ty, NULL, 0, 0);
     LLVMValueRef fn_value = LLVMAddFunction(module, "main", fn_ty);
@@ -1540,7 +1746,7 @@ static void emit_test_harness_main(EmitCtx *e, const SaModule *m) {
     for (size_t i = 0; i < m->function_count; i++) {
         if (m->functions[i].kind != SA_F_TEST) continue;
         char glob_name[64];
-        sprintf(glob_name, ".sa_test_name_%zu", i);
+        if (snprintf(glob_name, sizeof(glob_name), ".sa_test_name_%zu", i) >= (int)sizeof(glob_name)) return;
         LLVMValueRef test_name_ptr = const_c_string(e, glob_name, m->functions[i].name);
         LLVMValueRef strcmp_args[2] = { filter, test_name_ptr };
         LLVMValueRef cmp = LLVMBuildCall2(e->builder, LLVMGlobalGetValueType(strcmp_fn), strcmp_fn, strcmp_args, 2, "cmp");
@@ -1576,20 +1782,35 @@ static int build_sa_llvm_module(const SaModule *m, EmitCtx *e, char **out_error)
     if (e->ctx == NULL) return set_error(out_error, "LLVMContextCreate failed");
     e->module = LLVMModuleCreateWithNameInContext("sa_module", e->ctx);
     e->builder = LLVMCreateBuilderInContext(e->ctx);
+    if (e->module == NULL || e->builder == NULL) {
+        dispose_emit_ctx(e);
+        return set_error(out_error, "LLVM module or builder creation failed");
+    }
     e->size_bits = m->size_bits;
     e->is_cgu = m->is_cgu;
+    e->wasm_compat = m->wasm_compat;
+    if (m->function_count > UINT_MAX) {
+        dispose_emit_ctx(e);
+        return set_error(out_error, "function table too large");
+    }
     e->i8_ty  = LLVMInt8TypeInContext(e->ctx);
     e->i32_ty = LLVMInt32TypeInContext(e->ctx);
     e->i64_ty = LLVMInt64TypeInContext(e->ctx);
     e->ptr_ty = LLVMPointerType(e->i8_ty, 0);
     e->functions     = m->functions;
     e->function_count = m->function_count;
+    if (apply_native_target_layout(e, out_error) != 0) {
+        dispose_emit_ctx(e);
+        return 1;
+    }
 
     debug_init(e, m);
     declare_runtime(e);
 
     for (size_t i = 0; i < m->const_count; i++) {
-        LLVMTypeRef arr_ty = LLVMArrayType(e->i8_ty, (unsigned)m->consts[i].len);
+        if (m->consts[i].len > UINT_MAX) { dispose_emit_ctx(e); return set_error(out_error, "const too large"); }
+        const unsigned const_len = (unsigned)m->consts[i].len;
+        LLVMTypeRef arr_ty = LLVMArrayType(e->i8_ty, const_len);
         LLVMValueRef glob = LLVMAddGlobal(e->module, arr_ty, m->consts[i].name);
         LLVMSetGlobalConstant(glob, 1);
         LLVMSetLinkage(glob, LLVMPrivateLinkage);
@@ -1597,7 +1818,7 @@ static int build_sa_llvm_module(const SaModule *m, EmitCtx *e, char **out_error)
         if (m->consts[i].len != 0) vals = (LLVMValueRef *)malloc(sizeof(LLVMValueRef) * m->consts[i].len);
         if (m->consts[i].len != 0 && vals == NULL) { dispose_emit_ctx(e); return set_error(out_error, "alloc const failed"); }
         for (size_t j = 0; j < m->consts[i].len; j++) vals[j] = LLVMConstInt(e->i8_ty, m->consts[i].data[j], 0);
-        LLVMSetInitializer(glob, LLVMConstArray(e->i8_ty, vals, (unsigned)m->consts[i].len));
+        LLVMSetInitializer(glob, LLVMConstArray(e->i8_ty, vals, const_len));
         free(vals);
     }
 
@@ -1611,13 +1832,21 @@ static int build_sa_llvm_module(const SaModule *m, EmitCtx *e, char **out_error)
         LLVMValueRef fn = LLVMAddFunction(e->module, m->functions[i].name, fty);
         if (m->functions[i].kind != SA_F_EXPORTED && strcmp(m->functions[i].name, "saasm_main") != 0)
             LLVMSetLinkage(fn, (m->functions[i].kind == SA_F_EXTERNAL || m->is_cgu) ? LLVMExternalLinkage : LLVMInternalLinkage);
+        if (m->functions[i].kind == SA_F_NORMAL &&
+            !m->is_cgu &&
+            !m->functions[i].emit_main_wrapper &&
+            m->functions[i].instruction_count <= 100) {
+            add_inline_hint(e, fn);
+        }
     }
     if (m->wasm_compat) emit_sa_print_bytes(e);
     emit_sys_runtime(e);
 
     for (size_t i = 0; i < m->vtable_count; i++) {
         LLVMTypeRef slot_ty = vtable_slot_type(e);
-        LLVMTypeRef arr_ty  = LLVMArrayType(slot_ty, (unsigned)m->vtables[i].func_count);
+        if (m->vtables[i].func_count > UINT_MAX) { dispose_emit_ctx(e); return set_error(out_error, "vtable too large"); }
+        const unsigned vtable_len = (unsigned)m->vtables[i].func_count;
+        LLVMTypeRef arr_ty  = LLVMArrayType(slot_ty, vtable_len);
         LLVMValueRef glob   = LLVMAddGlobal(e->module, arr_ty, m->vtables[i].name);
         LLVMSetGlobalConstant(glob, 1);
         LLVMSetLinkage(glob, LLVMPrivateLinkage);
@@ -1629,7 +1858,7 @@ static int build_sa_llvm_module(const SaModule *m, EmitCtx *e, char **out_error)
             if (fn == NULL) { free(vals); dispose_emit_ctx(e); return set_error(out_error, "vtable function not found"); }
             vals[j] = vtable_slot_value(e, fn);
         }
-        LLVMSetInitializer(glob, LLVMConstArray(slot_ty, vals, (unsigned)m->vtables[i].func_count));
+        LLVMSetInitializer(glob, LLVMConstArray(slot_ty, vals, vtable_len));
         free(vals);
     }
 
@@ -1670,26 +1899,24 @@ static int build_sa_llvm_module(const SaModule *m, EmitCtx *e, char **out_error)
 
     if (e->dib != NULL) LLVMDIBuilderFinalize(e->dib);
 
-    char *verify_error = NULL;
-    if (LLVMVerifyModule(e->module, LLVMReturnStatusAction, &verify_error) != 0) {
-        if (verify_error != NULL) {
-            int status = set_error(out_error, verify_error);
-            LLVMDisposeMessage(verify_error);
-            dispose_emit_ctx(e);
-            return status;
-        }
+    if (verify_emit_module(e, out_error) != 0) {
         dispose_emit_ctx(e);
-        return set_error(out_error, "LLVMVerifyModule failed");
+        return 1;
     }
     return 0;
 }
 
 /* Emit LLVM bitcode bytes to heap (original interface). */
-int sa_llvmc_emit_module_bitcode(const SaModule *m, unsigned char **out_bytes, size_t *out_len, char **out_error) {
+int sa_llvmc_emit_module_bitcode(const SaModule *m, int opt_level, unsigned char **out_bytes, size_t *out_len, char **out_error) {
     if (m == NULL || out_bytes == NULL || out_len == NULL) return set_error(out_error, "invalid module pointers");
     *out_bytes = NULL; *out_len = 0;
     EmitCtx e;
     if (build_sa_llvm_module(m, &e, out_error) != 0) return 1;
+    optimize_module_ir(&e, opt_level);
+    if (verify_emit_module(&e, out_error) != 0) {
+        dispose_emit_ctx(&e);
+        return 1;
+    }
     int status = module_bitcode_to_heap(e.module, out_bytes, out_len);
     dispose_emit_ctx(&e);
     if (status != 0) return set_error(out_error, "writing bitcode failed");
@@ -1702,10 +1929,6 @@ int sa_llvmc_emit_module_object(const SaModule *m, const char *out_path, int opt
     if (m == NULL || out_path == NULL) return set_error(out_error, "invalid pointers");
     EmitCtx e;
     if (build_sa_llvm_module(m, &e, out_error) != 0) return 1;
-
-    /* Initialize native backend (idempotent, safe to call from multiple threads) */
-    LLVMInitializeNativeTarget();
-    LLVMInitializeNativeAsmPrinter();
 
     char *triple = LLVMGetDefaultTargetTriple();
     LLVMTargetRef target;
@@ -1742,14 +1965,79 @@ int sa_llvmc_emit_module_object(const SaModule *m, const char *out_path, int opt
         return set_error(out_error, "TargetMachine creation failed");
     }
 
-    /* Align the module data layout with the target machine */
-    LLVMTargetDataRef dl = LLVMCreateTargetDataLayout(tm);
-    char *dl_str = LLVMCopyStringRepOfTargetData(dl);
-    LLVMSetDataLayout(e.module, dl_str);
-    LLVMDisposeMessage(dl_str);
-    LLVMDisposeTargetData(dl);
+    optimize_module_ir(&e, opt_level);
+    if (verify_emit_module(&e, out_error) != 0) {
+        LLVMDisposeTargetMachine(tm);
+        dispose_emit_ctx(&e);
+        return 1;
+    }
 
     if (LLVMTargetMachineEmitToFile(tm, e.module, (char *)out_path, LLVMObjectFile, &err_msg)) {
+        int s = set_error(out_error, err_msg ? err_msg : "emit object failed");
+        if (err_msg) LLVMDisposeMessage(err_msg);
+        LLVMDisposeTargetMachine(tm);
+        dispose_emit_ctx(&e);
+        return s;
+    }
+
+    LLVMDisposeTargetMachine(tm);
+    dispose_emit_ctx(&e);
+    return 0;
+}
+
+int sa_llvmc_emit_module_artifacts(const SaModule *m, const char *out_bitcode_path, const char *out_object_path, int opt_level, char **out_error) {
+    if (m == NULL || out_bitcode_path == NULL || out_object_path == NULL) return set_error(out_error, "invalid pointers");
+    EmitCtx e;
+    if (build_sa_llvm_module(m, &e, out_error) != 0) return 1;
+
+    char *triple = LLVMGetDefaultTargetTriple();
+    LLVMTargetRef target;
+    char *err_msg = NULL;
+    if (LLVMGetTargetFromTriple(triple, &target, &err_msg)) {
+        int s = set_error(out_error, err_msg ? err_msg : "target lookup failed");
+        if (err_msg) LLVMDisposeMessage(err_msg);
+        LLVMDisposeMessage(triple);
+        dispose_emit_ctx(&e);
+        return s;
+    }
+
+    LLVMCodeGenOptLevel cg_opt;
+    switch (opt_level) {
+        case 0:  cg_opt = LLVMCodeGenLevelNone;        break;
+        case 1:  cg_opt = LLVMCodeGenLevelLess;        break;
+        case 2:  cg_opt = LLVMCodeGenLevelDefault;     break;
+        default: cg_opt = LLVMCodeGenLevelAggressive;  break;
+    }
+
+    char *cpu      = LLVMGetHostCPUName();
+    char *features = LLVMGetHostCPUFeatures();
+    LLVMTargetMachineRef tm = LLVMCreateTargetMachine(
+        target, triple, cpu, features,
+        cg_opt, LLVMRelocDefault, LLVMCodeModelDefault
+    );
+    LLVMDisposeMessage(cpu);
+    LLVMDisposeMessage(features);
+    LLVMDisposeMessage(triple);
+
+    if (tm == NULL) {
+        dispose_emit_ctx(&e);
+        return set_error(out_error, "TargetMachine creation failed");
+    }
+
+    optimize_module_ir(&e, opt_level);
+    if (verify_emit_module(&e, out_error) != 0) {
+        LLVMDisposeTargetMachine(tm);
+        dispose_emit_ctx(&e);
+        return 1;
+    }
+
+    if (LLVMWriteBitcodeToFile(e.module, out_bitcode_path) != 0) {
+        LLVMDisposeTargetMachine(tm);
+        dispose_emit_ctx(&e);
+        return set_error(out_error, "writing bitcode failed");
+    }
+
+    if (LLVMTargetMachineEmitToFile(tm, e.module, (char *)out_object_path, LLVMObjectFile, &err_msg)) {
         int s = set_error(out_error, err_msg ? err_msg : "emit object failed");
         if (err_msg) LLVMDisposeMessage(err_msg);
         LLVMDisposeTargetMachine(tm);

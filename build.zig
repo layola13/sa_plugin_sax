@@ -32,6 +32,8 @@ pub fn build(b: *std.Build) void {
         .linkage = .dynamic,
     });
     b.installArtifact(lib);
+    const install_sap = b.addInstallFile(b.path("sap.json"), "lib/sap.json");
+    b.getInstallStep().dependOn(&install_sap.step);
 
     const tests = b.addTest(.{
         .root_module = root_module,
@@ -73,6 +75,7 @@ pub fn build(b: *std.Build) void {
 
     const counter_check = b.addSystemCommand(&.{ sa_bin, "sax", "check", "demos/counter.sax" });
     counter_check.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    counter_check.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     counter_check.addFileInput(plugin_lib_input);
     counter_check.addFileInput(counter_demo_input);
     counter_check.step.dependOn(b.getInstallStep());
@@ -81,6 +84,7 @@ pub fn build(b: *std.Build) void {
     const counter_build = b.addSystemCommand(&.{ sa_bin, "sax", "build", "demos/counter.sax", "--out-dir" });
     const counter_output = counter_build.addOutputDirectoryArg("sax-counter");
     counter_build.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    counter_build.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     counter_build.addFileInput(plugin_lib_input);
     counter_build.addFileInput(counter_demo_input);
     counter_build.step.dependOn(b.getInstallStep());
@@ -88,6 +92,7 @@ pub fn build(b: *std.Build) void {
 
     const demo_check = b.addSystemCommand(&.{ sa_bin, "sax", "check", "demos/reactive_dashboard.sax" });
     demo_check.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    demo_check.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     demo_check.addFileInput(plugin_lib_input);
     demo_check.addFileInput(dashboard_demo_input);
     demo_check.step.dependOn(b.getInstallStep());
@@ -96,6 +101,7 @@ pub fn build(b: *std.Build) void {
     const demo_build = b.addSystemCommand(&.{ sa_bin, "sax", "build", "demos/reactive_dashboard.sax", "--out-dir" });
     const demo_output = demo_build.addOutputDirectoryArg("sax-reactive-dashboard");
     demo_build.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    demo_build.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     demo_build.addFileInput(plugin_lib_input);
     demo_build.addFileInput(dashboard_demo_input);
     demo_build.step.dependOn(b.getInstallStep());
@@ -137,6 +143,7 @@ pub fn build(b: *std.Build) void {
 
     const todo_check = b.addSystemCommand(&.{ sa_bin, "sax", "check", "demos/todolist.sax" });
     todo_check.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    todo_check.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     todo_check.addFileInput(plugin_lib_input);
     todo_check.addFileInput(todo_demo_input);
     todo_check.step.dependOn(b.getInstallStep());
@@ -145,6 +152,7 @@ pub fn build(b: *std.Build) void {
     const todo_build = b.addSystemCommand(&.{ sa_bin, "sax", "build", "demos/todolist.sax", "--out-dir" });
     const todo_output = todo_build.addOutputDirectoryArg("sax-todolist");
     todo_build.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    todo_build.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     todo_build.addFileInput(plugin_lib_input);
     todo_build.addFileInput(todo_demo_input);
     todo_build.step.dependOn(b.getInstallStep());
@@ -187,6 +195,7 @@ pub fn build(b: *std.Build) void {
 
     const buffer_check = b.addSystemCommand(&.{ sa_bin, "sax", "check", "demos/buffer_state.sax" });
     buffer_check.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    buffer_check.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     buffer_check.addFileInput(plugin_lib_input);
     buffer_check.addFileInput(buffer_demo_input);
     buffer_check.step.dependOn(b.getInstallStep());
@@ -195,6 +204,7 @@ pub fn build(b: *std.Build) void {
     const buffer_build = b.addSystemCommand(&.{ sa_bin, "sax", "build", "demos/buffer_state.sax", "--out-dir" });
     const buffer_output = buffer_build.addOutputDirectoryArg("sax-buffer-state");
     buffer_build.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    buffer_build.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     buffer_build.addFileInput(plugin_lib_input);
     buffer_build.addFileInput(buffer_demo_input);
     buffer_build.step.dependOn(b.getInstallStep());
@@ -212,6 +222,7 @@ pub fn build(b: *std.Build) void {
 
     const attrs_check = b.addSystemCommand(&.{ sa_bin, "sax", "check", "demos/allowed_attrs.sax" });
     attrs_check.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    attrs_check.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     attrs_check.addFileInput(plugin_lib_input);
     attrs_check.addFileInput(attrs_demo_input);
     attrs_check.step.dependOn(b.getInstallStep());
@@ -220,6 +231,7 @@ pub fn build(b: *std.Build) void {
     const attrs_build = b.addSystemCommand(&.{ sa_bin, "sax", "build", "demos/allowed_attrs.sax", "--out-dir" });
     const attrs_output = attrs_build.addOutputDirectoryArg("sax-allowed-attrs");
     attrs_build.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    attrs_build.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     attrs_build.addFileInput(plugin_lib_input);
     attrs_build.addFileInput(attrs_demo_input);
     attrs_build.step.dependOn(b.getInstallStep());
@@ -237,6 +249,7 @@ pub fn build(b: *std.Build) void {
 
     const expr_check = b.addSystemCommand(&.{ sa_bin, "sax", "check", "demos/expression_interpolation.sax" });
     expr_check.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    expr_check.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     expr_check.addFileInput(plugin_lib_input);
     expr_check.addFileInput(expr_demo_input);
     expr_check.step.dependOn(b.getInstallStep());
@@ -245,6 +258,7 @@ pub fn build(b: *std.Build) void {
     const expr_build = b.addSystemCommand(&.{ sa_bin, "sax", "build", "demos/expression_interpolation.sax", "--out-dir" });
     const expr_output = expr_build.addOutputDirectoryArg("sax-expression-interpolation");
     expr_build.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    expr_build.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     expr_build.addFileInput(plugin_lib_input);
     expr_build.addFileInput(expr_demo_input);
     expr_build.step.dependOn(b.getInstallStep());
@@ -262,6 +276,7 @@ pub fn build(b: *std.Build) void {
 
     const typed_check = b.addSystemCommand(&.{ sa_bin, "sax", "check", "demos/typed_state_interpolation.sax" });
     typed_check.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    typed_check.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     typed_check.addFileInput(plugin_lib_input);
     typed_check.addFileInput(typed_demo_input);
     typed_check.step.dependOn(b.getInstallStep());
@@ -270,6 +285,7 @@ pub fn build(b: *std.Build) void {
     const typed_build = b.addSystemCommand(&.{ sa_bin, "sax", "build", "demos/typed_state_interpolation.sax", "--out-dir" });
     const typed_output = typed_build.addOutputDirectoryArg("sax-typed-state-interpolation");
     typed_build.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    typed_build.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
     typed_build.addFileInput(plugin_lib_input);
     typed_build.addFileInput(typed_demo_input);
     typed_build.step.dependOn(b.getInstallStep());

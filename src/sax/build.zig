@@ -201,7 +201,13 @@ const TestFlattenResult = struct {
 const TestFlattener = struct {
     pub const FlattenResult = TestFlattenResult;
     pub const ErrorContext = struct {};
-    pub const ResolveContext = struct { dependencies: []const u8 = &.{}, options: struct { project_root: []const u8 } = .{ .project_root = "" } };
+    pub const ResolveContext = struct {
+        dependencies: []const u8 = &.{},
+        options: struct {
+            project_root: []const u8,
+            plugin_import_roots: []const []const u8 = &.{},
+        } = .{ .project_root = "" },
+    };
     pub fn takeErrorSourceLine(ctx: *ErrorContext) ?u32 {
         _ = ctx;
         return null;
@@ -222,9 +228,25 @@ const TestFlattener = struct {
     }
 };
 
-const TestManifest = struct {};
+const TestManifest = struct {
+    pub const RequireEntry = struct {};
+    pub const PluginRequireEntry = struct { identity: []const u8 = "", ref: []const u8 = "", abi: u32 = 1 };
+    pub const Manifest = struct {
+        requires: []RequireEntry = &.{},
+        plugin_requires: []PluginRequireEntry = &.{},
+
+        pub fn deinit(self: *Manifest, allocator: std.mem.Allocator) void {
+            _ = allocator;
+            self.* = undefined;
+        }
+    };
+};
 const TestPkgResolver = struct {
     pub const Dependency = struct { url: []const u8 = "", ref: []const u8 = "" };
+    pub const ResolveOptions = struct {
+        project_root: ?[]const u8 = null,
+        plugin_import_roots: []const []const u8 = &.{},
+    };
 };
 
 const driver = if (builtin.is_test) TestDriver else @import("../driver/zigcc.zig");
@@ -325,6 +347,39 @@ fn manifestDependencies(manifest_file: *const manifest.Manifest, allocator: std.
     }
 
     return try deps.toOwnedSlice();
+}
+
+fn freeOwnedStringSlice(allocator: std.mem.Allocator, items: []const []const u8) void {
+    for (items) |item| allocator.free(item);
+    allocator.free(items);
+}
+
+fn manifestPluginImportRoots(manifest_file: *const manifest.Manifest, allocator: std.mem.Allocator) ![]const []const u8 {
+    if (builtin.is_test) return &.{};
+
+    var roots = std.ArrayList([]const u8).init(allocator);
+    errdefer {
+        for (roots.items) |root| allocator.free(root);
+        roots.deinit();
+    }
+
+    if (manifest_file.plugin_requires.len == 0) return try roots.toOwnedSlice();
+
+    const plugins_home = std.process.getEnvVarOwned(allocator, "SA_PLUGINS_HOME") catch |home_err| switch (home_err) {
+        error.EnvironmentVariableNotFound => blk: {
+            const user_home = try std.process.getEnvVarOwned(allocator, "HOME");
+            defer allocator.free(user_home);
+            break :blk try std.fs.path.join(allocator, &.{ user_home, ".local", "share", "sa_plugins" });
+        },
+        else => return home_err,
+    };
+    defer allocator.free(plugins_home);
+
+    for (manifest_file.plugin_requires) |entry| {
+        try roots.append(try std.fs.path.join(allocator, &.{ plugins_home, "installed", entry.identity, "current", "sa" }));
+    }
+
+    return try roots.toOwnedSlice();
 }
 
 fn lineAt(source: []const u8, target_line: u32) ?[]const u8 {
@@ -465,8 +520,12 @@ pub fn compileSourceText(
     var dependency_slice: []pkg_resolver.Dependency = &.{};
     defer if (dependency_slice.len != 0) allocator.free(dependency_slice);
 
+    var plugin_import_roots: []const []const u8 = &.{};
+    defer if (plugin_import_roots.len != 0) freeOwnedStringSlice(allocator, plugin_import_roots);
+
     if (project_manifest) |*m| {
         dependency_slice = try manifestDependencies(m, allocator);
+        plugin_import_roots = try manifestPluginImportRoots(m, allocator);
     }
 
     const package_grants: []const manifest.RequireEntry = if (project_manifest) |*m| m.requires else &.{};
@@ -474,7 +533,7 @@ pub fn compileSourceText(
     var error_ctx: flattener.ErrorContext = .{};
     const resolve_ctx = flattener.ResolveContext{
         .dependencies = dependency_slice,
-        .options = .{ .project_root = project_root },
+        .options = .{ .project_root = project_root, .plugin_import_roots = plugin_import_roots },
     };
     var flat = flattener.flattenFileWithContextAndPackages(allocator, source_path, source_text, &error_ctx, resolve_ctx) catch |err| {
         return .{ .trap = trapFromFlattenError(source_text, err, flattener.takeErrorSourceLine(&error_ctx)) };
