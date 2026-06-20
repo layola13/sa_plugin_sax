@@ -11,11 +11,19 @@ pub const LowerError = error{
     UnknownHandler,
     InvalidInterpolation,
     InvalidTextExpression,
+    SlaHandlerCompileFailed,
 };
 
 pub const LowerOptions = struct {
     emit_shared_decls: bool = true,
     emit_app_alias: bool = false,
+};
+
+pub const SlaHandlerCompileFailure = struct {
+    component_name: []const u8,
+    handler_name: []const u8,
+    line: u32,
+    err_name: []const u8,
 };
 
 const StringPool = struct {
@@ -288,6 +296,7 @@ pub const SaxLowerer = struct {
     node_slots: []NodeSlots,
     string_pool: StringPool,
     event_handlers: std.StringHashMap([]const u8),
+    sla_handler_compile_failure: ?SlaHandlerCompileFailure = null,
 
     pub fn init(allocator: Allocator, component: parser.Component) !SaxLowerer {
         var pool = StringPool.init(allocator);
@@ -327,6 +336,7 @@ pub const SaxLowerer = struct {
             .node_slots = node_slots,
             .string_pool = pool,
             .event_handlers = event_handlers,
+            .sla_handler_compile_failure = null,
         };
     }
 
@@ -935,8 +945,20 @@ pub const SaxLowerer = struct {
         return try sla_handler_bridge.compileHandler(self.allocator, handler.name, handler.body, fields, .{});
     }
 
+    pub fn slaHandlerCompileFailure(self: *const SaxLowerer) ?SlaHandlerCompileFailure {
+        return self.sla_handler_compile_failure;
+    }
+
     fn emitHandler(self: *SaxLowerer, out: *std.ArrayList(u8), handler: parser.Handler) !void {
-        const compiled_body = if (handler.language == .sla) try self.compileSlaHandlerBody(handler) else null;
+        const compiled_body = if (handler.language == .sla) self.compileSlaHandlerBody(handler) catch |err| {
+            self.sla_handler_compile_failure = .{
+                .component_name = self.component.name,
+                .handler_name = handler.name,
+                .line = handler.line,
+                .err_name = @errorName(err),
+            };
+            return LowerError.SlaHandlerCompileFailed;
+        } else null;
         defer if (compiled_body) |body| self.allocator.free(body);
         const body = compiled_body orelse handler.body;
         const export_name = try self.handlerExportName(handler.name);

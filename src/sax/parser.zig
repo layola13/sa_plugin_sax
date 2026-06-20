@@ -86,6 +86,7 @@ pub const Handler = struct {
     body: []const u8,
     language: HandlerLanguage = .sa,
     is_ffi_wrapper: bool = false,
+    line: u32 = 0,
 };
 
 pub const RoutePage = struct {
@@ -854,6 +855,7 @@ const Parser = struct {
     }
 
     fn parseHandler(self: *Parser, allocator: std.mem.Allocator, pos: *usize) ParseError!Handler {
+        const handler_line = self.line;
         const header = trimText(self.peekLine(pos));
         if (header.len < 3 or header[0] != '@' or header[header.len - 1] != ':') return ParseError.InvalidHandler;
         var name = trimText(header[1 .. header.len - 1]);
@@ -890,11 +892,13 @@ const Parser = struct {
             .name = try allocator.dupe(u8, name),
             .body = try allocator.dupe(u8, body),
             .is_ffi_wrapper = is_ffi_wrapper,
+            .line = handler_line,
         };
     }
 
     fn parseSlaHandler(self: *Parser, allocator: std.mem.Allocator, pos: *usize) ParseError!Handler {
         while (pos.* < self.source.len and (self.source[pos.*] == ' ' or self.source[pos.*] == '\t' or self.source[pos.*] == '\r')) : (pos.* += 1) {}
+        const handler_line = self.line;
         const body_start = pos.*;
         try self.expectString(pos, "fn");
         if (pos.* >= self.source.len or !std.ascii.isWhitespace(self.source[pos.*])) return ParseError.InvalidHandler;
@@ -963,6 +967,7 @@ const Parser = struct {
             .name = try allocator.dupe(u8, name),
             .body = try allocator.dupe(u8, body),
             .language = .sla,
+            .line = handler_line,
         };
     }
 

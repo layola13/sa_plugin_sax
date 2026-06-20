@@ -507,6 +507,35 @@ fn writeValidationFailure(stderr: std.io.AnyWriter, failure: ValidationFailure) 
     if (failure.text.len != 0) try stderr.print("  source: {s}\n", .{failure.text});
 }
 
+fn sourceLineAt(source: []const u8, wanted_line: u32) []const u8 {
+    if (wanted_line == 0) return "";
+    var line_no: u32 = 1;
+    var start: usize = 0;
+    var idx: usize = 0;
+    while (idx <= source.len) : (idx += 1) {
+        if (idx == source.len or source[idx] == '\n') {
+            if (line_no == wanted_line) return std.mem.trimRight(u8, source[start..idx], "\r");
+            line_no += 1;
+            start = idx + 1;
+        }
+    }
+    return "";
+}
+
+fn writeSlaHandlerCompileFailure(
+    stderr: std.io.AnyWriter,
+    sax_file: []const u8,
+    source: []const u8,
+    failure: lowerer.SlaHandlerCompileFailure,
+) !void {
+    try stderr.print(
+        "error[SAX_HANDLER_COMPILE_FAIL]: {s} while compiling Sla handler {s}.{s} at {s}:{d}\n",
+        .{ failure.err_name, failure.component_name, failure.handler_name, sax_file, failure.line },
+    );
+    const line = sourceLineAt(source, failure.line);
+    if (line.len != 0) try stderr.print("  {s}\n", .{line});
+}
+
 fn hasNativeEscape(text: []const u8) bool {
     var lines = std.mem.splitScalar(u8, text, '\n');
     while (lines.next()) |line| {
@@ -680,7 +709,16 @@ fn compileSaxArtifacts(
     for (program.components, 0..) |component, idx| {
         var sax_lowerer = try lowerer.SaxLowerer.init(allocator, component);
         defer sax_lowerer.deinit();
-        try sax_lowerer.lower(&sa_code, .{ .emit_shared_decls = idx == 0 });
+        sax_lowerer.lower(&sa_code, .{ .emit_shared_decls = idx == 0 }) catch |err| switch (err) {
+            lowerer.LowerError.SlaHandlerCompileFailed => {
+                if (sax_lowerer.slaHandlerCompileFailure()) |failure| {
+                    try writeSlaHandlerCompileFailure(stderr, sax_file, source, failure);
+                    return error.SaxCheckFailed;
+                }
+                return err;
+            },
+            else => return err,
+        };
         if (idx + 1 < program.components.len) try sa_code.writer().writeByte('\n');
     }
 
@@ -1101,6 +1139,68 @@ test "sax plugin check parses and lowers a real component" {
     try std.testing.expect(std.mem.containsAtLeast(u8, stdout_buf.items, 1, "SAX check passed"));
     try std.testing.expectEqual(@as(usize, 0), stderr_buf.items.len);
     try std.testing.expectError(error.FileNotFound, std.fs.cwd().openFile("dist/app.sa", .{}));
+}
+
+test "sax plugin check accepts mixed sa and sla handlers" {
+    const mixed_source =
+        \\<Component name="Mixed">
+        \\  <state>
+        \\    count: i64 = 0
+        \\    last: i64 = 0
+        \\  </state>
+        \\  <section><h1>{count}</h1><button onclick={^inc}>+1</button><button onclick={^reset}>Reset</button></section>
+        \\  fn inc() {
+        \\    count = count + 1;
+        \\    last = sax_get_time();
+        \\    render();
+        \\  }
+        \\  @reset:
+        \\  L_ENTRY:
+        \\    store state+Mixed_count, 0 as i64
+        \\    call @render()
+        \\    ret
+        \\  !count !last
+        \\</Component>
+        \\
+    ;
+
+    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    defer original_cwd.close();
+    var tmp = std.testing.tmpDir(.{ .iterate = true });
+    defer tmp.cleanup();
+    try tmp.dir.setAsCwd();
+    defer original_cwd.setAsCwd() catch {};
+
+    try writeAllFile("mixed.sax", mixed_source);
+    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    defer stdout_buf.deinit();
+    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    defer stderr_buf.deinit();
+
+    const code = try invokeForTest(&.{ "sa", "sax", "check", "mixed.sax" }, &stdout_buf, &stderr_buf, std.testing.allocator);
+    try std.testing.expectEqual(@as(u8, 0), code);
+    try std.testing.expect(std.mem.containsAtLeast(u8, stdout_buf.items, 1, "SAX check passed"));
+    try std.testing.expectEqual(@as(usize, 0), stderr_buf.items.len);
+}
+
+test "sax plugin check reports sla handler compile failures with source location" {
+    const invalid_source =
+        \\<Component name="BadSla">
+        \\  <state>
+        \\    count: i64 = 0
+        \\  </state>
+        \\  <section><button onclick={^inc}>+1</button></section>
+        \\  fn inc() {
+        \\    count = missing_name + 1;
+        \\    render();
+        \\  }
+        \\  !count
+        \\</Component>
+        \\
+    ;
+    try expectSaxCheckFailure(invalid_source, "bad_sla.sax", "SAX_HANDLER_COMPILE_FAIL");
+    try expectSaxCheckFailure(invalid_source, "bad_sla.sax", "BadSla.inc");
+    try expectSaxCheckFailure(invalid_source, "bad_sla.sax", "bad_sla.sax:6");
 }
 
 test "sax plugin build emits frontend artifacts from real sax source" {
