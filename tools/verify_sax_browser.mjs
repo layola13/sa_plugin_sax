@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, mkdir, readFile } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { chromium, firefox, webkit } from "playwright";
@@ -7,6 +7,7 @@ const browserMap = { chromium, firefox, webkit };
 const playwrightCacheDir = path.join(process.env.HOME ?? "", ".cache", "ms-playwright");
 
 function browserExecutablePath(browserName) {
+  if (process.env.SAX_BROWSER_EXECUTABLE) return process.env.SAX_BROWSER_EXECUTABLE;
   if (browserName === "chromium") {
     return path.join(playwrightCacheDir, "chromium-1179", "chrome-linux", "chrome");
   }
@@ -126,6 +127,12 @@ async function runBrowser(browserName, outDir) {
     const fatalRequests = failedRequests.filter((line) => !line.includes("/favicon.ico"));
     if (fatalRequests.length !== 0) {
       throw new Error(`browser request failures:\n${fatalRequests.join("\n")}`);
+    }
+    if (process.env.SAX_BROWSER_SCREENSHOT) {
+      const screenshotPath = process.env.SAX_BROWSER_SCREENSHOT;
+      await mkdir(path.dirname(screenshotPath), { recursive: true });
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      console.log(`[PASS] sax browser screenshot ${screenshotPath}`);
     }
   } finally {
     await browser.close();

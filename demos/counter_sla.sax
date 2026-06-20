@@ -1,0 +1,34 @@
+<Component name="Counter">
+  <state>
+    count: i64 = 0
+    last: i64 = 0
+  </state>
+
+  <section class="counter">
+    <h1>{count}</h1>
+    <p>Last updated: {last} ms ago</p>
+    <button onclick={^inc}>+1</button>
+    <button onclick={^dec}>-1</button>
+    <button onclick={^reset}>Reset</button>
+  </section>
+
+  fn inc() {
+    count = count + 1;
+    last = sax_get_time();
+    render();
+  }
+
+  fn dec() {
+    count = count - 1;
+    last = sax_get_time();
+    render();
+  }
+
+  fn reset() {
+    count = 0;
+    last = sax_get_time();
+    render();
+  }
+
+  !count !last
+</Component>

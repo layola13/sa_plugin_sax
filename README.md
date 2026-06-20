@@ -26,6 +26,27 @@ The sidecar share directory is discovered from explicit env vars, `SA_PLUGINS_PA
 SA_PLUGINS_PATH=$PWD/zig-out/lib/libsax.so /home/vscode/projects/sci/zig-out/bin/sa sax build demos/counter.sax --out-dir /tmp/sax-counter
 ```
 
+SAX also accepts opt-in Sla handlers in component files. Existing SA label handlers such as `@inc: L_ENTRY: ...` are still supported; Sla handlers use normal function syntax and are compiled through `sa_plugin_sla`:
+
+```sax
+fn inc() {
+  count = count + 1;
+  last = sax_get_time();
+  render();
+}
+```
+
+The focused Sla demo is `demos/counter_sla.sax`:
+
+```bash
+zig build test
+SA_PLUGINS_PATH=$PWD/zig-out/lib/libsax.so /home/vscode/projects/sci/zig-out/bin/sa sax check demos/counter_sla.sax
+SA_PLUGINS_PATH=$PWD/zig-out/lib/libsax.so /home/vscode/projects/sci/zig-out/bin/sa sax build demos/counter_sla.sax --out-dir zig-out/sax-counter-sla-browser
+SAX_BROWSER_EXECUTABLE=/home/vscode/.local/bin/chromium \
+SAX_BROWSER_SCREENSHOT=$PWD/zig-out/sax-counter-sla-browser/counter_sla_chromium.png \
+node tools/verify_sax_browser.mjs zig-out/sax-counter-sla-browser chromium
+```
+
 ## Verification
 
 The plugin ships with runtime checks for:

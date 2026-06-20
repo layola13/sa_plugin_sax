@@ -40,6 +40,11 @@ pub const StateVar = struct {
     alloc_size: ?usize = null,
 };
 
+pub const HandlerLanguage = enum {
+    sa,
+    sla,
+};
+
 pub const TextPiece = union(enum) {
     text: []const u8,
     interpolation: Expr,
@@ -79,6 +84,7 @@ pub const DomNode = struct {
 pub const Handler = struct {
     name: []const u8,
     body: []const u8,
+    language: HandlerLanguage = .sa,
     is_ffi_wrapper: bool = false,
 };
 
@@ -267,6 +273,30 @@ fn inferStateType(init_expr: []const u8) ParseError!struct { ty: StateType, allo
     return .{ .ty = .i64, .alloc_size = null };
 }
 
+fn parseStateTypeName(type_name: []const u8) ParseError!StateType {
+    if (std.mem.eql(u8, type_name, "i1") or std.mem.eql(u8, type_name, "bool")) return .i1;
+    if (std.mem.eql(u8, type_name, "i32")) return .i32;
+    if (std.mem.eql(u8, type_name, "i64") or std.mem.eql(u8, type_name, "int")) return .i64;
+    if (std.mem.eql(u8, type_name, "f64") or std.mem.eql(u8, type_name, "float")) return .f64;
+    if (std.mem.eql(u8, type_name, "ptr")) return .ptr;
+    return ParseError.InvalidStateType;
+}
+
+fn explicitStateAllocSize(init_expr: []const u8, ty: StateType) ParseError!?usize {
+    if (ty != .ptr) return null;
+    const trimmed = trimText(init_expr);
+    if (!std.mem.startsWith(u8, trimmed, "alloc ")) return null;
+    const size_text = trimText(trimmed["alloc ".len..]);
+    if (size_text.len == 0) return ParseError.InvalidStateInit;
+    return std.fmt.parseInt(usize, size_text, 10) catch return ParseError.InvalidStateInit;
+}
+
+fn isSlaFunctionHeader(line: []const u8) bool {
+    if (!std.mem.startsWith(u8, line, "fn")) return false;
+    if (line.len == 2) return false;
+    return std.ascii.isWhitespace(line[2]);
+}
+
 fn parseTextPieces(allocator: std.mem.Allocator, raw_text: []const u8) ParseError![]TextPiece {
     const trimmed = trimText(raw_text);
     if (trimmed.len == 0) return &.{};
@@ -453,7 +483,7 @@ const Parser = struct {
             if (self.peekString(pos, "</Component>")) break;
             const line = self.peekLine(pos);
             const trimmed = stripLeadingSpace(line);
-            if (trimmed.len != 0 and (trimmed[0] == '@' or trimmed[0] == '!')) break;
+            if (trimmed.len != 0 and (trimmed[0] == '@' or trimmed[0] == '!' or isSlaFunctionHeader(trimmed))) break;
             self.advanceLine(pos);
         }
         const dom_end = pos.*;
@@ -485,6 +515,13 @@ const Parser = struct {
                     try handler_names.put(try allocator.dupe(u8, handler.name), {});
                     try handlers.append(handler);
                 }
+                continue;
+            }
+            if (isSlaFunctionHeader(trimmed)) {
+                const handler = try self.parseSlaHandler(allocator, pos);
+                if (handler_names.contains(handler.name)) return ParseError.DuplicateHandler;
+                try handler_names.put(try allocator.dupe(u8, handler.name), {});
+                try handlers.append(handler);
                 continue;
             }
             if (trimmed[0] == '!') {
@@ -577,8 +614,16 @@ const Parser = struct {
                 continue;
             }
             const eq = std.mem.indexOfScalar(u8, line, '=') orelse return ParseError.InvalidStateVar;
-            const name = trimText(line[0..eq]);
+            const lhs = trimText(line[0..eq]);
             const expr = trimText(line[eq + 1 ..]);
+            var name = lhs;
+            var explicit_ty: ?StateType = null;
+            if (std.mem.indexOfScalar(u8, lhs, ':')) |colon| {
+                name = trimText(lhs[0..colon]);
+                const type_name = trimText(lhs[colon + 1 ..]);
+                if (type_name.len == 0) return ParseError.InvalidStateType;
+                explicit_ty = try parseStateTypeName(type_name);
+            }
             if (name.len == 0 or expr.len == 0) return ParseError.InvalidStateVar;
             if (!isIdentStart(name[0])) return ParseError.InvalidStateVar;
             for (name[1..]) |c| {
@@ -587,11 +632,13 @@ const Parser = struct {
             if (state_names.contains(name)) return ParseError.DuplicateStateVar;
             try state_names.put(name, {});
             const init_info = try inferStateType(expr);
+            const state_ty = explicit_ty orelse init_info.ty;
+            const alloc_size = if (explicit_ty) |ty| try explicitStateAllocSize(expr, ty) else init_info.alloc_size;
             try state_vars.append(.{
                 .name = try allocator.dupe(u8, name),
                 .init_expr = try allocator.dupe(u8, expr),
-                .ty = init_info.ty,
-                .alloc_size = init_info.alloc_size,
+                .ty = state_ty,
+                .alloc_size = alloc_size,
             });
             self.advanceLine(pos);
         }
@@ -834,7 +881,7 @@ const Parser = struct {
                 self.advanceLine(pos);
                 continue;
             }
-            if ((line[0] == '@' and line[line.len - 1] == ':') or line[0] == '!') break;
+            if ((line[0] == '@' and line[line.len - 1] == ':') or line[0] == '!' or isSlaFunctionHeader(line)) break;
             if (self.peekString(pos, "</Component>")) break;
             self.advanceLine(pos);
         }
@@ -843,6 +890,79 @@ const Parser = struct {
             .name = try allocator.dupe(u8, name),
             .body = try allocator.dupe(u8, body),
             .is_ffi_wrapper = is_ffi_wrapper,
+        };
+    }
+
+    fn parseSlaHandler(self: *Parser, allocator: std.mem.Allocator, pos: *usize) ParseError!Handler {
+        while (pos.* < self.source.len and (self.source[pos.*] == ' ' or self.source[pos.*] == '\t' or self.source[pos.*] == '\r')) : (pos.* += 1) {}
+        const body_start = pos.*;
+        try self.expectString(pos, "fn");
+        if (pos.* >= self.source.len or !std.ascii.isWhitespace(self.source[pos.*])) return ParseError.InvalidHandler;
+        self.skipInlineSpace(pos);
+
+        const name_start = pos.*;
+        if (pos.* >= self.source.len or !isIdentStart(self.source[pos.*])) return ParseError.InvalidHandler;
+        pos.* += 1;
+        while (pos.* < self.source.len and isIdentChar(self.source[pos.*])) : (pos.* += 1) {}
+        const name = self.source[name_start..pos.*];
+
+        var cursor = pos.*;
+        while (cursor < self.source.len and self.source[cursor] != '{') : (cursor += 1) {
+            if (self.source[cursor] == '\n') return ParseError.InvalidHandler;
+        }
+        if (cursor >= self.source.len or self.source[cursor] != '{') return ParseError.InvalidHandler;
+
+        var depth: usize = 0;
+        var in_string = false;
+        var escaped = false;
+        while (cursor < self.source.len) : (cursor += 1) {
+            const ch = self.source[cursor];
+            if (in_string) {
+                if (escaped) {
+                    escaped = false;
+                } else if (ch == '\\') {
+                    escaped = true;
+                } else if (ch == '"') {
+                    in_string = false;
+                }
+                continue;
+            }
+            if (ch == '/' and cursor + 1 < self.source.len and self.source[cursor + 1] == '/') {
+                while (cursor < self.source.len and self.source[cursor] != '\n') : (cursor += 1) {}
+                if (cursor >= self.source.len) break;
+            }
+            if (ch == '"') {
+                in_string = true;
+                continue;
+            }
+            if (ch == '{') {
+                depth += 1;
+                continue;
+            }
+            if (ch == '}') {
+                if (depth == 0) return ParseError.InvalidHandler;
+                depth -= 1;
+                if (depth == 0) {
+                    cursor += 1;
+                    break;
+                }
+            }
+        }
+        if (depth != 0) return ParseError.UnexpectedEOF;
+
+        const body = self.source[body_start..cursor];
+        while (pos.* < cursor) : (pos.* += 1) {
+            if (self.source[pos.*] == '\n') {
+                self.line += 1;
+                self.col = 1;
+            }
+        }
+        self.skipWhitespaceAndComments(pos);
+
+        return .{
+            .name = try allocator.dupe(u8, name),
+            .body = try allocator.dupe(u8, body),
+            .language = .sla,
         };
     }
 
@@ -1075,6 +1195,34 @@ test "parser accepts the counter example from the docs" {
     try std.testing.expectEqual(@as(usize, 6), component.dom_nodes.len);
     try std.testing.expectEqual(@as(usize, 1), component.root_nodes.len);
     try std.testing.expectEqual(@as(usize, 0), component.root_nodes[0]);
+}
+
+test "parser accepts typed state and sla handlers" {
+    const source =
+        \\<Component name="Counter">
+        \\  <state>
+        \\    count: i64 = 0
+        \\  </state>
+        \\  <section class="counter"><h1>{count}</h1><button onclick={^inc}>+1</button></section>
+        \\  fn inc() {
+        \\    count = count + 1;
+        \\    render();
+        \\  }
+        \\  !count
+        \\</Component>
+    ;
+    var parser = Parser.init(std.testing.allocator, source);
+    var program = try parser.parse();
+    defer program.deinit();
+
+    const component = program.components[0];
+    try std.testing.expectEqual(@as(usize, 1), component.state_vars.len);
+    try std.testing.expectEqualStrings("count", component.state_vars[0].name);
+    try std.testing.expectEqual(StateType.i64, component.state_vars[0].ty);
+    try std.testing.expectEqual(@as(usize, 1), component.handlers.len);
+    try std.testing.expectEqualStrings("inc", component.handlers[0].name);
+    try std.testing.expectEqual(HandlerLanguage.sla, component.handlers[0].language);
+    try std.testing.expect(std.mem.containsAtLeast(u8, component.handlers[0].body, 1, "count = count + 1"));
 }
 
 test "parser records interpolation dependencies" {

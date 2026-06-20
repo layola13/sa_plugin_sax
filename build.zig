@@ -22,7 +22,13 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .link_libc = true,
     });
+    const sla_handler_bridge = b.createModule(.{
+        .root_source_file = b.path("../sa_plugin_sla/src/handler_bridge.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
     root_module.addImport("plugin_api", plugin_api);
+    root_module.addImport("sla_handler_bridge", sla_handler_bridge);
     root_module.addOptions("build_options", build_options);
     addLlvmcShimToModule(b, root_module);
     linkLLVMToModule(root_module, llvm_include_dir, llvm_lib_dir, llvm_lib_name);
@@ -66,6 +72,7 @@ pub fn build(b: *std.Build) void {
     const installed_lib = b.getInstallPath(.lib, "libsax.so");
     const plugin_lib_input = lib.getEmittedBin();
     const counter_demo_input = b.path("demos/counter.sax");
+    const counter_sla_demo_input = b.path("demos/counter_sla.sax");
     const todo_demo_input = b.path("demos/todolist.sax");
     const dashboard_demo_input = b.path("demos/reactive_dashboard.sax");
     const buffer_demo_input = b.path("demos/buffer_state.sax");
@@ -89,6 +96,23 @@ pub fn build(b: *std.Build) void {
     counter_build.addFileInput(counter_demo_input);
     counter_build.step.dependOn(b.getInstallStep());
     test_step.dependOn(&counter_build.step);
+
+    const counter_sla_check = b.addSystemCommand(&.{ sa_bin, "sax", "check", "demos/counter_sla.sax" });
+    counter_sla_check.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    counter_sla_check.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
+    counter_sla_check.addFileInput(plugin_lib_input);
+    counter_sla_check.addFileInput(counter_sla_demo_input);
+    counter_sla_check.step.dependOn(b.getInstallStep());
+    test_step.dependOn(&counter_sla_check.step);
+
+    const counter_sla_build = b.addSystemCommand(&.{ sa_bin, "sax", "build", "demos/counter_sla.sax", "--out-dir" });
+    const counter_sla_output = counter_sla_build.addOutputDirectoryArg("sax-counter-sla");
+    counter_sla_build.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
+    counter_sla_build.setEnvironmentVariable("SA_PLUGIN_DEV", "1");
+    counter_sla_build.addFileInput(plugin_lib_input);
+    counter_sla_build.addFileInput(counter_sla_demo_input);
+    counter_sla_build.step.dependOn(b.getInstallStep());
+    test_step.dependOn(&counter_sla_build.step);
 
     const demo_check = b.addSystemCommand(&.{ sa_bin, "sax", "check", "demos/reactive_dashboard.sax" });
     demo_check.setEnvironmentVariable("SA_PLUGINS_PATH", installed_lib);
@@ -129,11 +153,29 @@ pub fn build(b: *std.Build) void {
     });
     test_step.dependOn(&run_counter_wasm_verify.step);
 
+    const run_counter_sla_wasm_verify = b.addRunArtifact(wasm_verify);
+    run_counter_sla_wasm_verify.addDirectoryArg(counter_sla_output);
+    run_counter_sla_wasm_verify.addArgs(&.{
+        "sax_counter_init",
+        "sax_counter_render",
+        "sax_counter_destroy",
+        "sax_counter_inc",
+        "sax_counter_dec",
+        "sax_counter_reset",
+    });
+    test_step.dependOn(&run_counter_sla_wasm_verify.step);
+
     const run_counter_runtime_verify = b.addSystemCommand(&.{ "node", "tools/verify_sax_runtime.mjs" });
     run_counter_runtime_verify.addFileInput(b.path("tools/verify_sax_runtime.mjs"));
     run_counter_runtime_verify.addDirectoryArg(counter_output);
     run_counter_runtime_verify.addArg("counter");
     test_step.dependOn(&run_counter_runtime_verify.step);
+
+    const run_counter_sla_runtime_verify = b.addSystemCommand(&.{ "node", "tools/verify_sax_runtime.mjs" });
+    run_counter_sla_runtime_verify.addFileInput(b.path("tools/verify_sax_runtime.mjs"));
+    run_counter_sla_runtime_verify.addDirectoryArg(counter_sla_output);
+    run_counter_sla_runtime_verify.addArg("counter");
+    test_step.dependOn(&run_counter_sla_runtime_verify.step);
 
     const run_counter_security_verify = b.addSystemCommand(&.{ "node", "tools/verify_sax_runtime.mjs" });
     run_counter_security_verify.addFileInput(b.path("tools/verify_sax_runtime.mjs"));

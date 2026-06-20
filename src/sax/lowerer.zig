@@ -1,5 +1,6 @@
 const std = @import("std");
 const parser = @import("parser.zig");
+const sla_handler_bridge = @import("sla_handler_bridge");
 
 const Allocator = std.mem.Allocator;
 
@@ -64,6 +65,16 @@ fn stateInitValueExpr(init_expr: []const u8, ty: parser.StateType) []const u8 {
         }
     }
     return trimmed;
+}
+
+fn toSlaHandlerStateType(ty: parser.StateType) sla_handler_bridge.HandlerStateType {
+    return switch (ty) {
+        .i1 => .i1,
+        .i32 => .i32,
+        .i64 => .i64,
+        .f64 => .f64,
+        .ptr => .ptr,
+    };
 }
 
 fn f64BitsLiteral(init_expr: []const u8, ty: parser.StateType) LowerError!i64 {
@@ -899,8 +910,35 @@ pub const SaxLowerer = struct {
         }
     }
 
+    fn compileSlaHandlerBody(self: *SaxLowerer, handler: parser.Handler) ![]const u8 {
+        var fields = try self.allocator.alloc(sla_handler_bridge.HandlerStateField, self.component.state_vars.len);
+        defer self.allocator.free(fields);
+
+        var addresses = std.ArrayList([]const u8).init(self.allocator);
+        defer {
+            for (addresses.items) |address| self.allocator.free(address);
+            addresses.deinit();
+        }
+
+        for (self.component.state_vars, 0..) |sv, idx| {
+            const slot_name = try self.stateSlotConstName(sv.name);
+            defer self.allocator.free(slot_name);
+            const address = try std.fmt.allocPrint(self.allocator, "state+{s}", .{slot_name});
+            try addresses.append(address);
+            fields[idx] = .{
+                .name = sv.name,
+                .ty = toSlaHandlerStateType(sv.ty),
+                .address = address,
+            };
+        }
+
+        return try sla_handler_bridge.compileHandler(self.allocator, handler.name, handler.body, fields, .{});
+    }
+
     fn emitHandler(self: *SaxLowerer, out: *std.ArrayList(u8), handler: parser.Handler) !void {
-        const body = handler.body;
+        const compiled_body = if (handler.language == .sla) try self.compileSlaHandlerBody(handler) else null;
+        defer if (compiled_body) |body| self.allocator.free(body);
+        const body = compiled_body orelse handler.body;
         const export_name = try self.handlerExportName(handler.name);
         defer self.allocator.free(export_name);
         const impl_name = try self.handlerImplName(handler.name);
@@ -1560,6 +1598,39 @@ test "lowerer preserves typed state init and interpolation formatting" {
     try std.testing.expect(std.mem.indexOf(u8, out.items, "as f64 as f64") == null);
     try std.testing.expect(std.mem.indexOf(u8, out.items, "load state+TypedLab_ratio as f64") == null);
     try std.testing.expect(std.mem.indexOf(u8, out.items, "bitcast ") == null);
+}
+
+test "lowerer compiles sla handlers with injected state bindings" {
+    const source =
+        \\<Component name="Counter">
+        \\  <state>
+        \\    count: i64 = 0
+        \\  </state>
+        \\  <section class="counter"><h1>{count}</h1><button onclick={^inc}>+1</button></section>
+        \\  fn inc() {
+        \\    count = count + 1;
+        \\    render();
+        \\  }
+        \\  !count
+        \\</Component>
+    ;
+
+    var sax_parser = parser.SaxParser.init(std.testing.allocator, source);
+    var program = try sax_parser.parse();
+    defer program.deinit();
+
+    var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
+    defer lowerer.deinit();
+
+    var out = std.ArrayList(u8).init(std.testing.allocator);
+    defer out.deinit();
+    try lowerer.lower(&out, .{});
+
+    try std.testing.expect(std.mem.containsAtLeast(u8, out.items, 1, "@export sax_counter_inc(ctx: ptr):"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, out.items, 1, "load state+Counter_count as i64"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, out.items, 1, "store state+Counter_count"));
+    try std.testing.expect(std.mem.indexOf(u8, out.items, "call @render()") == null);
+    try std.testing.expect(std.mem.containsAtLeast(u8, out.items, 1, "call @sax_dom_set_text"));
 }
 
 test "lowerer emits selective render for state writes" {
