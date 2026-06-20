@@ -17,6 +17,7 @@ pub const LowerError = error{
 pub const LowerOptions = struct {
     emit_shared_decls: bool = true,
     emit_app_alias: bool = false,
+    sla_base_dir: []const u8 = ".",
 };
 
 pub const SlaHandlerCompileFailure = struct {
@@ -83,6 +84,20 @@ fn toSlaHandlerStateType(ty: parser.StateType) sla_handler_bridge.HandlerStateTy
         .f64 => .f64,
         .ptr => .ptr,
     };
+}
+
+fn componentHasSlaHandlers(component: parser.Component) bool {
+    for (component.handlers) |handler| {
+        if (handler.language == .sla) return true;
+    }
+    return false;
+}
+
+fn releaseListContains(names: []const []const u8, needle: []const u8) bool {
+    for (names) |name| {
+        if (std.mem.eql(u8, name, needle)) return true;
+    }
+    return false;
 }
 
 fn f64BitsLiteral(init_expr: []const u8, ty: parser.StateType) LowerError!i64 {
@@ -297,6 +312,8 @@ pub const SaxLowerer = struct {
     string_pool: StringPool,
     event_handlers: std.StringHashMap([]const u8),
     sla_handler_compile_failure: ?SlaHandlerCompileFailure = null,
+    sla_base_dir: []const u8 = ".",
+    emitted_sla_support: std.StringHashMap(void),
 
     pub fn init(allocator: Allocator, component: parser.Component) !SaxLowerer {
         var pool = StringPool.init(allocator);
@@ -328,6 +345,9 @@ pub const SaxLowerer = struct {
             try event_handlers.put(handler.name, handler.body);
         }
 
+        var emitted_sla_support = std.StringHashMap(void).init(allocator);
+        errdefer emitted_sla_support.deinit();
+
         return .{
             .allocator = allocator,
             .component = component,
@@ -337,10 +357,15 @@ pub const SaxLowerer = struct {
             .string_pool = pool,
             .event_handlers = event_handlers,
             .sla_handler_compile_failure = null,
+            .sla_base_dir = ".",
+            .emitted_sla_support = emitted_sla_support,
         };
     }
 
     pub fn deinit(self: *SaxLowerer) void {
+        var support_keys = self.emitted_sla_support.keyIterator();
+        while (support_keys.next()) |key| self.allocator.free(key.*);
+        self.emitted_sla_support.deinit();
         self.event_handlers.deinit();
         self.string_pool.deinit();
         self.allocator.free(self.node_slots);
@@ -920,7 +945,7 @@ pub const SaxLowerer = struct {
         }
     }
 
-    fn compileSlaHandlerBody(self: *SaxLowerer, handler: parser.Handler) ![]const u8 {
+    fn compileSlaHandler(self: *SaxLowerer, handler: parser.Handler) !sla_handler_bridge.CompileHandlerResult {
         var fields = try self.allocator.alloc(sla_handler_bridge.HandlerStateField, self.component.state_vars.len);
         defer self.allocator.free(fields);
 
@@ -942,7 +967,7 @@ pub const SaxLowerer = struct {
             };
         }
 
-        return try sla_handler_bridge.compileHandler(self.allocator, handler.name, handler.body, fields, .{});
+        return try sla_handler_bridge.compileHandlerWithSupport(self.allocator, handler.name, handler.body, fields, .{ .base_dir = self.sla_base_dir });
     }
 
     pub fn slaHandlerCompileFailure(self: *const SaxLowerer) ?SlaHandlerCompileFailure {
@@ -950,7 +975,7 @@ pub const SaxLowerer = struct {
     }
 
     fn emitHandler(self: *SaxLowerer, out: *std.ArrayList(u8), handler: parser.Handler) !void {
-        const compiled_body = if (handler.language == .sla) self.compileSlaHandlerBody(handler) catch |err| {
+        const compiled = if (handler.language == .sla) self.compileSlaHandler(handler) catch |err| {
             self.sla_handler_compile_failure = .{
                 .component_name = self.component.name,
                 .handler_name = handler.name,
@@ -959,8 +984,16 @@ pub const SaxLowerer = struct {
             };
             return LowerError.SlaHandlerCompileFailed;
         } else null;
-        defer if (compiled_body) |body| self.allocator.free(body);
-        const body = compiled_body orelse handler.body;
+        defer if (compiled) |result| result.deinit(self.allocator);
+        if (compiled) |result| {
+            const support = std.mem.trim(u8, result.support, " \t\r\n");
+            if (support.len != 0 and !self.emitted_sla_support.contains(support)) {
+                const key = try self.allocator.dupe(u8, support);
+                try self.emitted_sla_support.put(key, {});
+                try out.writer().print("{s}\n\n", .{support});
+            }
+        }
+        const body = if (compiled) |result| result.body else handler.body;
         const export_name = try self.handlerExportName(handler.name);
         defer self.allocator.free(export_name);
         const impl_name = try self.handlerImplName(handler.name);
@@ -1284,6 +1317,13 @@ pub const SaxLowerer = struct {
             try self.emitLoadState(out, release_name, release_name);
             try out.writer().print("  !{s}\n", .{release_name});
         }
+        if (componentHasSlaHandlers(self.component)) {
+            for (self.component.state_vars) |sv| {
+                if (releaseListContains(self.component.release_vars, sv.name)) continue;
+                try self.emitLoadState(out, sv.name, sv.name);
+                try out.writer().print("  !{s}\n", .{sv.name});
+            }
+        }
         try out.writer().writeAll("  !dom\n  !state\n  !ctx\n");
         try out.writer().writeAll("  return\n\n");
     }
@@ -1305,6 +1345,10 @@ pub const SaxLowerer = struct {
     }
 
     pub fn lower(self: *SaxLowerer, out: *std.ArrayList(u8), options: LowerOptions) !void {
+        const previous_sla_base_dir = self.sla_base_dir;
+        self.sla_base_dir = options.sla_base_dir;
+        defer self.sla_base_dir = previous_sla_base_dir;
+
         for (self.component.orphan_lines) |line| {
             try out.writer().print("{s}\n", .{line.text});
         }
@@ -1493,7 +1537,6 @@ test "lowerer emits onUpdate after render triggers" {
         \\  L_ENTRY:
         \\    call @sax_get_time()
         \\    ret
-        \\  !count
         \\</Component>
     ;
 
@@ -1651,6 +1694,7 @@ test "lowerer compiles sla handlers with injected state bindings" {
     try std.testing.expect(std.mem.containsAtLeast(u8, out.items, 1, "@export sax_counter_inc(ctx: ptr):"));
     try std.testing.expect(std.mem.containsAtLeast(u8, out.items, 1, "load state+Counter_count as i64"));
     try std.testing.expect(std.mem.containsAtLeast(u8, out.items, 1, "store state+Counter_count"));
+    try std.testing.expect(std.mem.containsAtLeast(u8, out.items, 1, "!count"));
     try std.testing.expect(std.mem.indexOf(u8, out.items, "call @render()") == null);
     try std.testing.expect(std.mem.containsAtLeast(u8, out.items, 1, "call @sax_dom_set_text"));
 }

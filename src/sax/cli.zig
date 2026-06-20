@@ -188,6 +188,13 @@ fn findEventHandler(component: parser.Component, handler_name: []const u8) bool 
     return false;
 }
 
+fn componentHasSlaHandlers(component: parser.Component) bool {
+    for (component.handlers) |handler| {
+        if (handler.language == .sla) return true;
+    }
+    return false;
+}
+
 fn hasNativeEscape(text: []const u8) bool {
     var lines = std.mem.splitScalar(u8, text, '\n');
     while (lines.next()) |line| {
@@ -205,7 +212,7 @@ fn findValidationTrap(allocator: Allocator, component: parser.Component) ?SaxVal
     }
 
     for (component.state_vars) |sv| {
-        if (!released.contains(sv.name)) {
+        if (!componentHasSlaHandlers(component) and !released.contains(sv.name)) {
             return .{
                 .component_name = component.name,
                 .err = SaxValidationError.SaxStateLeak,

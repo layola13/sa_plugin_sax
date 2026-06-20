@@ -29,6 +29,4 @@
     last = sax_get_time();
     render();
   }
-
-  !count !last
 </Component>

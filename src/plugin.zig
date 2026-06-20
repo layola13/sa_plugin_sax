@@ -193,6 +193,10 @@ fn sourceStem(path: []const u8) []const u8 {
     return basename[0..dot_idx];
 }
 
+fn sourceDir(path: []const u8) []const u8 {
+    return std.fs.path.dirname(path) orelse ".";
+}
+
 fn lowercaseName(allocator: std.mem.Allocator, text: []const u8) ![]u8 {
     const out = try allocator.dupe(u8, text);
     for (out) |*c| c.* = std.ascii.toLower(c.*);
@@ -552,6 +556,13 @@ fn findEventHandler(component: parser.Component, handler_name: []const u8) bool 
     return false;
 }
 
+fn componentHasSlaHandlers(component: parser.Component) bool {
+    for (component.handlers) |handler| {
+        if (handler.language == .sla) return true;
+    }
+    return false;
+}
+
 fn interpolationIsInvalid(expr: parser.Expr) bool {
     return std.mem.indexOfAny(u8, expr.expr, "^!") != null;
 }
@@ -562,7 +573,7 @@ fn findValidationFailure(allocator: std.mem.Allocator, component: parser.Compone
     for (component.release_vars) |name| released.put(name, {}) catch return null;
 
     for (component.state_vars) |sv| {
-        if (!released.contains(sv.name)) {
+        if (!componentHasSlaHandlers(component) and !released.contains(sv.name)) {
             return .{ .component_name = component.name, .err = .SaxStateLeak, .line = 1, .text = sv.name };
         }
     }
@@ -709,7 +720,7 @@ fn compileSaxArtifacts(
     for (program.components, 0..) |component, idx| {
         var sax_lowerer = try lowerer.SaxLowerer.init(allocator, component);
         defer sax_lowerer.deinit();
-        sax_lowerer.lower(&sa_code, .{ .emit_shared_decls = idx == 0 }) catch |err| switch (err) {
+        sax_lowerer.lower(&sa_code, .{ .emit_shared_decls = idx == 0, .sla_base_dir = sourceDir(sax_file) }) catch |err| switch (err) {
             lowerer.LowerError.SlaHandlerCompileFailed => {
                 if (sax_lowerer.slaHandlerCompileFailure()) |failure| {
                     try writeSlaHandlerCompileFailure(stderr, sax_file, source, failure);
@@ -1159,7 +1170,6 @@ test "sax plugin check accepts mixed sa and sla handlers" {
         \\    store state+Mixed_count, 0 as i64
         \\    call @render()
         \\    ret
-        \\  !count !last
         \\</Component>
         \\
     ;
@@ -1183,6 +1193,49 @@ test "sax plugin check accepts mixed sa and sla handlers" {
     try std.testing.expectEqual(@as(usize, 0), stderr_buf.items.len);
 }
 
+test "sax plugin check resolves sla handler imports relative to sax file" {
+    const imported_source =
+        \\<Component name="Imported">
+        \\  <state>
+        \\    count: i64 = 0
+        \\  </state>
+        \\  <section><h1>{count}</h1><button onclick={^inc}>+1</button></section>
+        \\  @import "helpers.sla"
+        \\  fn inc() {
+        \\    count = add_two(count);
+        \\    render();
+        \\  }
+        \\</Component>
+        \\
+    ;
+    const helper_source =
+        \\fn add_two(value: i64) -> i64 {
+        \\  return value + 2;
+        \\}
+        \\
+    ;
+
+    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    defer original_cwd.close();
+    var tmp = std.testing.tmpDir(.{ .iterate = true });
+    defer tmp.cleanup();
+    try tmp.dir.setAsCwd();
+    defer original_cwd.setAsCwd() catch {};
+    try std.fs.cwd().makePath("pages");
+
+    try writeAllFile("pages/imported.sax", imported_source);
+    try writeAllFile("pages/helpers.sla", helper_source);
+    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    defer stdout_buf.deinit();
+    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    defer stderr_buf.deinit();
+
+    const code = try invokeForTest(&.{ "sa", "sax", "check", "pages/imported.sax" }, &stdout_buf, &stderr_buf, std.testing.allocator);
+    try std.testing.expectEqual(@as(u8, 0), code);
+    try std.testing.expect(std.mem.containsAtLeast(u8, stdout_buf.items, 1, "SAX check passed"));
+    try std.testing.expectEqual(@as(usize, 0), stderr_buf.items.len);
+}
+
 test "sax plugin check reports sla handler compile failures with source location" {
     const invalid_source =
         \\<Component name="BadSla">
@@ -1194,7 +1247,6 @@ test "sax plugin check reports sla handler compile failures with source location
         \\    count = missing_name + 1;
         \\    render();
         \\  }
-        \\  !count
         \\</Component>
         \\
     ;

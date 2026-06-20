@@ -26,7 +26,7 @@ The sidecar share directory is discovered from explicit env vars, `SA_PLUGINS_PA
 SA_PLUGIN_DEV=1 SA_PLUGINS_PATH=$PWD/zig-out/lib/libsax.so /home/vscode/projects/sci/zig-out/bin/sa sax build demos/counter.sax --out-dir /tmp/sax-counter
 ```
 
-SAX also accepts opt-in Sla handlers in component files. Existing SA label handlers such as `@inc: L_ENTRY: ...` are still supported; Sla handlers use normal function syntax and are compiled through `sa_plugin_sla`:
+SAX also accepts opt-in Sla handlers in component files. Existing SA label handlers such as `@inc: L_ENTRY: ...` are still supported; Sla handlers use normal function syntax and are compiled through `sa_plugin_sla`. Components that use Sla handlers automatically release their state during destroy, so they do not need explicit `!state_name` release lines:
 
 ```sax
 fn inc() {

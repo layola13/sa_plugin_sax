@@ -471,6 +471,9 @@ const Parser = struct {
         var orphan_lines = std.ArrayList(BodyLine).init(allocator);
         defer orphan_lines.deinit();
 
+        var sla_import_lines = std.ArrayList([]const u8).init(allocator);
+        defer sla_import_lines.deinit();
+
         self.skipWhitespaceAndComments(pos);
         if (self.peekString(pos, "<state>")) {
             try self.parseStateBlock(allocator, pos, &state_vars, &state_names);
@@ -501,6 +504,11 @@ const Parser = struct {
                 self.advanceLine(pos);
                 continue;
             }
+            if (std.mem.startsWith(u8, trimmed, "@import")) {
+                try sla_import_lines.append(try allocator.dupe(u8, trimmed));
+                self.advanceLine(pos);
+                continue;
+            }
             if (trimmed[0] == '@') {
                 const handler = try self.parseHandler(allocator, pos);
                 if (!handler.is_ffi_wrapper and hasNativeEscape(handler.body)) return ParseError.InvalidNativeEscape;
@@ -519,7 +527,16 @@ const Parser = struct {
                 continue;
             }
             if (isSlaFunctionHeader(trimmed)) {
-                const handler = try self.parseSlaHandler(allocator, pos);
+                var handler = try self.parseSlaHandler(allocator, pos);
+                if (sla_import_lines.items.len != 0) {
+                    var body = std.ArrayList(u8).init(allocator);
+                    for (sla_import_lines.items) |import_line| {
+                        try body.appendSlice(import_line);
+                        try body.append('\n');
+                    }
+                    try body.appendSlice(handler.body);
+                    handler.body = try body.toOwnedSlice();
+                }
                 if (handler_names.contains(handler.name)) return ParseError.DuplicateHandler;
                 try handler_names.put(try allocator.dupe(u8, handler.name), {});
                 try handlers.append(handler);
@@ -1124,7 +1141,6 @@ test "parser accepts a simple component" {
         \\    call @render()
         \\    ret
         \\
-        \\  !count
         \\</Component>
     ;
     var parser = Parser.init(std.testing.allocator, source);
