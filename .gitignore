@@ -18,3 +18,10 @@ Thumbs.db
 *.swo
 *~
 .sa_cache
+
+# code-index generated artifacts
+.code_index
+.claude/skills/code-index
+.codex/skills/code-index
+.opencode/skills/code-index
+# end code-index generated artifacts
