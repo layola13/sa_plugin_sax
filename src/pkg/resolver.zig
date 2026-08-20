@@ -154,12 +154,17 @@ pub const ResolvedImport = struct {
     source_sha256: ?[32]u8 = null,
     source: []const u8,
     owned_source: ?[]u8 = null,
-    mapped: ?[]align(std.heap.page_size_min) u8 = null,
+    mapped: ?[]u8 = null,
+    mapped_owned_by_allocator: bool = false,
     is_global: bool = false,
 
     pub fn deinit(self: *ResolvedImport, allocator: std.mem.Allocator) void {
         if (self.mapped) |mapped| {
-            std.posix.munmap(mapped);
+            if (self.mapped_owned_by_allocator) {
+                allocator.free(mapped);
+            } else {
+                comptime if (builtin.os.tag != .windows) std.posix.munmap(@alignCast(mapped));
+            }
         } else if (self.owned_source) |owned_source| {
             allocator.free(owned_source);
         }
@@ -262,13 +267,17 @@ fn readFileAlloc(allocator: std.mem.Allocator, path: []const u8, max_bytes: usiz
     return file.readToEndAlloc(allocator, max_bytes) catch error.PackageNotResolved;
 }
 
-fn mapFileReadOnly(path: []const u8) ResolveError!struct { mapped: []align(std.heap.page_size_min) u8, source: []u8 } {
+fn mapFileReadOnly(allocator: std.mem.Allocator, path: []const u8) ResolveError!struct { mapped: []u8, source: []u8, owned_by_allocator: bool } {
     var file = std.fs.cwd().openFile(path, .{}) catch return error.PackageNotResolved;
     defer file.close();
 
     const end_pos = file.getEndPos() catch return error.PackageNotResolved;
     const len = std.math.cast(usize, end_pos) orelse return error.PackageNotResolved;
     if (len == 0) return error.PackageNotResolved;
+    if (comptime builtin.os.tag == .windows) {
+        const bytes = file.readToEndAlloc(allocator, len) catch return error.PackageNotResolved;
+        return .{ .mapped = bytes, .source = bytes, .owned_by_allocator = true };
+    }
 
     const mapped = std.posix.mmap(
         null,
@@ -281,7 +290,7 @@ fn mapFileReadOnly(path: []const u8) ResolveError!struct { mapped: []align(std.h
         error.OutOfMemory => return error.OutOfMemory,
         else => return error.PackageNotResolved,
     };
-    return .{ .mapped = mapped, .source = mapped };
+    return .{ .mapped = mapped, .source = mapped, .owned_by_allocator = false };
 }
 
 fn computeResolvedSourceHash(
@@ -367,7 +376,7 @@ fn resolveFromPackageRoot(
         if (!pathWithinRoot(canonical_root, canonical_entry)) return error.InvalidImportPath;
 
         if (global) {
-            const mapped = try mapFileReadOnly(canonical_entry);
+            const mapped = try mapFileReadOnly(allocator, canonical_entry);
             const source_hash = try computeResolvedSourceHash(allocator, canonical_entry, canonical_root, mapped.source);
             var resolved: ResolvedImport = .{
                 .entry_path = canonical_entry,
@@ -375,6 +384,7 @@ fn resolveFromPackageRoot(
                 .source = mapped.source,
                 .owned_source = null,
                 .mapped = mapped.mapped,
+                .mapped_owned_by_allocator = mapped.owned_by_allocator,
                 .is_global = true,
                 .source_sha256 = source_hash,
             };

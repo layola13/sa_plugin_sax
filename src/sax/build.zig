@@ -9,42 +9,23 @@ fn writeTestWasm(path: []const u8) !void {
     try file.writeAll("\x00asm\x01\x00\x00\x00\x00\x09\x08sax-test");
 }
 
-fn runLlvmAs(allocator: std.mem.Allocator, ll_path: []const u8, artifact_path: []const u8) !void {
-    const tools = [_][]const u8{ "llvm-as-14", "llvm-as" };
-    for (tools) |tool| {
-        const result = std.process.Child.run(.{
-            .allocator = allocator,
-            .argv = &.{ tool, ll_path, "-o", artifact_path },
-        }) catch |err| switch (err) {
-            error.FileNotFound => continue,
-            else => return err,
-        };
-        defer allocator.free(result.stdout);
-        defer allocator.free(result.stderr);
-
-        switch (result.term) {
-            .Exited => |code| if (code == 0) return,
-            else => {},
-        }
-        return error.ChildProcessFailed;
-    }
-    return error.LlvmAsNotFound;
-}
+extern fn sa_llvmc_make_minimal_module_bitcode(out_bytes: *?[*]u8, out_len: *usize, out_error: *?[*:0]u8) callconv(.C) i32;
+extern fn sa_llvmc_free(ptr: ?*anyopaque) callconv(.C) void;
 
 fn writeTestBitcode(allocator: std.mem.Allocator, artifact_path: []const u8) !void {
-    const ll_path = try std.fmt.allocPrint(allocator, "{s}.ll", .{artifact_path});
-    defer allocator.free(ll_path);
-    defer std.fs.cwd().deleteFile(ll_path) catch {};
-
-    try writeAllFile(ll_path,
-        \\target triple = "wasm32-unknown-unknown"
-        \\define void @__sax_test() {
-        \\entry:
-        \\  ret void
-        \\}
-        \\
-    );
-    try runLlvmAs(allocator, ll_path, artifact_path);
+    _ = allocator;
+    var out_bytes: ?[*]u8 = null;
+    var out_len: usize = 0;
+    var out_error: ?[*:0]u8 = null;
+    if (sa_llvmc_make_minimal_module_bitcode(&out_bytes, &out_len, &out_error) != 0) {
+        if (out_error) |msg| sa_llvmc_free(msg);
+        return error.LlvmEmitFailed;
+    }
+    defer if (out_bytes) |bytes| sa_llvmc_free(bytes);
+    const bytes = out_bytes orelse return error.LlvmEmitFailed;
+    var file = try std.fs.cwd().createFile(artifact_path, .{ .truncate = true });
+    defer file.close();
+    try file.writeAll(bytes[0..out_len]);
 }
 
 const TestDriver = struct {

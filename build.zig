@@ -3,11 +3,11 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-    const sa_repo_root = b.option([]const u8, "sa-repo-root", "SA repository root used to resolve sa_std imports.") orelse "/home/vscode/projects/sci";
-    const sa_bin = b.option([]const u8, "sa-bin", "Path to the SA host binary used for SAX integration tests.") orelse b.pathJoin(&.{ sa_repo_root, "zig-out/bin/sa" });
-    const llvm_include_dir = b.option([]const u8, "llvm-include-dir", "LLVM C API include directory.") orelse "/usr/lib/llvm-14/include";
-    const llvm_lib_dir = b.option([]const u8, "llvm-lib-dir", "LLVM library directory.") orelse "/usr/lib/llvm-14/lib";
-    const llvm_lib_name = b.option([]const u8, "llvm-lib-name", "LLVM system library name.") orelse "LLVM-14";
+    const sa_repo_root = b.option([]const u8, "sa-repo-root", "SA repository root used to resolve sa_std imports.") orelse if (target.result.os.tag == .windows) b.pathJoin(&.{ "..", "sci" }) else "/home/vscode/projects/sci";
+    const sa_bin = b.option([]const u8, "sa-bin", "Path to the SA host binary used for SAX integration tests.") orelse b.pathJoin(&.{ sa_repo_root, if (target.result.os.tag == .windows) "zig-out/bin/sa.exe" else "zig-out/bin/sa" });
+    const llvm_include_dir = b.option([]const u8, "llvm-include-dir", "LLVM C API include directory.") orelse if (target.result.os.tag == .windows) "C:/LLVM-14/include" else "/usr/lib/llvm-14/include";
+    const llvm_lib_dir = b.option([]const u8, "llvm-lib-dir", "LLVM library directory.") orelse if (target.result.os.tag == .windows) "C:/LLVM-14/lib" else "/usr/lib/llvm-14/lib";
+    const llvm_lib_name = b.option([]const u8, "llvm-lib-name", "LLVM system library name.") orelse if (target.result.os.tag == .windows) "LLVM-C" else "LLVM-14";
     const build_options = b.addOptions();
     build_options.addOption([]const u8, "repo_root", sa_repo_root);
 
@@ -30,7 +30,7 @@ pub fn build(b: *std.Build) void {
     root_module.addImport("plugin_api", plugin_api);
     root_module.addImport("sla_handler_bridge", sla_handler_bridge);
     root_module.addOptions("build_options", build_options);
-    addLlvmcShimToModule(b, root_module);
+    addLlvmcShimToModule(b, root_module, target);
     linkLLVMToModule(root_module, llvm_include_dir, llvm_lib_dir, llvm_lib_name);
     const lib = b.addLibrary(.{
         .name = "sax",
@@ -69,7 +69,7 @@ pub fn build(b: *std.Build) void {
     sa_typed_unit.addFileInput(b.path("tests/sax_typed_state_contract.sa"));
     test_step.dependOn(&sa_typed_unit.step);
 
-    const installed_lib = b.getInstallPath(.lib, "libsax.so");
+    const installed_lib = if (target.result.os.tag == .windows) b.getInstallPath(.bin, "sax.dll") else b.getInstallPath(.lib, "libsax.so");
     const plugin_lib_input = lib.getEmittedBin();
     const counter_demo_input = b.path("demos/counter.sax");
     const counter_sla_demo_input = b.path("demos/counter_sla.sax");
@@ -350,8 +350,9 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&run_typed_runtime_verify.step);
 }
 
-fn addLlvmcShimToModule(b: *std.Build, module: *std.Build.Module) void {
+fn addLlvmcShimToModule(b: *std.Build, module: *std.Build.Module, target: std.Build.ResolvedTarget) void {
     module.addCSourceFile(.{ .file = b.path("src/emit_llvm_llvmc_shim.c"), .flags = &.{} });
+    if (target.result.os.tag == .windows) module.addSystemIncludePath(.{ .cwd_relative = "../sa_plugin_react/src/llvm_compat" });
 }
 
 fn linkLLVMToModule(module: *std.Build.Module, include_dir: []const u8, lib_dir: []const u8, lib_name: []const u8) void {

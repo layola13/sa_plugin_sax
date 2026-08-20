@@ -13,6 +13,9 @@
   "artifacts": {
     "linux-x86_64": {
       "path": "zig-out/lib/libsax.so"
+    },
+    "windows-x86_64": {
+      "path": "zig-out/bin/sax.dll"
     }
   },
   "interfaces": {},
