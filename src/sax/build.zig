@@ -239,6 +239,36 @@ const referee = if (builtin.is_test) TestReferee else @import("../referee.zig");
 const trap = @import("../common/trap.zig");
 
 pub const CompileOptions = struct { jobs: ?usize = null };
+fn stdRootFromEnv(allocator: std.mem.Allocator) ![]u8 {
+    const repo_std_root = try std.fs.path.join(allocator, &.{ build_options.repo_root, "sa_std" });
+    errdefer allocator.free(repo_std_root);
+    if (builtin.is_test) return repo_std_root;
+
+    const env_root = std.process.getEnvVarOwned(allocator, "SA_STD_DIR") catch |err| switch (err) {
+        error.EnvironmentVariableNotFound => return repo_std_root,
+        else => return err,
+    };
+    errdefer allocator.free(env_root);
+
+    const required_files = [_][]const u8{
+        "io/print.sai",
+        "core/sa_core.sa",
+        "core/result.sa",
+        "core/option.sa",
+    };
+    for (required_files) |rel| {
+        const probe_path = try std.fs.path.join(allocator, &.{ env_root, rel });
+        defer allocator.free(probe_path);
+        const file = std.fs.cwd().openFile(probe_path, .{}) catch {
+            allocator.free(env_root);
+            return repo_std_root;
+        };
+        file.close();
+    }
+
+    allocator.free(repo_std_root);
+    return env_root;
+}
 
 pub const CompileOk = if (builtin.is_test) struct {
     pub fn deinit(self: *CompileOk, allocator: std.mem.Allocator) void {
@@ -495,6 +525,9 @@ pub fn compileSourceText(
     const project_root = try projectRootFromSourcePath(allocator, source_path);
     defer allocator.free(project_root);
 
+    const std_root = try stdRootFromEnv(allocator);
+    defer allocator.free(std_root);
+
     var project_manifest = try readProjectManifest(allocator, source_path);
     defer if (project_manifest) |*m| m.deinit(allocator);
 
@@ -514,7 +547,7 @@ pub fn compileSourceText(
     var error_ctx: flattener.ErrorContext = .{};
     const resolve_ctx = flattener.ResolveContext{
         .dependencies = dependency_slice,
-        .options = .{ .project_root = project_root, .plugin_import_roots = plugin_import_roots },
+        .options = .{ .project_root = project_root, .std_root = std_root, .plugin_import_roots = plugin_import_roots },
     };
     var flat = flattener.flattenFileWithContextAndPackages(allocator, source_path, source_text, &error_ctx, resolve_ctx) catch |err| {
         return .{ .trap = trapFromFlattenError(source_text, err, flattener.takeErrorSourceLine(&error_ctx)) };
@@ -671,7 +704,9 @@ fn getBrowserWasmCacheKey(
     hasher.update(&[_]u8{0});
     hasher.update(build_options.repo_root);
     hasher.update(&[_]u8{0});
-    try hashSaStdTree(allocator, &hasher);
+    const std_root = try stdRootFromEnv(allocator);
+    defer allocator.free(std_root);
+    try hashSaStdTree(allocator, &hasher, std_root);
     hasher.update(source_text);
     hasher.update(&[_]u8{0});
     hasher.update(if (debug) "\x01" else "\x00");
@@ -701,10 +736,7 @@ fn hashNormalizedPath(hasher: *std.crypto.hash.sha2.Sha256, path: []const u8) vo
     }
 }
 
-fn hashSaStdTree(allocator: std.mem.Allocator, hasher: *std.crypto.hash.sha2.Sha256) !void {
-    const std_root = try std.fs.path.join(allocator, &.{ build_options.repo_root, "sa_std" });
-    defer allocator.free(std_root);
-
+fn hashSaStdTree(allocator: std.mem.Allocator, hasher: *std.crypto.hash.sha2.Sha256, std_root: []const u8) !void {
     var entries = std.ArrayList([]u8).init(allocator);
     defer {
         for (entries.items) |entry| allocator.free(entry);

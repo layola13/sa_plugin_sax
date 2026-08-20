@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const plugin_api = @import("plugin_api");
 const parser = @import("sax/parser.zig");
 const lowerer = @import("sax/lowerer.zig");
@@ -70,9 +71,9 @@ const wgpu_sidecar = SidecarSpec{
     .share_env = "SA_WGPU_SHARE_DIR",
     .airlock_env = "SA_WGPU_AIRLOCK_JS",
     .installed_name = "wgpu",
-    .lib_name = "libwgpu.so",
+    .lib_name = if (builtin.os.tag == .windows) "wgpu.dll" else "libwgpu.so",
     .path_token = "sa_plugin_wgpu",
-    .dev_share_dir = "/home/vscode/projects/sa_plugins/sa_plugin_wgpu/zig-out/share",
+    .dev_share_dir = if (builtin.os.tag == .windows) "E:/projects/sla/sa_plugin_wgpu/zig-out/share" else "/home/vscode/projects/sa_plugins/sa_plugin_wgpu/zig-out/share",
     .sai_file = "wgpu.sai",
     .sal_file = "wgpu.sal",
     .airlock_file = "wgpu_airlock.js",
@@ -85,9 +86,9 @@ const sa3d_sidecar = SidecarSpec{
     .share_env_alt = "SA3D_SHARE_DIR",
     .airlock_env = "SA_3D_AIRLOCK_JS",
     .installed_name = "3d",
-    .lib_name = "lib3d.so",
+    .lib_name = if (builtin.os.tag == .windows) "3d.dll" else "lib3d.so",
     .path_token = "sa_plugin_3d",
-    .dev_share_dir = "/home/vscode/projects/sa_plugins/sa_plugin_3dengines/sa_plugin_3d/zig-out/share",
+    .dev_share_dir = if (builtin.os.tag == .windows) "E:/projects/sla/sa_plugin_3dengines/sa_plugin_3d/zig-out/share" else "/home/vscode/projects/sa_plugins/sa_plugin_3dengines/sa_plugin_3d/zig-out/share",
     .sai_file = "sa3d.sai",
     .sal_file = "sa3d.sal",
     .airlock_file = "sa3d_airlock.js",
@@ -99,9 +100,9 @@ const sa3d_render_wgpu_sidecar = SidecarSpec{
     .share_env = "SA_3D_RENDER_WGPU_SHARE_DIR",
     .airlock_env = "SA_3D_RENDER_WGPU_AIRLOCK_JS",
     .installed_name = "3d_render_wgpu",
-    .lib_name = "lib3d_render_wgpu.so",
+    .lib_name = if (builtin.os.tag == .windows) "3d_render_wgpu.dll" else "lib3d_render_wgpu.so",
     .path_token = "sa_plugin_3d_render_wgpu",
-    .dev_share_dir = "/home/vscode/projects/sa_plugins/sa_plugin_3dengines/sa_plugin_3d_render_wgpu/zig-out/share",
+    .dev_share_dir = if (builtin.os.tag == .windows) "E:/projects/sla/sa_plugin_3dengines/sa_plugin_3d_render_wgpu/zig-out/share" else "/home/vscode/projects/sa_plugins/sa_plugin_3dengines/sa_plugin_3d_render_wgpu/zig-out/share",
     .sai_file = "3d_render_wgpu.sai",
     .sal_file = "3d_render_wgpu.sal",
     .airlock_file = null,
@@ -335,7 +336,8 @@ fn addPluginPathCandidates(allocator: std.mem.Allocator, candidates: *std.ArrayL
     };
     defer allocator.free(value);
 
-    var parts = std.mem.splitScalar(u8, value, ':');
+    const separator = if (builtin.os.tag == .windows) ';' else ':';
+    var parts = std.mem.splitScalar(u8, value, separator);
     while (parts.next()) |part| {
         if (part.len == 0) continue;
         try addShareDirFromPluginLib(allocator, candidates, spec, part);
