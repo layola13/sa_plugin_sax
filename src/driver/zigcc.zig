@@ -288,6 +288,40 @@ pub fn compileObj(
     }
 }
 
+/// Windows limits a spawned command line to 32767 characters; large browser
+/// builds (many object files and per-symbol --export flags) overflow it and
+/// CreateProcess fails with FILENAME_EXCED_RANGE. Zig accepts the same
+/// arguments from an @response file, one argument per line, so past the
+/// threshold we serialize everything after "build-exe" into `<out>.rsp`.
+const max_direct_command_line_chars: usize = 8000;
+
+fn argvTotalChars(argv: []const []const u8) usize {
+    var total: usize = 0;
+    for (argv) |arg| total += arg.len + 1;
+    return total;
+}
+
+fn writeResponseFile(allocator: std.mem.Allocator, out_path: []const u8, argv: []const []const u8) ![]u8 {
+    const rsp_path = try std.fmt.allocPrint(allocator, "{s}.rsp", .{out_path});
+    errdefer allocator.free(rsp_path);
+
+    var file = try std.fs.cwd().createFile(rsp_path, .{ .truncate = true });
+    defer file.close();
+
+    var buffered = std.io.bufferedWriter(file.writer());
+    // Skip argv[0] ("zig") and argv[1] ("build-exe"); the response file only
+    // holds the arguments that follow them.
+    for (argv[2..]) |arg| {
+        if (std.mem.indexOfAny(u8, arg, " \t\"") != null) {
+            try buffered.writer().print("\"{s}\"\n", .{arg});
+        } else {
+            try buffered.writer().print("{s}\n", .{arg});
+        }
+    }
+    try buffered.flush();
+    return rsp_path;
+}
+
 pub fn compileWasm(
     allocator: std.mem.Allocator,
     artifact_path: []const u8,
@@ -299,11 +333,27 @@ pub fn compileWasm(
 ) !void {
     var argv = try argvForWasm(allocator, artifact_path, out_path, target, optimization, debug);
     defer argv.deinit();
-    const argv_slice = argv.slice();
+    var argv_slice = argv.slice();
+
+    var rsp_path: ?[]u8 = null;
+    defer if (rsp_path) |p| allocator.free(p);
+    if (argvTotalChars(argv_slice) > max_direct_command_line_chars) {
+        rsp_path = writeResponseFile(allocator, out_path, argv_slice) catch null;
+        if (rsp_path) |p| {
+            var short_argv = try allocator.alloc([]const u8, 3);
+            short_argv[0] = argv_slice[0];
+            short_argv[1] = argv_slice[1];
+            short_argv[2] = p;
+            argv_slice = short_argv;
+        }
+    }
+
     const term = runProcessFast(allocator, argv_slice) catch |err| {
+        if (rsp_path != null and argv_slice.len == 3) allocator.free(argv_slice);
         try printCompilerLaunchFailure(stderr, argv_slice, "linking wasm", artifact_path, out_path, err);
         return CompileError.ChildProcessFailed;
     };
+    if (rsp_path != null and argv_slice.len == 3) allocator.free(argv_slice);
 
     const failed = switch (term) {
         .Exited => |code| code != 0,
