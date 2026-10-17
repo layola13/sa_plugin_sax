@@ -3,13 +3,13 @@ const std = @import("std");
 pub const SymbolTable = struct {
     allocator: std.mem.Allocator,
     map: std.StringHashMap(u32),
-    names: std.ArrayList([]const u8),
+    names: std.array_list.Managed([]const u8),
 
     pub fn init(allocator: std.mem.Allocator) SymbolTable {
         return .{
             .allocator = allocator,
             .map = std.StringHashMap(u32).init(allocator),
-            .names = std.ArrayList([]const u8).init(allocator),
+            .names = std.array_list.Managed([]const u8).init(allocator),
         };
     }
 

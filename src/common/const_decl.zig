@@ -206,7 +206,7 @@ fn splitTopLevelCommaSegments(allocator: std.mem.Allocator, text: []const u8) Pa
     const trimmed = trim(text);
     if (trimmed.len == 0) return try allocator.alloc([]const u8, 0);
 
-    var list = std.ArrayList([]const u8).init(allocator);
+    var list = std.array_list.Managed([]const u8).init(allocator);
     errdefer list.deinit();
 
     var depth: usize = 0;
@@ -258,7 +258,7 @@ fn decodeQuotedBytes(allocator: std.mem.Allocator, raw: []const u8) ParseError![
         return ParseError.InvalidLiteral;
     }
 
-    var out = std.ArrayList(u8).init(allocator);
+    var out = std.array_list.Managed(u8).init(allocator);
     errdefer out.deinit();
 
     var i: usize = 1;
@@ -315,7 +315,7 @@ fn parseHexBytes(allocator: std.mem.Allocator, literal: []const u8) ParseError!B
     }
     if (body.len % 4 != 0) return ParseError.InvalidLiteral;
 
-    var bytes = std.ArrayList(u8).init(allocator);
+    var bytes = std.array_list.Managed(u8).init(allocator);
     errdefer bytes.deinit();
 
     var i: usize = 0;
@@ -392,7 +392,7 @@ fn parseStruct(allocator: std.mem.Allocator, literal_text: []const u8) ParseErro
     const segments = try splitTopLevelCommaSegments(allocator, body);
     defer allocator.free(segments);
 
-    var fields = std.ArrayList(StructField).init(allocator);
+    var fields = std.array_list.Managed(StructField).init(allocator);
     errdefer {
         for (fields.items) |*field| field.deinit(allocator);
         fields.deinit();
@@ -463,7 +463,7 @@ fn parseVTable(allocator: std.mem.Allocator, literal_text: []const u8) ParseErro
     const segments = try splitTopLevelCommaSegments(allocator, body);
     defer allocator.free(segments);
 
-    var slots = std.ArrayList(VTableSlot).init(allocator);
+    var slots = std.array_list.Managed(VTableSlot).init(allocator);
     errdefer {
         for (slots.items) |*slot| slot.deinit(allocator);
         slots.deinit();

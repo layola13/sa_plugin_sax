@@ -1,4 +1,5 @@
 const std = @import("std");
+const sio = @import("sio");
 const builtin = @import("builtin");
 const build_options = if (builtin.is_test) struct {
     pub const repo_root: []const u8 = ".";
@@ -63,13 +64,13 @@ fn appendPathComponent(writer: anytype, path: []const u8) !void {
 }
 
 fn packageTreeHash(allocator: std.mem.Allocator, root_dir: []const u8) ResolveError![32]u8 {
-    var entries = std.ArrayList([]u8).init(allocator);
+    var entries = std.array_list.Managed([]u8).init(allocator);
     defer {
         for (entries.items) |entry| allocator.free(entry);
         entries.deinit();
     }
 
-    var root = std.fs.cwd().openDir(root_dir, .{ .iterate = true }) catch return error.PackageNotResolved;
+    var root = sio.cwd().openDir(root_dir, .{ .iterate = true }) catch return error.PackageNotResolved;
     defer root.close();
 
     var walker = try root.walk(allocator);
@@ -104,7 +105,7 @@ fn packageTreeHash(allocator: std.mem.Allocator, root_dir: []const u8) ResolveEr
         const file_bytes = readFileAlloc(allocator, full_path, 16 * 1024 * 1024) catch return error.PackageNotResolved;
         defer allocator.free(file_bytes);
 
-        var normalized = std.ArrayList(u8).init(allocator);
+        var normalized = std.array_list.Managed(u8).init(allocator);
         defer normalized.deinit();
         for (entry_path) |c| {
             try normalized.append(if (std.fs.path.isSep(c)) '/' else c);
@@ -236,7 +237,7 @@ fn projectRootPath(allocator: std.mem.Allocator, options: ResolveOptions) Resolv
     if (options.project_root) |project_root| {
         return allocator.dupe(u8, project_root);
     }
-    return std.fs.cwd().realpathAlloc(allocator, ".") catch |err| switch (err) {
+    return sio.cwd().realpathAlloc(allocator, ".") catch |err| switch (err) {
         error.OutOfMemory => error.OutOfMemory,
         else => error.InvalidPath,
     };
@@ -246,8 +247,8 @@ fn homeDirPath(allocator: std.mem.Allocator, options: ResolveOptions) ResolveErr
     if (options.home_dir) |home_dir| {
         return allocator.dupe(u8, home_dir);
     }
-    return std.process.getEnvVarOwned(allocator, "HOME") catch {
-        return std.process.getEnvVarOwned(allocator, "USERPROFILE") catch return error.InvalidPath;
+    return sio.getEnvVarOwned(allocator, "HOME") catch {
+        return sio.getEnvVarOwned(allocator, "USERPROFILE") catch return error.InvalidPath;
     };
 }
 
@@ -256,14 +257,14 @@ fn pathJoin(allocator: std.mem.Allocator, parts: []const []const u8) ResolveErro
 }
 
 fn readFileAlloc(allocator: std.mem.Allocator, path: []const u8, max_bytes: usize) ResolveError![]u8 {
-    var file = std.fs.cwd().openFile(path, .{}) catch return error.PackageNotResolved;
+    var file = sio.cwd().openFile(path, .{}) catch return error.PackageNotResolved;
     defer file.close();
 
     return file.readToEndAlloc(allocator, max_bytes) catch error.PackageNotResolved;
 }
 
 fn mapFileReadOnly(path: []const u8) ResolveError!struct { mapped: []align(std.heap.page_size_min) u8, source: []u8 } {
-    var file = std.fs.cwd().openFile(path, .{}) catch return error.PackageNotResolved;
+    var file = sio.cwd().openFile(path, .{}) catch return error.PackageNotResolved;
     defer file.close();
 
     const end_pos = file.getEndPos() catch return error.PackageNotResolved;
@@ -273,9 +274,9 @@ fn mapFileReadOnly(path: []const u8) ResolveError!struct { mapped: []align(std.h
     const mapped = std.posix.mmap(
         null,
         len,
-        std.posix.PROT.READ,
+        .{ .READ = true },
         .{ .TYPE = .SHARED },
-        file.handle,
+        file.inner.handle,
         0,
     ) catch |err| switch (err) {
         error.OutOfMemory => return error.OutOfMemory,
@@ -314,7 +315,7 @@ fn resolveRelativeImport(
             try pathJoin(allocator, &.{ base_dir, current_path });
         defer allocator.free(candidate);
 
-        const canonical = std.fs.cwd().realpathAlloc(allocator, candidate) catch {
+        const canonical = sio.cwd().realpathAlloc(allocator, candidate) catch {
             if (std.mem.indexOfScalar(u8, current_path, '/')) |slash| {
                 current_path = current_path[slash + 1 ..];
                 continue;
@@ -352,17 +353,17 @@ fn resolveFromPackageRoot(
     global: bool,
     max_bytes: usize,
 ) ResolveError!?ResolvedImport {
-    const canonical_root = std.fs.cwd().realpathAlloc(allocator, root_dir) catch return null;
+    const canonical_root = sio.cwd().realpathAlloc(allocator, root_dir) catch return null;
     errdefer allocator.free(canonical_root);
 
-    var root_dir_handle = std.fs.cwd().openDir(canonical_root, .{ .iterate = true }) catch return null;
+    var root_dir_handle = sio.cwd().openDir(canonical_root, .{ .iterate = true }) catch return null;
     defer root_dir_handle.close();
 
     for (entry_candidates) |entry_name| {
         const candidate = try pathJoin(allocator, &.{ canonical_root, entry_name });
         defer allocator.free(candidate);
 
-        const canonical_entry = std.fs.cwd().realpathAlloc(allocator, candidate) catch continue;
+        const canonical_entry = sio.cwd().realpathAlloc(allocator, candidate) catch continue;
         errdefer allocator.free(canonical_entry);
         if (!pathWithinRoot(canonical_root, canonical_entry)) return error.InvalidImportPath;
 
@@ -408,13 +409,13 @@ fn resolveFromPluginImportRoot(
     import_path: []const u8,
     max_bytes: usize,
 ) ResolveError!?ResolvedImport {
-    const canonical_root = std.fs.cwd().realpathAlloc(allocator, root_dir) catch return null;
+    const canonical_root = sio.cwd().realpathAlloc(allocator, root_dir) catch return null;
     errdefer allocator.free(canonical_root);
 
     const candidate = try pathJoin(allocator, &.{ canonical_root, import_path });
     defer allocator.free(candidate);
 
-    const canonical_entry = std.fs.cwd().realpathAlloc(allocator, candidate) catch {
+    const canonical_entry = sio.cwd().realpathAlloc(allocator, candidate) catch {
         allocator.free(canonical_root);
         return null;
     };
@@ -480,12 +481,12 @@ fn resolveRootedImport(
     const candidate = try std.fs.path.join(allocator, &.{ root_path, import_rel });
     defer allocator.free(candidate);
 
-    const canonical_entry = std.fs.cwd().realpathAlloc(allocator, candidate) catch return null;
+    const canonical_entry = sio.cwd().realpathAlloc(allocator, candidate) catch return null;
     errdefer allocator.free(canonical_entry);
-    const canonical_root = std.fs.cwd().realpathAlloc(allocator, root_path) catch return null;
+    const canonical_root = sio.cwd().realpathAlloc(allocator, root_path) catch return null;
     errdefer allocator.free(canonical_root);
 
-    const source = std.fs.cwd().readFileAlloc(allocator, canonical_entry, max_bytes) catch return null;
+    const source = sio.cwd().readFileAlloc(allocator, canonical_entry, max_bytes) catch return null;
     errdefer allocator.free(source);
 
     const source_hash = try computeResolvedSourceHash(allocator, canonical_entry, canonical_root, source);

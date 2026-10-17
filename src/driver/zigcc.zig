@@ -1,4 +1,5 @@
 const std = @import("std");
+const sio = @import("sio");
 
 pub const Optimization = enum {
     release_small,
@@ -122,10 +123,10 @@ pub fn argvForWasm(
     optimization: Optimization,
     debug: bool,
 ) !WasmArgv {
-    var argv = std.ArrayList([]const u8).init(allocator);
+    var argv = std.array_list.Managed([]const u8).init(allocator);
     errdefer argv.deinit();
 
-    var owned_args = std.ArrayList([]const u8).init(allocator);
+    var owned_args = std.array_list.Managed([]const u8).init(allocator);
     errdefer {
         for (owned_args.items) |arg| allocator.free(arg);
         owned_args.deinit();
@@ -177,15 +178,15 @@ pub fn argvForWasm(
     };
 }
 
-fn runProcess(allocator: std.mem.Allocator, argv: []const []const u8) !std.process.Child.RunResult {
-    return try std.process.Child.run(.{
+fn runProcess(allocator: std.mem.Allocator, argv: []const []const u8) !sio.Child.RunResult {
+    return try sio.Child.run(.{
         .allocator = allocator,
         .argv = argv,
     });
 }
 
-fn runProcessFast(allocator: std.mem.Allocator, argv: []const []const u8) !std.process.Child.Term {
-    var child = std.process.Child.init(argv, allocator);
+fn runProcessFast(allocator: std.mem.Allocator, argv: []const []const u8) !sio.Child.Term {
+    var child = sio.Child.init(argv, allocator);
     child.stdin_behavior = .Ignore;
     child.stdout_behavior = .Ignore;
     child.stderr_behavior = .Ignore;
@@ -214,9 +215,9 @@ fn printCompilerLaunchFailure(writer: anytype, argv: []const []const u8, action:
     try printCommandLine(writer, argv);
 }
 
-fn printCompilerFailure(writer: anytype, argv: []const []const u8, action: []const u8, input_path: []const u8, out_path: []const u8, result: std.process.Child.RunResult) !void {
+fn printCompilerFailure(writer: anytype, argv: []const []const u8, action: []const u8, input_path: []const u8, out_path: []const u8, result: sio.Child.RunResult) !void {
     switch (result.term) {
-        .Exited => |code| try writer.print("error[ExternalCompiler]: zig exited with code {d} while {s} {s} -> {s}\n", .{ code, action, input_path, out_path }),
+        .exited => |code| try writer.print("error[ExternalCompiler]: zig exited with code {d} while {s} {s} -> {s}\n", .{ code, action, input_path, out_path }),
         else => try writer.print("error[ExternalCompiler]: zig terminated unexpectedly while {s} {s} -> {s}\n", .{ action, input_path, out_path }),
     }
     try printCommandLine(writer, argv);
@@ -242,7 +243,7 @@ pub fn compileExe(
     };
 
     const failed = switch (term) {
-        .Exited => |code| code != 0,
+        .exited => |code| code != 0,
         else => true,
     };
     if (failed) {
@@ -273,7 +274,7 @@ pub fn compileObj(
     };
 
     const failed = switch (term) {
-        .Exited => |code| code != 0,
+        .exited => |code| code != 0,
         else => true,
     };
     if (failed) {
@@ -306,7 +307,7 @@ pub fn compileWasm(
     };
 
     const failed = switch (term) {
-        .Exited => |code| code != 0,
+        .exited => |code| code != 0,
         else => true,
     };
     if (failed) {

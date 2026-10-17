@@ -1,4 +1,5 @@
 const std = @import("std");
+const sio = @import("sio");
 
 const Kind = struct {
     const function: u8 = 0;
@@ -31,22 +32,28 @@ const optional_imports = [_]Symbol{
 };
 
 const Found = struct {
-    imports: [required_imports.len]bool = [_]bool{false} ** required_imports.len,
-    optional_imports: [optional_imports.len]bool = [_]bool{false} ** optional_imports.len,
+    imports: [required_imports.len]bool = std.mem.zeroes([required_imports.len]bool),
+    optional_imports: [optional_imports.len]bool = std.mem.zeroes([optional_imports.len]bool),
     memory_export: bool = false,
     app_init_export: bool = false,
     function_exports: []bool,
 };
 
-pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
+pub fn main(init: std.process.Init) !void {
+    const allocator = init.gpa;
+    const io = init.io;
 
-    const args = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, args);
+    var arg_list = std.array_list.Managed([]const u8).init(allocator);
+    defer arg_list.deinit();
+    var arg_it = try std.process.Args.Iterator.initAllocator(init.minimal.args, allocator);
+    defer arg_it.deinit();
+    while (arg_it.next()) |a| try arg_list.append(a);
+    const args = arg_list.items;
+    var ebuf: [8192]u8 = undefined;
+    var ew = std.Io.File.stderr().writerStreaming(io, &ebuf);
+    defer ew.interface.flush() catch {};
     if (args.len < 3) {
-        try std.io.getStdErr().writer().print("usage: {s} <sax-demo-output-dir> <expected-function-export>...\n", .{args[0]});
+        try ew.interface.print("usage: {s} <sax-demo-output-dir> <expected-function-export>...\n", .{if (args.len > 0) args[0] else "verify-sax-demo-wasm"});
         return error.InvalidArguments;
     }
     const expected_function_exports = args[2..];
@@ -58,10 +65,10 @@ pub fn main() !void {
     const app_sa_path = try std.fs.path.join(allocator, &.{ args[1], "app.sa" });
     defer allocator.free(app_sa_path);
 
-    const wasm = try std.fs.cwd().readFileAlloc(allocator, wasm_path, 16 * 1024 * 1024);
+    const wasm = try sio.cwd().readFileAlloc(allocator, wasm_path, 16 * 1024 * 1024);
     defer allocator.free(wasm);
     if (wasm.len < 1024) {
-        try std.io.getStdErr().writer().print("SAX demo wasm is unexpectedly small: {d} bytes\n", .{wasm.len});
+        try sio.getStdErr().print("SAX demo wasm is unexpectedly small: {d} bytes\n", .{wasm.len});
         return error.InvalidDemoWasm;
     }
 
@@ -73,26 +80,26 @@ pub fn main() !void {
     try scanWasm(wasm, expected_function_exports, &found);
     try reportMissing(&found, expected_function_exports);
 
-    const airlock = try std.fs.cwd().readFileAlloc(allocator, airlock_path, 16 * 1024 * 1024);
+    const airlock = try sio.cwd().readFileAlloc(allocator, airlock_path, 16 * 1024 * 1024);
     defer allocator.free(airlock);
     if (!std.mem.containsAtLeast(u8, airlock, 1, "malloc(size)") or
         !std.mem.containsAtLeast(u8, airlock, 1, "return _malloc(size);") or
         !std.mem.containsAtLeast(u8, airlock, 1, "free(_ptr)") or
         std.mem.containsAtLeast(u8, airlock, 1, "return BigInt(_malloc(size));"))
     {
-        try std.io.getStdErr().writer().writeAll("airlock.js does not expose the expected wasm32 malloc/free imports\n");
+        try sio.getStdErr().writeAll("airlock.js does not expose the expected wasm32 malloc/free imports\n");
         return error.InvalidAirlock;
     }
 
-    const app_sa = try std.fs.cwd().readFileAlloc(allocator, app_sa_path, 16 * 1024 * 1024);
+    const app_sa = try sio.cwd().readFileAlloc(allocator, app_sa_path, 16 * 1024 * 1024);
     defer allocator.free(app_sa);
     if (std.mem.containsAtLeast(u8, app_sa, 1, "call @sax_ftoa_bits(")) {
         if (!found.optional_imports[0]) {
-            try std.io.getStdErr().writer().writeAll("missing wasm import env.sax_ftoa_bits:function\n");
+            try sio.getStdErr().writeAll("missing wasm import env.sax_ftoa_bits:function\n");
             return error.MissingWasmSymbol;
         }
         if (!std.mem.containsAtLeast(u8, airlock, 1, "sax_ftoa_bits(value_bits, decimals, buf_ptr, buf_len)")) {
-            try std.io.getStdErr().writer().writeAll("airlock.js does not expose sax_ftoa_bits for f64 state formatting\n");
+            try sio.getStdErr().writeAll("airlock.js does not expose sax_ftoa_bits for f64 state formatting\n");
             return error.InvalidAirlock;
         }
     }
@@ -100,7 +107,7 @@ pub fn main() !void {
         if (!std.mem.containsAtLeast(u8, app_sa, 1, "utf8:\"click\"") or
             std.mem.containsAtLeast(u8, app_sa, 1, "utf8:\"onclick\""))
         {
-            try std.io.getStdErr().writer().writeAll("app.sa binds browser events with SAX attribute names instead of DOM event names\n");
+            try sio.getStdErr().writeAll("app.sa binds browser events with SAX attribute names instead of DOM event names\n");
             return error.InvalidDemoEventBinding;
         }
     }
@@ -182,7 +189,7 @@ fn scanExportSection(section: []const u8, expected_function_exports: []const []c
 
 fn reportMissing(found: *const Found, expected_function_exports: []const []const u8) !void {
     var ok = true;
-    const stderr = std.io.getStdErr().writer();
+    const stderr = sio.getStdErr();
     for (required_imports, 0..) |symbol, index| {
         if (!found.imports[index]) {
             ok = false;

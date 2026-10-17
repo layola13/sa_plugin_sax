@@ -158,7 +158,7 @@ fn splitCommaPair(text: []const u8) ?struct { left: []const u8, right: []const u
 
 fn splitCommaTriple(text: []const u8) ?struct { first: []const u8, second: []const u8, third: []const u8 } {
     const first_comma = std.mem.indexOfScalar(u8, text, ',') orelse return null;
-    const second_segment = std.mem.trimLeft(u8, text[first_comma + 1 ..], " \t");
+    const second_segment = std.mem.trimStart(u8, text[first_comma + 1 ..], " \t");
     const second_comma = std.mem.indexOfScalar(u8, second_segment, ',') orelse return null;
     const first = std.mem.trim(u8, text[0..first_comma], " \t");
     const second = std.mem.trim(u8, second_segment[0..second_comma], " \t");
@@ -178,7 +178,7 @@ fn parseAddress(text: []const u8) ?struct { base: []const u8, offset: []const u8
 fn splitTrailingType(text: []const u8) ?struct { body: []const u8, ty: []const u8 } {
     const trimmed = std.mem.trim(u8, text, " \t");
     const idx = std.mem.lastIndexOf(u8, trimmed, " as ") orelse return null;
-    const body = std.mem.trimRight(u8, trimmed[0..idx], " \t");
+    const body = std.mem.trimEnd(u8, trimmed[0..idx], " \t");
     const ty = std.mem.trim(u8, trimmed[idx + 4 ..], " \t");
     if (body.len == 0 or ty.len == 0) return null;
     return .{ .body = body, .ty = ty };
@@ -191,7 +191,7 @@ fn peelLastToken(text: []const u8) ?struct { body: []const u8, token: []const u8
     var start: usize = end;
     while (start > 0 and !std.ascii.isWhitespace(text[start - 1])) : (start -= 1) {}
     return .{
-        .body = std.mem.trimRight(u8, text[0..start], " \t"),
+        .body = std.mem.trimEnd(u8, text[0..start], " \t"),
         .token = text[start..end],
     };
 }
@@ -202,7 +202,7 @@ fn stripOrderingSuffix(text: []const u8) struct { body: []const u8, ordering: ?A
             return .{ .body = peel.body, .ordering = ordering };
         }
     }
-    return .{ .body = std.mem.trimRight(u8, text, " \t"), .ordering = null };
+    return .{ .body = std.mem.trimEnd(u8, text, " \t"), .ordering = null };
 }
 
 fn stripCmpxchgOrderingSuffix(text: []const u8) struct { body: []const u8, success: AtomicOrdering, failure: AtomicOrdering } {
@@ -215,7 +215,7 @@ fn stripCmpxchgOrderingSuffix(text: []const u8) struct { body: []const u8, succe
         }
         return .{ .body = first.body, .success = failure, .failure = .acquire };
     }
-    return .{ .body = std.mem.trimRight(u8, text, " \t"), .success = .seq_cst, .failure = .acquire };
+    return .{ .body = std.mem.trimEnd(u8, text, " \t"), .success = .seq_cst, .failure = .acquire };
 }
 
 pub const Load = struct {
@@ -265,7 +265,7 @@ pub fn parseLoad(text: []const u8) ParseError!Load {
     const dst = std.mem.trim(u8, assignment.lhs, " \t");
     const rhs = std.mem.trim(u8, assignment.rhs, " \t");
     if (dst.len == 0 or !startsWithWord(rhs, "atomic_load")) return ParseError.InvalidAtomicSyntax;
-    var body = std.mem.trimLeft(u8, rhs["atomic_load".len..], " \t");
+    var body = std.mem.trimStart(u8, rhs["atomic_load".len..], " \t");
     if (body.len == 0) return ParseError.InvalidAtomicSyntax;
     const order = stripOrderingSuffix(body);
     body = order.body;
@@ -288,7 +288,7 @@ pub fn parseLoad(text: []const u8) ParseError!Load {
 pub fn parseStore(text: []const u8) ParseError!Store {
     const trimmed = std.mem.trim(u8, text, " \t\r");
     if (!startsWithWord(trimmed, "atomic_store")) return ParseError.InvalidAtomicSyntax;
-    var body = std.mem.trimLeft(u8, trimmed["atomic_store".len..], " \t");
+    var body = std.mem.trimStart(u8, trimmed["atomic_store".len..], " \t");
     if (body.len == 0) return ParseError.InvalidAtomicSyntax;
     const order = stripOrderingSuffix(body);
     body = order.body;
@@ -316,7 +316,7 @@ pub fn parseCmpxchg(text: []const u8) ParseError!Cmpxchg {
     const lhs_ok = lhs_pair.right;
     const rhs = std.mem.trim(u8, assignment.rhs, " \t");
     if (lhs_old.len == 0 or lhs_ok.len == 0 or !startsWithWord(rhs, "cmpxchg")) return ParseError.InvalidAtomicSyntax;
-    var body = std.mem.trimLeft(u8, rhs["cmpxchg".len..], " \t");
+    var body = std.mem.trimStart(u8, rhs["cmpxchg".len..], " \t");
     if (body.len == 0) return ParseError.InvalidAtomicSyntax;
     const order = stripCmpxchgOrderingSuffix(body);
     body = order.body;
@@ -347,11 +347,11 @@ pub fn parseRmw(text: []const u8) ParseError!Rmw {
     const dst = std.mem.trim(u8, assignment.lhs, " \t");
     const rhs = std.mem.trim(u8, assignment.rhs, " \t");
     if (dst.len == 0 or !std.mem.startsWith(u8, rhs, "atomic_rmw_")) return ParseError.InvalidAtomicSyntax;
-    const suffix = std.mem.trimLeft(u8, rhs["atomic_rmw_".len..], " \t");
+    const suffix = std.mem.trimStart(u8, rhs["atomic_rmw_".len..], " \t");
     const op_end = std.mem.indexOfAny(u8, suffix, " \t(") orelse suffix.len;
     const op_text = suffix[0..op_end];
     const op = parseRmwOp(op_text) orelse return ParseError.InvalidAtomicSyntax;
-    var body = std.mem.trimLeft(u8, suffix[op_end..], " \t");
+    var body = std.mem.trimStart(u8, suffix[op_end..], " \t");
     if (body.len == 0) return ParseError.InvalidAtomicSyntax;
     const order = stripOrderingSuffix(body);
     body = order.body;
@@ -377,7 +377,7 @@ pub fn parseRmw(text: []const u8) ParseError!Rmw {
 pub fn parseFence(text: []const u8) ParseError!Fence {
     const trimmed = std.mem.trim(u8, text, " \t\r");
     if (!startsWithWord(trimmed, "fence")) return ParseError.InvalidAtomicSyntax;
-    const body = std.mem.trimLeft(u8, trimmed["fence".len..], " \t");
+    const body = std.mem.trimStart(u8, trimmed["fence".len..], " \t");
     if (body.len == 0) return .{ .ordering = .seq_cst };
     const order = stripOrderingSuffix(body);
     if (std.mem.trim(u8, order.body, " \t").len != 0) return ParseError.InvalidAtomicSyntax;

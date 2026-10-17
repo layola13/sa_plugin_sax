@@ -8,11 +8,8 @@
 #include <llvm-c/DebugInfo.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/TargetMachine.h>
-#include <llvm-c/Transforms/IPO.h>
-#include <llvm-c/Transforms/PassManagerBuilder.h>
-#include <llvm-c/Transforms/Scalar.h>
-#include <llvm-c/Transforms/Utils.h>
-#include <llvm-c/Transforms/Vectorize.h>
+#include <llvm-c/Error.h>
+#include <llvm-c/Transforms/PassBuilder.h>
 
 typedef enum { SA_T_VOID=0, SA_T_I1=1, SA_T_I8=2, SA_T_I16=3, SA_T_I32=4, SA_T_I64=5, SA_T_F32=6, SA_T_F64=7, SA_T_PTR=8, SA_T_U8=9, SA_T_U16=10, SA_T_U32=11, SA_T_U64=12 } SaType;
 typedef enum { SA_F_NORMAL=0, SA_F_EXTERNAL=1, SA_F_EXPORTED=2, SA_F_TEST=3 } SaFuncKind;
@@ -204,64 +201,15 @@ static void optimize_module_ir(EmitCtx *e, int opt_level) {
     if (level == 0 || e == NULL || e->module == NULL) return;
     if (e->wasm_compat) return;
 
-    LLVMPassManagerBuilderRef pmb = LLVMPassManagerBuilderCreate();
-    if (pmb == NULL) return;
-    LLVMPassManagerBuilderSetOptLevel(pmb, level);
-    LLVMPassManagerBuilderSetSizeLevel(pmb, 0);
-    LLVMPassManagerBuilderUseInlinerWithThreshold(pmb, level >= 3 ? 900 : 225);
-
-    LLVMPassManagerRef fpm = LLVMCreateFunctionPassManagerForModule(e->module);
-    if (fpm != NULL) {
-        LLVMAddScalarReplAggregatesPassSSA(fpm);
-        LLVMAddPromoteMemoryToRegisterPass(fpm);
-        LLVMAddInstructionCombiningPass(fpm);
-        LLVMAddReassociatePass(fpm);
-        LLVMAddGVNPass(fpm);
-        LLVMAddCFGSimplificationPass(fpm);
-        LLVMPassManagerBuilderPopulateFunctionPassManager(pmb, fpm);
-        LLVMInitializeFunctionPassManager(fpm);
-        for (LLVMValueRef fn = LLVMGetFirstFunction(e->module); fn != NULL; fn = LLVMGetNextFunction(fn)) {
-            if (LLVMCountBasicBlocks(fn) != 0) LLVMRunFunctionPassManager(fpm, fn);
-        }
-        LLVMFinalizeFunctionPassManager(fpm);
-        LLVMDisposePassManager(fpm);
-    }
-
-    LLVMPassManagerRef mpm = LLVMCreatePassManager();
-    if (mpm != NULL) {
-        LLVMAddFunctionAttrsPass(mpm);
-        LLVMAddAlwaysInlinerPass(mpm);
-        LLVMAddGlobalOptimizerPass(mpm);
-        if (level >= 2) LLVMAddIPSCCPPass(mpm);
-        LLVMPassManagerBuilderPopulateModulePassManager(pmb, mpm);
-        LLVMAddScalarReplAggregatesPassSSA(mpm);
-        LLVMAddPromoteMemoryToRegisterPass(mpm);
-        LLVMAddInstructionCombiningPass(mpm);
-        LLVMAddReassociatePass(mpm);
-        LLVMAddGVNPass(mpm);
-        LLVMAddSCCPPass(mpm);
-        LLVMAddDeadStoreEliminationPass(mpm);
-        LLVMAddTailCallEliminationPass(mpm);
-        LLVMAddLoopRotatePass(mpm);
-        LLVMAddLICMPass(mpm);
-        LLVMAddLoopDeletionPass(mpm);
-        LLVMAddLoopIdiomPass(mpm);
-        LLVMAddIndVarSimplifyPass(mpm);
-        LLVMAddMemCpyOptPass(mpm);
-        if (level >= 3) {
-            LLVMAddLoopUnrollPass(mpm);
-            LLVMAddLoopVectorizePass(mpm);
-            LLVMAddSLPVectorizePass(mpm);
-        }
-        LLVMAddCFGSimplificationPass(mpm);
-        LLVMAddAggressiveDCEPass(mpm);
-        LLVMAddGlobalDCEPass(mpm);
-        LLVMAddStripDeadPrototypesPass(mpm);
-        LLVMRunPassManager(mpm, e->module);
-        LLVMDisposePassManager(mpm);
-    }
-
-    LLVMPassManagerBuilderDispose(pmb);
+    const char *passes = "default<O0>";
+    if (level == 1) passes = "default<O1>";
+    else if (level == 2) passes = "default<O2>";
+    else passes = "default<O3>";
+    LLVMPassBuilderOptionsRef opts = LLVMCreatePassBuilderOptions();
+    if (opts == NULL) return;
+    LLVMErrorRef err = LLVMRunPasses(e->module, passes, NULL, opts);
+    if (err != NULL) LLVMConsumeError(err);
+    LLVMDisposePassBuilderOptions(opts);
 }
 
 static LLVMTypeRef type_of(EmitCtx *e, SaType ty) {
@@ -947,7 +895,7 @@ static void debug_declare_locals(EmitCtx *e, LLVMMetadataRef scope, const SaFunc
         } else {
             info = LLVMDIBuilderCreateAutoVariable(e->dib, scope, var->name, strlen(var->name), e->di_file, var_line, ty, 1, LLVMDIFlagZero, 64);
         }
-        LLVMDIBuilderInsertDeclareAtEnd(e->dib, regs[var->slot].slot, info, expr, loc, block);
+        LLVMDIBuilderInsertDeclareRecordAtEnd(e->dib, regs[var->slot].slot, info, expr, loc, block);
     }
 }
 

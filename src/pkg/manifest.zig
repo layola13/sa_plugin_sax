@@ -1,4 +1,5 @@
 const std = @import("std");
+const sio = @import("sio");
 
 pub const max_manifest_bytes: usize = 1024 * 1024;
 
@@ -356,7 +357,7 @@ fn parseCapabilityList(allocator: std.mem.Allocator, text: []const u8) ParseErro
         return ParseError.InvalidFormat;
     }
     const body = trim(trimmed[1 .. trimmed.len - 1]);
-    var list = std.ArrayList(Capability).init(allocator);
+    var list = std.array_list.Managed(Capability).init(allocator);
     errdefer list.deinit();
 
     if (body.len == 0) return try list.toOwnedSlice();
@@ -379,7 +380,7 @@ fn parseGrantsClause(allocator: std.mem.Allocator, text: []const u8) ParseError!
     return try parseCapabilityList(allocator, trimmed["grants".len..]);
 }
 
-fn parseStringListInto(allocator: std.mem.Allocator, text: []const u8, dest: *std.ArrayList([]const u8)) ParseError!void {
+fn parseStringListInto(allocator: std.mem.Allocator, text: []const u8, dest: *std.array_list.Managed([]const u8)) ParseError!void {
     const trimmed = trim(text);
     if (trimmed.len < 2 or trimmed[0] != '[' or trimmed[trimmed.len - 1] != ']') {
         return ParseError.InvalidFormat;
@@ -401,27 +402,27 @@ fn parseStringListInto(allocator: std.mem.Allocator, text: []const u8, dest: *st
 const PermissionSetBuilder = struct {
     allocator: std.mem.Allocator,
     name: []const u8,
-    env: std.ArrayList([]const u8),
-    read: std.ArrayList([]const u8),
-    write: std.ArrayList([]const u8),
-    net: std.ArrayList([]const u8),
-    run: std.ArrayList([]const u8),
+    env: std.array_list.Managed([]const u8),
+    read: std.array_list.Managed([]const u8),
+    write: std.array_list.Managed([]const u8),
+    net: std.array_list.Managed([]const u8),
+    run: std.array_list.Managed([]const u8),
     upstream_loc: UpstreamLoc,
 
     fn init(allocator: std.mem.Allocator, name: []const u8, source_file: []const u8, line_no: u32) ParseError!PermissionSetBuilder {
         return .{
             .allocator = allocator,
             .name = try allocator.dupe(u8, name),
-            .env = std.ArrayList([]const u8).init(allocator),
-            .read = std.ArrayList([]const u8).init(allocator),
-            .write = std.ArrayList([]const u8).init(allocator),
-            .net = std.ArrayList([]const u8).init(allocator),
-            .run = std.ArrayList([]const u8).init(allocator),
+            .env = std.array_list.Managed([]const u8).init(allocator),
+            .read = std.array_list.Managed([]const u8).init(allocator),
+            .write = std.array_list.Managed([]const u8).init(allocator),
+            .net = std.array_list.Managed([]const u8).init(allocator),
+            .run = std.array_list.Managed([]const u8).init(allocator),
             .upstream_loc = .{ .file = try allocator.dupe(u8, source_file), .line = line_no, .col = 1 },
         };
     }
 
-    fn deinitList(self: *PermissionSetBuilder, list: *std.ArrayList([]const u8)) void {
+    fn deinitList(self: *PermissionSetBuilder, list: *std.array_list.Managed([]const u8)) void {
         for (list.items) |item| self.allocator.free(item);
         list.deinit();
     }
@@ -591,25 +592,25 @@ pub fn parseManifestWithFile(
         return ParseError.ForbiddenGlobalConfig;
     }
 
-    var requires = std.ArrayList(RequireEntry).init(allocator);
+    var requires = std.array_list.Managed(RequireEntry).init(allocator);
     errdefer {
         for (requires.items) |*entry| entry.deinit(allocator);
         requires.deinit();
     }
 
-    var mirrors = std.ArrayList(MirrorRule).init(allocator);
+    var mirrors = std.array_list.Managed(MirrorRule).init(allocator);
     errdefer {
         for (mirrors.items) |*rule| rule.deinit(allocator);
         mirrors.deinit();
     }
 
-    var plugin_requires = std.ArrayList(PluginRequireEntry).init(allocator);
+    var plugin_requires = std.array_list.Managed(PluginRequireEntry).init(allocator);
     errdefer {
         for (plugin_requires.items) |*entry| entry.deinit(allocator);
         plugin_requires.deinit();
     }
 
-    var permission_sets = std.ArrayList(PermissionSet).init(allocator);
+    var permission_sets = std.array_list.Managed(PermissionSet).init(allocator);
     errdefer {
         for (permission_sets.items) |*set| set.deinit(allocator);
         permission_sets.deinit();
@@ -762,7 +763,7 @@ fn lessThanHashItem(_: void, lhs: HashItem, rhs: HashItem) bool {
 }
 
 fn sortedHashItems(allocator: std.mem.Allocator, map: TargetHashMap) ParseError![]HashItem {
-    var items = std.ArrayList(HashItem).init(allocator);
+    var items = std.array_list.Managed(HashItem).init(allocator);
     errdefer items.deinit();
 
     var it = map.iterator();
@@ -905,7 +906,7 @@ fn parseHashMapLine(builder: *LockBuilder, allocator: std.mem.Allocator, line: [
 }
 
 pub fn parseLock(allocator: std.mem.Allocator, source: []const u8) ParseError!LockFile {
-    var entries = std.ArrayList(LockEntry).init(allocator);
+    var entries = std.array_list.Managed(LockEntry).init(allocator);
     errdefer {
         for (entries.items) |*entry| entry.deinit(allocator);
         entries.deinit();
@@ -1042,7 +1043,7 @@ fn parseSumEntry(allocator: std.mem.Allocator, line: []const u8) ParseError!SumE
 }
 
 pub fn parseSum(allocator: std.mem.Allocator, source: []const u8) ParseError!SumFile {
-    var entries = std.ArrayList(SumEntry).init(allocator);
+    var entries = std.array_list.Managed(SumEntry).init(allocator);
     errdefer {
         for (entries.items) |*entry| entry.deinit(allocator);
         entries.deinit();
@@ -1111,9 +1112,9 @@ test "manifest parser preserves requires and mirrors" {
     try std.testing.expectEqual(Capability.net_tx, manifest.requires[1].grants[0]);
     try std.testing.expectEqual(Capability.net_rx, manifest.requires[1].grants[1]);
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
-    try writeManifest(out.writer(), manifest);
+    try writeManifest(sio.managedWriter(&out), manifest);
 
     var manifest2 = try parseManifestWithFile(std.testing.allocator, out.items, "pkg/sa.mod");
     defer manifest2.deinit(std.testing.allocator);
@@ -1148,9 +1149,9 @@ test "lock parser preserves dependency blocks and target hashes" {
     try std.testing.expect(entry.approved_machine_code_hashes.contains("x86_64-linux-gnu"));
     try std.testing.expect(entry.approved_machine_code_hashes.contains(""));
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
-    try writeLock(out.writer(), lock_file);
+    try writeLock(sio.managedWriter(&out), lock_file);
 
     var lock_file2 = try parseLock(std.testing.allocator, out.items);
     defer lock_file2.deinit(std.testing.allocator);
@@ -1170,9 +1171,9 @@ test "sum parser preserves depth and sha256" {
     try std.testing.expectEqual(@as(usize, 2), sum_file.entries.len);
     try std.testing.expectEqual(@as(u32, 2), sum_file.entries[1].depth);
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
-    try writeSum(out.writer(), sum_file);
+    try writeSum(sio.managedWriter(&out), sum_file);
 
     var sum_file2 = try parseSum(std.testing.allocator, out.items);
     defer sum_file2.deinit(std.testing.allocator);

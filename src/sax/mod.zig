@@ -23,9 +23,9 @@ pub const SaxCompiler = struct {
         sax_source: []const u8,
         component_name: []const u8,
     ) !struct {
-        sa_code: std.ArrayList(u8),
-        airlock_js: std.ArrayList(u8),
-        index_html: std.ArrayList(u8),
+        sa_code: std.array_list.Managed(u8),
+        airlock_js: std.array_list.Managed(u8),
+        index_html: std.array_list.Managed(u8),
     } {
         var sax_parser = parser.SaxParser.init(self.allocator, sax_source);
         var program = try sax_parser.parse();
@@ -33,7 +33,7 @@ pub const SaxCompiler = struct {
 
         if (program.components.len == 0) return error.InvalidComponentBody;
 
-        var sa_code = std.ArrayList(u8).init(self.allocator);
+        var sa_code = std.array_list.Managed(u8).init(self.allocator);
         errdefer sa_code.deinit();
 
         for (program.components, 0..) |component, idx| {
@@ -43,13 +43,13 @@ pub const SaxCompiler = struct {
             const opts: lowerer.LowerOptions = .{ .emit_shared_decls = idx == 0 };
             try sax_lowerer.lower(&sa_code, opts);
 
-            if (idx + 1 < program.components.len) try sa_code.writer().writeByte('\n');
+            if (idx + 1 < program.components.len) try sa_code.append('\n');
         }
 
         if (program.components.len != 0) {
             const root_name = try lowercaseName(self.allocator, program.components[0].name);
             defer self.allocator.free(root_name);
-            try sa_code.writer().print("@export sax_app_init() -> ptr:\nL_ENTRY:\n  ctx = call @sax_{s}_init()\n  return ctx\n\n", .{root_name});
+            try sa_code.print("@export sax_app_init() -> ptr:\nL_ENTRY:\n  ctx = call @sax_{s}_init()\n  return ctx\n\n", .{root_name});
         }
 
         var airlock_generator = airlock_gen.AirlockGenerator.init(self.allocator);

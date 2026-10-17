@@ -59,7 +59,7 @@ fn splitCallArgs(allocator: std.mem.Allocator, text: []const u8) ![]const []cons
     const trimmed = std.mem.trim(u8, text, " \t");
     if (trimmed.len == 0) return try allocator.alloc([]const u8, 0);
 
-    var segments = std.ArrayList([]const u8).init(allocator);
+    var segments = std.array_list.Managed([]const u8).init(allocator);
     errdefer segments.deinit();
 
     var paren_depth: usize = 0;
@@ -135,7 +135,7 @@ fn parseCallBody(allocator: std.mem.Allocator, body: []const u8, is_indirect: bo
     if (callee_text.len == 0) return CallError.InvalidCallSyntax;
     const callee_name = if (callee_text[0] == '@') callee_text[1..] else callee_text;
 
-    var args_list = std.ArrayList(ParsedArg).init(allocator);
+    var args_list = std.array_list.Managed(ParsedArg).init(allocator);
     errdefer {
         for (args_list.items) |arg| allocator.free(arg.text);
         args_list.deinit();
@@ -170,7 +170,7 @@ fn parseSpecialCallBody(allocator: std.mem.Allocator, body: []const u8, callee_n
     const prefix = std.mem.trim(u8, trimmed[0..open], " \t");
     if (!std.mem.eql(u8, prefix, callee_name)) return CallError.InvalidCallSyntax;
 
-    var args_list = std.ArrayList(ParsedArg).init(allocator);
+    var args_list = std.array_list.Managed(ParsedArg).init(allocator);
     errdefer {
         for (args_list.items) |arg| allocator.free(arg.text);
         args_list.deinit();
@@ -223,14 +223,14 @@ pub fn parseCall(allocator: std.mem.Allocator, raw_text: []const u8) !ParsedCall
     errdefer if (dest) |value| allocator.free(value);
 
     if (std.mem.indexOf(u8, trimmed, "call_indirect")) |idx| {
-        const body = std.mem.trimLeft(u8, trimmed[idx + "call_indirect".len ..], " \t");
+        const body = std.mem.trimStart(u8, trimmed[idx + "call_indirect".len ..], " \t");
         var call = try parseCallBody(allocator, body, true);
         call.dest = dest;
         return call;
     }
 
     if (std.mem.indexOf(u8, trimmed, "call")) |idx| {
-        const body = std.mem.trimLeft(u8, trimmed[idx + "call".len ..], " \t");
+        const body = std.mem.trimStart(u8, trimmed[idx + "call".len ..], " \t");
         var call = try parseCallBody(allocator, body, false);
         call.dest = dest;
         return call;
@@ -297,7 +297,7 @@ pub fn validateCall(
 }
 
 test "parse and validate a direct call signature" {
-    var sigs = std.ArrayList(common_signature.FunctionSig).init(std.testing.allocator);
+    var sigs = std.array_list.Managed(common_signature.FunctionSig).init(std.testing.allocator);
     defer {
         for (sigs.items) |*sig| sig.deinit(std.testing.allocator);
         sigs.deinit();
@@ -348,7 +348,7 @@ test "parseCall keeps quoted commas inside arguments" {
 }
 
 test "validateCall rejects capability mismatches" {
-    var sigs = std.ArrayList(common_signature.FunctionSig).init(std.testing.allocator);
+    var sigs = std.array_list.Managed(common_signature.FunctionSig).init(std.testing.allocator);
     defer {
         for (sigs.items) |*sig| sig.deinit(std.testing.allocator);
         sigs.deinit();
@@ -366,32 +366,32 @@ test "call contract PBT matches random capability signatures" {
 
     for (0..96) |iter| {
         const param_count = random.intRangeAtMost(usize, 1, 3);
-        var sig_text = std.ArrayList(u8).init(std.testing.allocator);
+        var sig_text = std.array_list.Managed(u8).init(std.testing.allocator);
         defer sig_text.deinit();
-        var call_text = std.ArrayList(u8).init(std.testing.allocator);
+        var call_text = std.array_list.Managed(u8).init(std.testing.allocator);
         defer call_text.deinit();
 
-        try sig_text.writer().writeAll("@sink(");
-        try call_text.writer().writeAll("call @sink(");
+        try sig_text.appendSlice("@sink(");
+        try call_text.appendSlice("call @sink(");
 
         var expect_ok = true;
         for (0..param_count) |idx| {
             if (idx != 0) {
-                try sig_text.writer().writeAll(", ");
-                try call_text.writer().writeAll(", ");
+                try sig_text.appendSlice(", ");
+                try call_text.appendSlice(", ");
             }
 
             const param_cap = caps[random.intRangeLessThan(usize, 0, caps.len)];
             const arg_cap = caps[random.intRangeLessThan(usize, 0, caps.len)];
             if (param_cap != arg_cap) expect_ok = false;
 
-            try sig_text.writer().print("{s}p{d}: ptr", .{ prefixText(param_cap), idx });
-            try call_text.writer().print("{s}p{d}", .{ prefixText(arg_cap), idx });
+            try sig_text.print("{s}p{d}: ptr", .{ prefixText(param_cap), idx });
+            try call_text.print("{s}p{d}", .{ prefixText(arg_cap), idx });
         }
-        try sig_text.writer().writeAll(") -> i32:");
-        try call_text.writer().writeByte(')');
+        try sig_text.appendSlice(") -> i32:");
+        try call_text.append(')');
 
-        var sigs = std.ArrayList(common_signature.FunctionSig).init(std.testing.allocator);
+        var sigs = std.array_list.Managed(common_signature.FunctionSig).init(std.testing.allocator);
         defer {
             for (sigs.items) |*sig| sig.deinit(std.testing.allocator);
             sigs.deinit();

@@ -29,12 +29,12 @@ pub const SlaHandlerCompileFailure = struct {
 
 const StringPool = struct {
     allocator: Allocator,
-    items: std.ArrayList([]const u8),
+    items: std.array_list.Managed([]const u8),
 
     fn init(allocator: Allocator) StringPool {
         return .{
             .allocator = allocator,
-            .items = std.ArrayList([]const u8).init(allocator),
+            .items = std.array_list.Managed([]const u8).init(allocator),
         };
     }
 
@@ -70,7 +70,7 @@ fn stateInitValueExpr(init_expr: []const u8, ty: parser.StateType) []const u8 {
     if (std.mem.lastIndexOf(u8, trimmed, " as ")) |idx| {
         const suffix = std.mem.trim(u8, trimmed[idx + 4 ..], " \t\r");
         if (std.mem.eql(u8, suffix, stateTypeName(ty))) {
-            return std.mem.trimRight(u8, trimmed[0..idx], " \t\r");
+            return std.mem.trimEnd(u8, trimmed[0..idx], " \t\r");
         }
     }
     return trimmed;
@@ -119,7 +119,7 @@ const InterpolationValue = struct {
 
 const InterpolationExprLowerer = struct {
     owner: *SaxLowerer,
-    out: *std.ArrayList(u8),
+    out: *std.array_list.Managed(u8),
     expr: []const u8,
     prefix: []const u8,
     scratch_allocator: Allocator,
@@ -228,7 +228,7 @@ const InterpolationExprLowerer = struct {
         const value = std.fmt.parseFloat(f64, literal) catch return LowerError.InvalidTextExpression;
         const bits: i64 = @bitCast(value);
         const bits_name = try self.nextName("f64_bits");
-        try self.out.writer().print("  {s} = {d}\n", .{ bits_name, bits });
+        try self.out.print("  {s} = {d}\n", .{ bits_name, bits });
         return .{ .name = bits_name, .ty = .f64 };
     }
 
@@ -246,18 +246,18 @@ const InterpolationExprLowerer = struct {
         defer self.owner.allocator.free(slot_name);
         switch (state_ty) {
             .i64 => {
-                try self.out.writer().print("  {s} = load state+{s} as i64\n", .{ dest, slot_name });
+                try self.out.print("  {s} = load state+{s} as i64\n", .{ dest, slot_name });
                 return .{ .name = dest, .ty = state_ty };
             },
             .f64 => {
-                try self.out.writer().print("  {s} = load state+{s} as i64\n", .{ dest, slot_name });
+                try self.out.print("  {s} = load state+{s} as i64\n", .{ dest, slot_name });
                 return .{ .name = dest, .ty = state_ty };
             },
             .i32, .i1 => {
-                try self.out.writer().print("  {s} = load state+{s} as {s}\n", .{ dest, slot_name, stateTypeName(state_ty) });
+                try self.out.print("  {s} = load state+{s} as {s}\n", .{ dest, slot_name, stateTypeName(state_ty) });
                 const widened = try self.nextName("wide");
                 const op = if (state_ty == .i1) "zext" else "sext";
-                try self.out.writer().print("  {s} = {s} {s} as i64\n", .{ widened, op, dest });
+                try self.out.print("  {s} = {s} {s} as i64\n", .{ widened, op, dest });
                 return .{ .name = widened, .ty = .i64 };
             },
             .ptr => unreachable,
@@ -267,7 +267,7 @@ const InterpolationExprLowerer = struct {
     fn emitBinary(self: *InterpolationExprLowerer, op: []const u8, left: InterpolationValue, right: InterpolationValue) LowerError!InterpolationValue {
         if (left.ty != .i64 or right.ty != .i64) return LowerError.InvalidTextExpression;
         const dest = try self.nextName("op");
-        try self.out.writer().print("  {s} = {s} {s}, {s}\n", .{ dest, op, left.name, right.name });
+        try self.out.print("  {s} = {s} {s}, {s}\n", .{ dest, op, left.name, right.name });
         return .{ .name = dest, .ty = .i64 };
     }
 
@@ -393,7 +393,7 @@ pub const SaxLowerer = struct {
     }
 
     fn escapeText(allocator: Allocator, text: []const u8) ![]const u8 {
-        var out = std.ArrayList(u8).init(allocator);
+        var out = std.array_list.Managed(u8).init(allocator);
         errdefer out.deinit();
         for (text) |c| {
             switch (c) {
@@ -535,13 +535,13 @@ pub const SaxLowerer = struct {
         return try std.fmt.allocPrint(self.allocator, "state+{d}", .{slot.offset});
     }
 
-    fn appendConstDecls(self: *const SaxLowerer, out: *std.ArrayList(u8)) !void {
+    fn appendConstDecls(self: *const SaxLowerer, out: *std.array_list.Managed(u8)) !void {
         for (self.string_pool.items.items, 0..) |text, idx| {
             const escaped = try escapeText(self.allocator, text);
             defer self.allocator.free(escaped);
-            try out.writer().print("@const sax_{s}_{d} = utf8:\"{s}\"\n", .{ self.component.name, idx, escaped });
+            try out.print("@const sax_{s}_{d} = utf8:\"{s}\"\n", .{ self.component.name, idx, escaped });
         }
-        if (self.string_pool.items.items.len != 0) try out.writer().writeByte('\n');
+        if (self.string_pool.items.items.len != 0) try out.append('\n');
 
         for (self.component.route_pages, 0..) |page, idx| {
             const path_const = try self.routeConstName(idx, "path");
@@ -552,18 +552,18 @@ pub const SaxLowerer = struct {
             defer self.allocator.free(escaped_path);
             const escaped_component = try escapeText(self.allocator, page.component);
             defer self.allocator.free(escaped_component);
-            try out.writer().print("@const {s} = utf8:\"{s}\"\n", .{ path_const, escaped_path });
-            try out.writer().print("@const {s} = utf8:\"{s}\"\n", .{ component_const, escaped_component });
+            try out.print("@const {s} = utf8:\"{s}\"\n", .{ path_const, escaped_path });
+            try out.print("@const {s} = utf8:\"{s}\"\n", .{ component_const, escaped_component });
         }
-        if (self.component.route_pages.len != 0) try out.writer().writeByte('\n');
+        if (self.component.route_pages.len != 0) try out.append('\n');
 
         const host_selector = try self.hostSelectorConstName();
         defer self.allocator.free(host_selector);
-        try out.writer().print("@const {s} = utf8:\"#app\"\n", .{host_selector});
-        try out.writer().writeByte('\n');
+        try out.print("@const {s} = utf8:\"#app\"\n", .{host_selector});
+        try out.append('\n');
     }
 
-    fn appendExternDecls(_: *const SaxLowerer, out: *std.ArrayList(u8)) !void {
+    fn appendExternDecls(_: *const SaxLowerer, out: *std.array_list.Managed(u8)) !void {
         const decls = [_][]const u8{
             "@extern sax_dom_query(*sel_ptr: ptr, sel_len: i64) -> i64",
             "@extern sax_dom_query_all(*sel_ptr: ptr, sel_len: i64, *out_ptr: ptr, max_count: i64) -> i64",
@@ -599,16 +599,16 @@ pub const SaxLowerer = struct {
             "@extern sax_ftoa_bits(value_bits: i64, decimals: i64, *buf_ptr: ptr, buf_len: i64) -> i64",
             "@extern sax_mem_copy(*dst_ptr: ptr, *src_ptr: ptr, len: i64) -> void",
         };
-        for (decls) |decl| try out.writer().print("{s}\n", .{decl});
-        try out.writer().writeByte('\n');
+        for (decls) |decl| try out.print("{s}\n", .{decl});
+        try out.append('\n');
     }
 
-    fn appendStdImports(_: *const SaxLowerer, out: *std.ArrayList(u8)) !void {
-        try out.writer().writeAll("@import \"sa_std/vec.sa\"\n\n");
+    fn appendStdImports(_: *const SaxLowerer, out: *std.array_list.Managed(u8)) !void {
+        try out.appendSlice("@import \"sa_std/vec.sa\"\n\n");
     }
 
-    fn appendArrayAdapter(_: *const SaxLowerer, out: *std.ArrayList(u8)) !void {
-        try out.writer().writeAll(
+    fn appendArrayAdapter(_: *const SaxLowerer, out: *std.array_list.Managed(u8)) !void {
+        try out.appendSlice(
             \\// SAX array adapter built on top of sa_std/vec
             \\@export sax_array_push(^vec: ptr, &elem_ptr: ptr, elem_size: u64) -> ^ptr:
             \\L_ENTRY:
@@ -671,17 +671,17 @@ pub const SaxLowerer = struct {
         );
     }
 
-    fn emitLoadState(self: *const SaxLowerer, out: *std.ArrayList(u8), dest: []const u8, name: []const u8) !void {
+    fn emitLoadState(self: *const SaxLowerer, out: *std.array_list.Managed(u8), dest: []const u8, name: []const u8) !void {
         const idx = self.stateVarIndex(name) orelse return LowerError.UnknownStateVar;
         const slot_name = try self.stateSlotConstName(name);
         defer self.allocator.free(slot_name);
         const load_ty = if (self.component.state_vars[idx].ty == .f64) "i64" else stateTypeName(self.component.state_vars[idx].ty);
-        try out.writer().print("  {s} = load state+{s} as {s}\n", .{ dest, slot_name, load_ty });
+        try out.print("  {s} = load state+{s} as {s}\n", .{ dest, slot_name, load_ty });
     }
 
     fn emitInterpolationExpr(
         self: *SaxLowerer,
-        out: *std.ArrayList(u8),
+        out: *std.array_list.Managed(u8),
         expr: parser.Expr,
         prefix: []const u8,
         scratch_allocator: Allocator,
@@ -699,34 +699,34 @@ pub const SaxLowerer = struct {
 
     fn emitFormatInterpolationValue(
         _: *SaxLowerer,
-        out: *std.ArrayList(u8),
+        out: *std.array_list.Managed(u8),
         value: InterpolationValue,
         tmp_buf_name: []const u8,
         tmp_len_name: []const u8,
     ) !void {
         switch (value.ty) {
-            .i64 => try out.writer().print("  {s} = call @sax_itoa({s}, *{s}, 64)\n", .{ tmp_len_name, value.name, tmp_buf_name }),
-            .f64 => try out.writer().print("  {s} = call @sax_ftoa_bits({s}, 6, *{s}, 64)\n", .{ tmp_len_name, value.name, tmp_buf_name }),
+            .i64 => try out.print("  {s} = call @sax_itoa({s}, *{s}, 64)\n", .{ tmp_len_name, value.name, tmp_buf_name }),
+            .f64 => try out.print("  {s} = call @sax_ftoa_bits({s}, 6, *{s}, 64)\n", .{ tmp_len_name, value.name, tmp_buf_name }),
             .i1, .i32, .ptr => return LowerError.InvalidTextExpression,
         }
     }
 
-    fn emitStoreState(self: *const SaxLowerer, out: *std.ArrayList(u8), name: []const u8, value: []const u8, ty: parser.StateType) !void {
+    fn emitStoreState(self: *const SaxLowerer, out: *std.array_list.Managed(u8), name: []const u8, value: []const u8, ty: parser.StateType) !void {
         if (self.stateVarIndex(name) == null) return LowerError.UnknownStateVar;
         const slot_name = try self.stateSlotConstName(name);
         defer self.allocator.free(slot_name);
-        try out.writer().print("  store state+{s}, {s} as {s}\n", .{ slot_name, value, stateTypeName(ty) });
+        try out.print("  store state+{s}, {s} as {s}\n", .{ slot_name, value, stateTypeName(ty) });
     }
 
-    fn emitStringSliceCopy(self: *const SaxLowerer, out: *std.ArrayList(u8), dst_ptr: []const u8, src_const_idx: usize) !void {
+    fn emitStringSliceCopy(self: *const SaxLowerer, out: *std.array_list.Managed(u8), dst_ptr: []const u8, src_const_idx: usize) !void {
         const const_name = try std.fmt.allocPrint(self.allocator, "sax_{s}_{d}", .{ self.component.name, src_const_idx });
         defer self.allocator.free(const_name);
-        try out.writer().print("  call @sax_mem_copy(*{s}, *{s}, {})\n", .{ dst_ptr, const_name, self.string_pool.items.items[src_const_idx].len });
+        try out.print("  call @sax_mem_copy(*{s}, *{s}, {})\n", .{ dst_ptr, const_name, self.string_pool.items.items[src_const_idx].len });
     }
 
     fn emitTextValue(
         self: *const SaxLowerer,
-        out: *std.ArrayList(u8),
+        out: *std.array_list.Managed(u8),
         node_name: []const u8,
         value_expr: []const u8,
         is_attr: bool,
@@ -737,18 +737,18 @@ pub const SaxLowerer = struct {
 
         const buf_name = try std.fmt.allocPrint(self.allocator, "tmp_buf_{s}", .{node_name});
         defer self.allocator.free(buf_name);
-        try out.writer().print("  {s} = stack_alloc 64\n", .{buf_name});
-        try out.writer().print("  tmp_len_{s} = call @sax_itoa({s}, *{s}, 64)\n", .{ node_name, value_expr, buf_name });
+        try out.print("  {s} = stack_alloc 64\n", .{buf_name});
+        try out.print("  tmp_len_{s} = call @sax_itoa({s}, *{s}, 64)\n", .{ node_name, value_expr, buf_name });
         if (is_attr) {
-            try out.writer().print("  call @sax_dom_set_attr({s}, *{s}, {}, *{s}, tmp_len_{s})\n", .{ node_name, key, self.string_pool.items.items[attr_key_idx.?].len, buf_name, node_name });
+            try out.print("  call @sax_dom_set_attr({s}, *{s}, {}, *{s}, tmp_len_{s})\n", .{ node_name, key, self.string_pool.items.items[attr_key_idx.?].len, buf_name, node_name });
         } else {
-            try out.writer().print("  call @sax_dom_set_text({s}, *{s}, tmp_len_{s})\n", .{ node_name, buf_name, node_name });
+            try out.print("  call @sax_dom_set_text({s}, *{s}, tmp_len_{s})\n", .{ node_name, buf_name, node_name });
         }
     }
 
     fn emitTextPieceBuffer(
         self: *SaxLowerer,
-        out: *std.ArrayList(u8),
+        out: *std.array_list.Managed(u8),
         node: parser.DomNode,
         node_var: []const u8,
     ) !void {
@@ -772,8 +772,8 @@ pub const SaxLowerer = struct {
         const cursor_name = try std.fmt.allocPrint(self.allocator, "text_len_{s}", .{node.alias});
         defer self.allocator.free(cursor_name);
 
-        try out.writer().print("  {s} = stack_alloc {}\n", .{ buf_name, buf_size });
-        try out.writer().print("  {s} = 0\n", .{cursor_name});
+        try out.print("  {s} = stack_alloc {}\n", .{ buf_name, buf_size });
+        try out.print("  {s} = 0\n", .{cursor_name});
 
         var piece_index: usize = 0;
         for (node.children) |child| {
@@ -785,9 +785,9 @@ pub const SaxLowerer = struct {
                         defer self.allocator.free(text_const);
                         const dst_name = try std.fmt.allocPrint(self.allocator, "text_dst_{s}_{d}", .{ node.alias, piece_index });
                         defer self.allocator.free(dst_name);
-                        try out.writer().print("  {s} = ptr_add {s}, {s}\n", .{ dst_name, buf_name, cursor_name });
-                        try out.writer().print("  call @sax_mem_copy(*{s}, *{s}, {})\n", .{ dst_name, text_const, txt.len });
-                        try out.writer().print("  {s} = add {s}, {}\n", .{ cursor_name, cursor_name, txt.len });
+                        try out.print("  {s} = ptr_add {s}, {s}\n", .{ dst_name, buf_name, cursor_name });
+                        try out.print("  call @sax_mem_copy(*{s}, *{s}, {})\n", .{ dst_name, text_const, txt.len });
+                        try out.print("  {s} = add {s}, {}\n", .{ cursor_name, cursor_name, txt.len });
                     },
                     .interpolation => |expr| {
                         var expr_arena = std.heap.ArenaAllocator.init(self.allocator);
@@ -801,11 +801,11 @@ pub const SaxLowerer = struct {
                         defer self.allocator.free(tmp_len_name);
                         const dst_name = try std.fmt.allocPrint(self.allocator, "text_dst_{s}_{d}", .{ node.alias, piece_index });
                         defer self.allocator.free(dst_name);
-                        try out.writer().print("  {s} = stack_alloc 64\n", .{tmp_buf_name});
+                        try out.print("  {s} = stack_alloc 64\n", .{tmp_buf_name});
                         try self.emitFormatInterpolationValue(out, value, tmp_buf_name, tmp_len_name);
-                        try out.writer().print("  {s} = ptr_add {s}, {s}\n", .{ dst_name, buf_name, cursor_name });
-                        try out.writer().print("  call @sax_mem_copy(*{s}, *{s}, {s})\n", .{ dst_name, tmp_buf_name, tmp_len_name });
-                        try out.writer().print("  {s} = add {s}, {s}\n", .{ cursor_name, cursor_name, tmp_len_name });
+                        try out.print("  {s} = ptr_add {s}, {s}\n", .{ dst_name, buf_name, cursor_name });
+                        try out.print("  call @sax_mem_copy(*{s}, *{s}, {s})\n", .{ dst_name, tmp_buf_name, tmp_len_name });
+                        try out.print("  {s} = add {s}, {s}\n", .{ cursor_name, cursor_name, tmp_len_name });
                     },
                 },
                 else => {},
@@ -813,12 +813,12 @@ pub const SaxLowerer = struct {
             piece_index += 1;
         }
 
-        try out.writer().print("  call @sax_dom_set_text({s}, *{s}, {s})\n", .{ node_var, buf_name, cursor_name });
+        try out.print("  call @sax_dom_set_text({s}, *{s}, {s})\n", .{ node_var, buf_name, cursor_name });
     }
 
     fn emitNodeAttrs(
         self: *SaxLowerer,
-        out: *std.ArrayList(u8),
+        out: *std.array_list.Managed(u8),
         node: parser.DomNode,
         node_var: []const u8,
         ctx_var: []const u8,
@@ -839,7 +839,7 @@ pub const SaxLowerer = struct {
                 const handler_idx = try self.string_pool.add(handler_export);
                 const handler_const = try std.fmt.allocPrint(self.allocator, "sax_{s}_{d}", .{ self.component.name, handler_idx });
                 defer self.allocator.free(handler_const);
-                try out.writer().print("  call @sax_dom_bind_event({s}, *{s}, {}, *{s}, {}, {s})\n", .{ node_var, evt_const, event_name.len, handler_const, handler_export.len, ctx_var });
+                try out.print("  call @sax_dom_bind_event({s}, *{s}, {}, *{s}, {}, {s})\n", .{ node_var, evt_const, event_name.len, handler_const, handler_export.len, ctx_var });
                 continue;
             }
 
@@ -851,7 +851,7 @@ pub const SaxLowerer = struct {
                     defer self.allocator.free(key_const);
                     const val_const = try std.fmt.allocPrint(self.allocator, "sax_{s}_{d}", .{ self.component.name, val_idx });
                     defer self.allocator.free(val_const);
-                    try out.writer().print("  call @sax_dom_set_attr({s}, *{s}, {}, *{s}, {})\n", .{ node_var, key_const, attr.name.len, val_const, lit.len });
+                    try out.print("  call @sax_dom_set_attr({s}, *{s}, {}, *{s}, {})\n", .{ node_var, key_const, attr.name.len, val_const, lit.len });
                 },
                 .interpolation => |expr| {
                     try self.emitInterpolatedValue(out, node_var, attr.name, expr, true);
@@ -861,7 +861,7 @@ pub const SaxLowerer = struct {
         }
     }
 
-    fn emitNodeInit(self: *SaxLowerer, out: *std.ArrayList(u8), ctx_var: []const u8, idx: usize) !void {
+    fn emitNodeInit(self: *SaxLowerer, out: *std.array_list.Managed(u8), ctx_var: []const u8, idx: usize) !void {
         const node = self.component.dom_nodes[idx];
         const slot = self.node_slots[idx];
         const node_var = try std.fmt.allocPrint(self.allocator, "node_{d}", .{idx});
@@ -869,15 +869,15 @@ pub const SaxLowerer = struct {
 
         const tag_const = try std.fmt.allocPrint(self.allocator, "sax_{s}_{d}", .{ self.component.name, slot.tag_const });
         defer self.allocator.free(tag_const);
-        try out.writer().print("  {s} = call @sax_dom_create(*{s}, {})\n", .{ node_var, tag_const, self.string_pool.items.items[slot.tag_const].len });
+        try out.print("  {s} = call @sax_dom_create(*{s}, {})\n", .{ node_var, tag_const, self.string_pool.items.items[slot.tag_const].len });
         const node_slot = try self.nodeSlotConstName(node.alias);
         defer self.allocator.free(node_slot);
-        try out.writer().print("  store dom+{s}, {s} as i64\n", .{ node_slot, node_var });
+        try out.print("  store dom+{s}, {s} as i64\n", .{ node_slot, node_var });
 
         try self.emitNodeAttrs(out, node, node_var, ctx_var, true);
     }
 
-    fn emitNodeAttachChildren(self: *const SaxLowerer, out: *std.ArrayList(u8), idx: usize) !void {
+    fn emitNodeAttachChildren(self: *const SaxLowerer, out: *std.array_list.Managed(u8), idx: usize) !void {
         const node = self.component.dom_nodes[idx];
         if (node.self_closing) return;
 
@@ -889,7 +889,7 @@ pub const SaxLowerer = struct {
                 .node_index => |child_idx| {
                     const child_var = try std.fmt.allocPrint(self.allocator, "node_{d}", .{child_idx});
                     defer self.allocator.free(child_var);
-                    try out.writer().print("  call @sax_dom_append_child({s}, {s})\n", .{ node_var, child_var });
+                    try out.print("  call @sax_dom_append_child({s}, {s})\n", .{ node_var, child_var });
                 },
                 else => {},
             }
@@ -900,19 +900,19 @@ pub const SaxLowerer = struct {
         return try std.fmt.allocPrint(self.allocator, "sax_{s}_node_{s}", .{ self.component.name, alias });
     }
 
-    fn emitNodeRender(self: *SaxLowerer, out: *std.ArrayList(u8), ctx_var: []const u8, idx: usize) !void {
+    fn emitNodeRender(self: *SaxLowerer, out: *std.array_list.Managed(u8), ctx_var: []const u8, idx: usize) !void {
         const node = self.component.dom_nodes[idx];
         const node_var = try std.fmt.allocPrint(self.allocator, "node_{d}", .{idx});
         defer self.allocator.free(node_var);
 
         const node_slot = try self.nodeSlotConstName(node.alias);
         defer self.allocator.free(node_slot);
-        try out.writer().print("  {s} = load dom+{s} as ptr\n", .{ node_var, node_slot });
+        try out.print("  {s} = load dom+{s} as ptr\n", .{ node_var, node_slot });
         try self.emitNodeAttrs(out, node, node_var, ctx_var, false);
         try self.emitTextPieceBuffer(out, node, node_var);
     }
 
-    fn emitInterpolatedValue(self: *SaxLowerer, out: *std.ArrayList(u8), node_var: []const u8, key_name: []const u8, expr: parser.Expr, is_attr: bool) !void {
+    fn emitInterpolatedValue(self: *SaxLowerer, out: *std.array_list.Managed(u8), node_var: []const u8, key_name: []const u8, expr: parser.Expr, is_attr: bool) !void {
         var expr_arena = std.heap.ArenaAllocator.init(self.allocator);
         defer expr_arena.deinit();
         const expr_prefix = try std.fmt.allocPrint(self.allocator, "attr_expr_{s}_{s}", .{ node_var, key_name });
@@ -923,13 +923,13 @@ pub const SaxLowerer = struct {
         defer self.allocator.free(buf_name);
         const len_name = try std.fmt.allocPrint(self.allocator, "interp_len_{s}", .{key_name});
         defer self.allocator.free(len_name);
-        try out.writer().print("  {s} = stack_alloc 64\n", .{buf_name});
+        try out.print("  {s} = stack_alloc 64\n", .{buf_name});
         try self.emitFormatInterpolationValue(out, value, buf_name, len_name);
         if (is_attr) {
             const key_idx = try self.string_pool.add(key_name);
             const key_const = try std.fmt.allocPrint(self.allocator, "sax_{s}_{d}", .{ self.component.name, key_idx });
             defer self.allocator.free(key_const);
-            try out.writer().print("  call @sax_dom_set_attr({s}, *{s}, {}, *{s}, {s})\n", .{
+            try out.print("  call @sax_dom_set_attr({s}, *{s}, {}, *{s}, {s})\n", .{
                 node_var,
                 key_const,
                 key_name.len,
@@ -937,7 +937,7 @@ pub const SaxLowerer = struct {
                 len_name,
             });
         } else {
-            try out.writer().print("  call @sax_dom_set_text({s}, *{s}, {s})\n", .{
+            try out.print("  call @sax_dom_set_text({s}, *{s}, {s})\n", .{
                 node_var,
                 buf_name,
                 len_name,
@@ -949,7 +949,7 @@ pub const SaxLowerer = struct {
         var fields = try self.allocator.alloc(sla_handler_bridge.HandlerStateField, self.component.state_vars.len);
         defer self.allocator.free(fields);
 
-        var addresses = std.ArrayList([]const u8).init(self.allocator);
+        var addresses = std.array_list.Managed([]const u8).init(self.allocator);
         defer {
             for (addresses.items) |address| self.allocator.free(address);
             addresses.deinit();
@@ -974,7 +974,7 @@ pub const SaxLowerer = struct {
         return self.sla_handler_compile_failure;
     }
 
-    fn emitHandler(self: *SaxLowerer, out: *std.ArrayList(u8), handler: parser.Handler) !void {
+    fn emitHandler(self: *SaxLowerer, out: *std.array_list.Managed(u8), handler: parser.Handler) !void {
         const compiled = if (handler.language == .sla) self.compileSlaHandler(handler) catch |err| {
             self.sla_handler_compile_failure = .{
                 .component_name = self.component.name,
@@ -990,7 +990,7 @@ pub const SaxLowerer = struct {
             if (support.len != 0 and !self.emitted_sla_support.contains(support)) {
                 const key = try self.allocator.dupe(u8, support);
                 try self.emitted_sla_support.put(key, {});
-                try out.writer().print("{s}\n\n", .{support});
+                try out.print("{s}\n\n", .{support});
             }
         }
         const body = if (compiled) |result| result.body else handler.body;
@@ -1002,18 +1002,18 @@ pub const SaxLowerer = struct {
         defer self.allocator.free(ctx_state_name);
         const ctx_dom_name = try self.ctxDomOffsetConstName();
         defer self.allocator.free(ctx_dom_name);
-        try out.writer().print("@export {s}(ctx: ptr):\nL_ENTRY:\n  call @{s}(ctx)\n  return\n\n", .{ export_name, impl_name });
-        try out.writer().print("@ffi_wrapper {s}(ctx: ptr):\n", .{impl_name});
-        try out.writer().print("L_ENTRY:\n  state = load ctx+{s} as ptr\n  dom = load ctx+{s} as ptr\n", .{ ctx_state_name, ctx_dom_name });
+        try out.print("@export {s}(ctx: ptr):\nL_ENTRY:\n  call @{s}(ctx)\n  return\n\n", .{ export_name, impl_name });
+        try out.print("@ffi_wrapper {s}(ctx: ptr):\n", .{impl_name});
+        try out.print("L_ENTRY:\n  state = load ctx+{s} as ptr\n  dom = load ctx+{s} as ptr\n", .{ ctx_state_name, ctx_dom_name });
         try self.emitHandlerBody(out, body);
-        try out.writer().writeByte('\n');
+        try out.append('\n');
     }
 
-    fn emitHandlerBody(self: *SaxLowerer, out: *std.ArrayList(u8), body: []const u8) !void {
+    fn emitHandlerBody(self: *SaxLowerer, out: *std.array_list.Managed(u8), body: []const u8) !void {
         var lines = std.mem.splitScalar(u8, body, '\n');
         var emitted_entry = false;
         while (lines.next()) |line| {
-            const trimmed = std.mem.trimRight(u8, line, "\r");
+            const trimmed = std.mem.trimEnd(u8, line, "\r");
             if (trimmed.len == 0) continue;
             if (!emitted_entry and std.mem.eql(u8, trimmed, "L_ENTRY:")) {
                 emitted_entry = true;
@@ -1023,11 +1023,11 @@ pub const SaxLowerer = struct {
                 try self.emitRenderAfterWrites(out, body, true);
                 continue;
             }
-            try out.writer().print("{s}\n", .{trimmed});
+            try out.print("{s}\n", .{trimmed});
         }
     }
 
-    fn emitLifecycleHook(self: *SaxLowerer, out: *std.ArrayList(u8), hook: parser.LifecycleHook) !void {
+    fn emitLifecycleHook(self: *SaxLowerer, out: *std.array_list.Managed(u8), hook: parser.LifecycleHook) !void {
         const stem = try self.componentStem();
         defer self.allocator.free(stem);
         const export_name = try std.fmt.allocPrint(self.allocator, "sax_{s}_{s}", .{ stem, hook.name });
@@ -1039,13 +1039,13 @@ pub const SaxLowerer = struct {
         const ctx_dom_name = try self.ctxDomOffsetConstName();
         defer self.allocator.free(ctx_dom_name);
 
-        try out.writer().print("@export {s}(ctx: ptr):\nL_ENTRY:\n  call @{s}(ctx)\n  return\n\n", .{ export_name, impl_name });
-        try out.writer().print("@ffi_wrapper {s}(ctx: ptr):\n", .{impl_name});
-        try out.writer().print("L_ENTRY:\n  state = load ctx+{s} as ptr\n  dom = load ctx+{s} as ptr\n", .{ ctx_state_name, ctx_dom_name });
+        try out.print("@export {s}(ctx: ptr):\nL_ENTRY:\n  call @{s}(ctx)\n  return\n\n", .{ export_name, impl_name });
+        try out.print("@ffi_wrapper {s}(ctx: ptr):\n", .{impl_name});
+        try out.print("L_ENTRY:\n  state = load ctx+{s} as ptr\n  dom = load ctx+{s} as ptr\n", .{ ctx_state_name, ctx_dom_name });
         var lines = std.mem.splitScalar(u8, hook.body, '\n');
         var emitted_entry = false;
         while (lines.next()) |line| {
-            const trimmed = std.mem.trimRight(u8, line, "\r");
+            const trimmed = std.mem.trimEnd(u8, line, "\r");
             if (trimmed.len == 0) continue;
             if (!emitted_entry and std.mem.eql(u8, trimmed, "L_ENTRY:")) {
                 emitted_entry = true;
@@ -1067,7 +1067,7 @@ pub const SaxLowerer = struct {
                 defer self.allocator.free(handler_const);
                 const delay_start = std.mem.indexOf(u8, trimmed, ",") orelse return LowerError.UnknownHandler;
                 const delay = std.mem.trim(u8, trimmed[delay_start + 1 .. trimmed.len - 1], " ");
-                try out.writer().print("  id = call @sax_set_interval(*{s}, {}, {s})\n", .{ handler_const, handler_export.len, delay });
+                try out.print("  id = call @sax_set_interval(*{s}, {}, {s})\n", .{ handler_const, handler_export.len, delay });
                 continue;
             }
             if (std.mem.startsWith(u8, trimmed, "id = call @sax_set_timeout(^")) {
@@ -1082,29 +1082,29 @@ pub const SaxLowerer = struct {
                 defer self.allocator.free(handler_const);
                 const delay_start = std.mem.indexOf(u8, trimmed, ",") orelse return LowerError.UnknownHandler;
                 const delay = std.mem.trim(u8, trimmed[delay_start + 1 .. trimmed.len - 1], " ");
-                try out.writer().print("  id = call @sax_set_timeout(*{s}, {}, {s})\n", .{ handler_const, handler_export.len, delay });
+                try out.print("  id = call @sax_set_timeout(*{s}, {}, {s})\n", .{ handler_const, handler_export.len, delay });
                 continue;
             }
-            try out.writer().print("{s}\n", .{trimmed});
+            try out.print("{s}\n", .{trimmed});
         }
-        try out.writer().writeByte('\n');
+        try out.append('\n');
     }
 
-    fn emitLifecycleDispatch(self: *const SaxLowerer, out: *std.ArrayList(u8), hook_name: []const u8) !void {
+    fn emitLifecycleDispatch(self: *const SaxLowerer, out: *std.array_list.Managed(u8), hook_name: []const u8) !void {
         for (self.component.lifecycle_hooks) |hook| {
             if (std.mem.eql(u8, hook.name, hook_name)) {
                 const impl_name = try self.lifecycleImplName(hook_name);
                 defer self.allocator.free(impl_name);
-                try out.writer().print("  call @{s}(ctx)\n", .{impl_name});
+                try out.print("  call @{s}(ctx)\n", .{impl_name});
                 return;
             }
         }
     }
 
-    fn emitRenderTrigger(self: *const SaxLowerer, out: *std.ArrayList(u8), include_update: bool) !void {
+    fn emitRenderTrigger(self: *const SaxLowerer, out: *std.array_list.Managed(u8), include_update: bool) !void {
         const stem = try self.componentStem();
         defer self.allocator.free(stem);
-        try out.writer().print("  call @sax_{s}_render(ctx)\n", .{stem});
+        try out.print("  call @sax_{s}_render(ctx)\n", .{stem});
         if (include_update) try self.emitLifecycleDispatch(out, "onUpdate");
     }
 
@@ -1167,7 +1167,7 @@ pub const SaxLowerer = struct {
         return false;
     }
 
-    fn emitSelectiveRender(self: *SaxLowerer, out: *std.ArrayList(u8), writes: *std.StringHashMap(void)) !void {
+    fn emitSelectiveRender(self: *SaxLowerer, out: *std.array_list.Managed(u8), writes: *std.StringHashMap(void)) !void {
         var emitted_any = false;
         for (self.component.dom_nodes, 0..) |node, idx| {
             var should_update = writes.count() == 0;
@@ -1191,14 +1191,14 @@ pub const SaxLowerer = struct {
         }
     }
 
-    fn emitRenderAfterWrites(self: *SaxLowerer, out: *std.ArrayList(u8), body: []const u8, include_update: bool) !void {
+    fn emitRenderAfterWrites(self: *SaxLowerer, out: *std.array_list.Managed(u8), body: []const u8, include_update: bool) !void {
         var writes = try self.collectWrittenStates(body);
         defer writes.deinit();
         try self.emitSelectiveRender(out, &writes);
         if (include_update) try self.emitLifecycleDispatch(out, "onUpdate");
     }
 
-    fn emitInit(self: *SaxLowerer, out: *std.ArrayList(u8)) !void {
+    fn emitInit(self: *SaxLowerer, out: *std.array_list.Managed(u8)) !void {
         const state_size_name = try self.stateSizeConstName();
         defer self.allocator.free(state_size_name);
         const dom_size_name = try self.domSizeConstName();
@@ -1214,46 +1214,46 @@ pub const SaxLowerer = struct {
         defer self.allocator.free(stem);
         const impl_name = try self.initImplName();
         defer self.allocator.free(impl_name);
-        try out.writer().print("@export sax_{s}_init() -> ptr:\nL_ENTRY:\n  ctx = call @{s}()\n  return ctx\n\n", .{ stem, impl_name });
-        try out.writer().print("@ffi_wrapper {s}() -> ptr:\nL_ENTRY:\n", .{impl_name});
-        try out.writer().print("  state = alloc {s}\n", .{state_size_name});
+        try out.print("@export sax_{s}_init() -> ptr:\nL_ENTRY:\n  ctx = call @{s}()\n  return ctx\n\n", .{ stem, impl_name });
+        try out.print("@ffi_wrapper {s}() -> ptr:\nL_ENTRY:\n", .{impl_name});
+        try out.print("  state = alloc {s}\n", .{state_size_name});
         for (self.component.state_vars, 0..) |sv, idx| {
             switch (sv.ty) {
                 .ptr => {
                     const init_expr = std.mem.trim(u8, sv.init_expr, " \t\r");
                     if (std.mem.startsWith(u8, init_expr, "alloc ")) {
                         const sz = std.mem.trim(u8, init_expr["alloc ".len..], " \t\r");
-                        try out.writer().print("  tmp_ptr_{d} = alloc {s}\n", .{ idx, sz });
+                        try out.print("  tmp_ptr_{d} = alloc {s}\n", .{ idx, sz });
                         const slot_name = try self.stateSlotConstName(sv.name);
                         defer self.allocator.free(slot_name);
-                        try out.writer().print("  store state+{s}, tmp_ptr_{d} as ptr\n", .{ slot_name, idx });
+                        try out.print("  store state+{s}, tmp_ptr_{d} as ptr\n", .{ slot_name, idx });
                     } else {
                         const slot_name = try self.stateSlotConstName(sv.name);
                         defer self.allocator.free(slot_name);
-                        try out.writer().print("  store state+{s}, 0 as ptr\n", .{slot_name});
+                        try out.print("  store state+{s}, 0 as ptr\n", .{slot_name});
                     }
                 },
                 .f64 => {
                     const slot_name = try self.stateSlotConstName(sv.name);
                     defer self.allocator.free(slot_name);
-                    try out.writer().print("  store state+{s}, {d} as i64\n", .{ slot_name, try f64BitsLiteral(sv.init_expr, sv.ty) });
+                    try out.print("  store state+{s}, {d} as i64\n", .{ slot_name, try f64BitsLiteral(sv.init_expr, sv.ty) });
                 },
                 else => {
                     const slot_name = try self.stateSlotConstName(sv.name);
                     defer self.allocator.free(slot_name);
-                    try out.writer().print("  store state+{s}, {s} as {s}\n", .{ slot_name, stateInitValueExpr(sv.init_expr, sv.ty), stateTypeName(sv.ty) });
+                    try out.print("  store state+{s}, {s} as {s}\n", .{ slot_name, stateInitValueExpr(sv.init_expr, sv.ty), stateTypeName(sv.ty) });
                 },
             }
         }
 
-        try out.writer().print("  dom = alloc {s}\n", .{dom_size_name});
-        try out.writer().print("  ctx = alloc {s}\n", .{ctx_size_name});
-        try out.writer().print("  store ctx+{s}, state as ptr\n", .{ctx_state_name});
-        try out.writer().print("  store ctx+{s}, dom as ptr\n", .{ctx_dom_name});
+        try out.print("  dom = alloc {s}\n", .{dom_size_name});
+        try out.print("  ctx = alloc {s}\n", .{ctx_size_name});
+        try out.print("  store ctx+{s}, state as ptr\n", .{ctx_state_name});
+        try out.print("  store ctx+{s}, dom as ptr\n", .{ctx_dom_name});
 
         const host_selector = try self.hostSelectorConstName();
         defer self.allocator.free(host_selector);
-        try out.writer().print("  host = call @sax_dom_query(*{s}, 4)\n", .{host_selector});
+        try out.print("  host = call @sax_dom_query(*{s}, 4)\n", .{host_selector});
         for (self.component.dom_nodes, 0..) |_, idx| {
             try self.emitNodeInit(out, "ctx", idx);
         }
@@ -1263,14 +1263,14 @@ pub const SaxLowerer = struct {
         for (self.component.root_nodes) |root_idx| {
             const root_var = try std.fmt.allocPrint(self.allocator, "node_{d}", .{root_idx});
             defer self.allocator.free(root_var);
-            try out.writer().print("  call @sax_dom_append_child(host, {s})\n", .{root_var});
+            try out.print("  call @sax_dom_append_child(host, {s})\n", .{root_var});
         }
         try self.emitRenderTrigger(out, false);
         try self.emitLifecycleDispatch(out, "onMount");
-        try out.writer().writeAll("  return ctx\n\n");
+        try out.appendSlice("  return ctx\n\n");
     }
 
-    fn emitRender(self: *SaxLowerer, out: *std.ArrayList(u8)) !void {
+    fn emitRender(self: *SaxLowerer, out: *std.array_list.Managed(u8)) !void {
         const ctx_state_name = try self.ctxStateOffsetConstName();
         defer self.allocator.free(ctx_state_name);
         const ctx_dom_name = try self.ctxDomOffsetConstName();
@@ -1280,17 +1280,17 @@ pub const SaxLowerer = struct {
         defer self.allocator.free(stem);
         const impl_name = try self.renderImplName();
         defer self.allocator.free(impl_name);
-        try out.writer().print("@export sax_{s}_render(ctx: ptr):\nL_ENTRY:\n  call @{s}(ctx)\n  return\n\n", .{ stem, impl_name });
-        try out.writer().print("@ffi_wrapper {s}(ctx: ptr):\nL_ENTRY:\n", .{impl_name});
-        try out.writer().print("  state = load ctx+{s} as ptr\n", .{ctx_state_name});
-        try out.writer().print("  dom = load ctx+{s} as ptr\n", .{ctx_dom_name});
+        try out.print("@export sax_{s}_render(ctx: ptr):\nL_ENTRY:\n  call @{s}(ctx)\n  return\n\n", .{ stem, impl_name });
+        try out.print("@ffi_wrapper {s}(ctx: ptr):\nL_ENTRY:\n", .{impl_name});
+        try out.print("  state = load ctx+{s} as ptr\n", .{ctx_state_name});
+        try out.print("  dom = load ctx+{s} as ptr\n", .{ctx_dom_name});
         for (self.component.dom_nodes, 0..) |_, idx| {
             try self.emitNodeRender(out, "ctx", idx);
         }
-        try out.writer().writeAll("  return\n\n");
+        try out.appendSlice("  return\n\n");
     }
 
-    fn emitDestroy(self: *const SaxLowerer, out: *std.ArrayList(u8)) !void {
+    fn emitDestroy(self: *const SaxLowerer, out: *std.array_list.Managed(u8)) !void {
         const ctx_state_name = try self.ctxStateOffsetConstName();
         defer self.allocator.free(ctx_state_name);
         const ctx_dom_name = try self.ctxDomOffsetConstName();
@@ -1300,35 +1300,35 @@ pub const SaxLowerer = struct {
         defer self.allocator.free(stem);
         const impl_name = try self.destroyImplName();
         defer self.allocator.free(impl_name);
-        try out.writer().print("@export sax_{s}_destroy(ctx: ptr):\nL_ENTRY:\n  call @{s}(ctx)\n  return\n\n", .{ stem, impl_name });
-        try out.writer().print("@ffi_wrapper {s}(ctx: ptr):\nL_ENTRY:\n", .{impl_name});
-        try out.writer().print("  state = load ctx+{s} as ptr\n", .{ctx_state_name});
-        try out.writer().print("  dom = load ctx+{s} as ptr\n", .{ctx_dom_name});
+        try out.print("@export sax_{s}_destroy(ctx: ptr):\nL_ENTRY:\n  call @{s}(ctx)\n  return\n\n", .{ stem, impl_name });
+        try out.print("@ffi_wrapper {s}(ctx: ptr):\nL_ENTRY:\n", .{impl_name});
+        try out.print("  state = load ctx+{s} as ptr\n", .{ctx_state_name});
+        try out.print("  dom = load ctx+{s} as ptr\n", .{ctx_dom_name});
         try self.emitLifecycleDispatch(out, "onUnmount");
         for (self.component.dom_nodes, 0..) |node, idx| {
             const node_slot = try self.nodeSlotConstName(node.alias);
             defer self.allocator.free(node_slot);
             const node_var = try std.fmt.allocPrint(self.allocator, "node_{d}", .{idx});
             defer self.allocator.free(node_var);
-            try out.writer().print("  {s} = load dom+{s} as ptr\n", .{ node_var, node_slot });
-            try out.writer().print("  call @sax_dom_remove_self({s})\n", .{node_var});
+            try out.print("  {s} = load dom+{s} as ptr\n", .{ node_var, node_slot });
+            try out.print("  call @sax_dom_remove_self({s})\n", .{node_var});
         }
         for (self.component.release_vars) |release_name| {
             try self.emitLoadState(out, release_name, release_name);
-            try out.writer().print("  !{s}\n", .{release_name});
+            try out.print("  !{s}\n", .{release_name});
         }
         if (componentHasSlaHandlers(self.component)) {
             for (self.component.state_vars) |sv| {
                 if (releaseListContains(self.component.release_vars, sv.name)) continue;
                 try self.emitLoadState(out, sv.name, sv.name);
-                try out.writer().print("  !{s}\n", .{sv.name});
+                try out.print("  !{s}\n", .{sv.name});
             }
         }
-        try out.writer().writeAll("  !dom\n  !state\n  !ctx\n");
-        try out.writer().writeAll("  return\n\n");
+        try out.appendSlice("  !dom\n  !state\n  !ctx\n");
+        try out.appendSlice("  return\n\n");
     }
 
-    fn emitRouterInit(self: *const SaxLowerer, out: *std.ArrayList(u8)) !void {
+    fn emitRouterInit(self: *const SaxLowerer, out: *std.array_list.Managed(u8)) !void {
         if (self.component.route_pages.len == 0) return;
         const stem = try self.componentStem();
         defer self.allocator.free(stem);
@@ -1337,22 +1337,22 @@ pub const SaxLowerer = struct {
 
         const impl_name = try self.routerInitImplName();
         defer self.allocator.free(impl_name);
-        try out.writer().print("@export sax_{s}_router_init(path: ptr):\nL_ENTRY:\n  call @{s}(path)\n  return\n\n", .{ stem, impl_name });
-        try out.writer().print("@ffi_wrapper {s}(path: ptr):\nL_ENTRY:\n", .{impl_name});
-        try out.writer().print("  call @sax_router_replace(*{s}, {})\n", .{ router_path_name, self.component.route_pages[0].path.len });
-        try out.writer().print("  call @sax_router_init(*{s}, {})\n", .{ router_path_name, self.component.route_pages[0].path.len });
-        try out.writer().writeAll("  return\n\n");
+        try out.print("@export sax_{s}_router_init(path: ptr):\nL_ENTRY:\n  call @{s}(path)\n  return\n\n", .{ stem, impl_name });
+        try out.print("@ffi_wrapper {s}(path: ptr):\nL_ENTRY:\n", .{impl_name});
+        try out.print("  call @sax_router_replace(*{s}, {})\n", .{ router_path_name, self.component.route_pages[0].path.len });
+        try out.print("  call @sax_router_init(*{s}, {})\n", .{ router_path_name, self.component.route_pages[0].path.len });
+        try out.appendSlice("  return\n\n");
     }
 
-    pub fn lower(self: *SaxLowerer, out: *std.ArrayList(u8), options: LowerOptions) !void {
+    pub fn lower(self: *SaxLowerer, out: *std.array_list.Managed(u8), options: LowerOptions) !void {
         const previous_sla_base_dir = self.sla_base_dir;
         self.sla_base_dir = options.sla_base_dir;
         defer self.sla_base_dir = previous_sla_base_dir;
 
         for (self.component.orphan_lines) |line| {
-            try out.writer().print("{s}\n", .{line.text});
+            try out.print("{s}\n", .{line.text});
         }
-        if (self.component.orphan_lines.len != 0) try out.writer().writeByte('\n');
+        if (self.component.orphan_lines.len != 0) try out.append('\n');
 
         const state_size_name = try self.stateSizeConstName();
         defer self.allocator.free(state_size_name);
@@ -1365,25 +1365,25 @@ pub const SaxLowerer = struct {
         const ctx_dom_name = try self.ctxDomOffsetConstName();
         defer self.allocator.free(ctx_dom_name);
 
-        try out.writer().print("#def {s} = {}\n", .{ state_size_name, self.stateAllocSize() });
-        try out.writer().print("#def {s} = {}\n", .{ dom_size_name, self.domAllocSize() });
-        try out.writer().print("#def {s} = 16\n", .{ctx_size_name});
-        try out.writer().print("#def {s} = +0\n", .{ctx_state_name});
-        try out.writer().print("#def {s} = +8\n\n", .{ctx_dom_name});
+        try out.print("#def {s} = {}\n", .{ state_size_name, self.stateAllocSize() });
+        try out.print("#def {s} = {}\n", .{ dom_size_name, self.domAllocSize() });
+        try out.print("#def {s} = 16\n", .{ctx_size_name});
+        try out.print("#def {s} = +0\n", .{ctx_state_name});
+        try out.print("#def {s} = +8\n\n", .{ctx_dom_name});
 
         for (self.component.state_vars, 0..) |sv, idx| {
             const slot_name = try self.stateSlotConstName(sv.name);
             defer self.allocator.free(slot_name);
-            try out.writer().print("#def {s} = +{}\n", .{ slot_name, self.state_slots[idx].offset });
+            try out.print("#def {s} = +{}\n", .{ slot_name, self.state_slots[idx].offset });
         }
-        if (self.component.state_vars.len != 0) try out.writer().writeByte('\n');
+        if (self.component.state_vars.len != 0) try out.append('\n');
 
         for (self.component.dom_nodes, 0..) |node, idx| {
             const slot_name = try self.nodeSlotConstName(node.alias);
             defer self.allocator.free(slot_name);
-            try out.writer().print("#def {s} = +{}\n", .{ slot_name, self.node_slots[idx].handle_slot * 8 });
+            try out.print("#def {s} = +{}\n", .{ slot_name, self.node_slots[idx].handle_slot * 8 });
         }
-        if (self.component.dom_nodes.len != 0) try out.writer().writeByte('\n');
+        if (self.component.dom_nodes.len != 0) try out.append('\n');
 
         if (options.emit_shared_decls) try self.appendExternDecls(out);
         try self.appendStdImports(out);
@@ -1457,7 +1457,7 @@ test "lowerer emits counter-shaped sa for the docs example" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
@@ -1509,7 +1509,7 @@ test "lowerer emits lifecycle hooks for docs phase 2 shapes" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
@@ -1547,7 +1547,7 @@ test "lowerer emits onUpdate after render triggers" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
@@ -1575,7 +1575,7 @@ test "lowerer keeps alloc state buffers on the heap" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
@@ -1608,7 +1608,7 @@ test "lowerer emits read-only arithmetic for interpolation expressions" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
@@ -1645,7 +1645,7 @@ test "lowerer preserves typed state init and interpolation formatting" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
@@ -1687,7 +1687,7 @@ test "lowerer compiles sla handlers with injected state bindings" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
@@ -1728,7 +1728,7 @@ test "lowerer emits selective render for state writes" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
@@ -1757,7 +1757,7 @@ test "lowerer emits router metadata and init when pages are present" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
@@ -1786,7 +1786,7 @@ test "lowerer emits ffi wrapper bridge for handlers" {
     var lowerer = try SaxLowerer.init(std.testing.allocator, program.components[0]);
     defer lowerer.deinit();
 
-    var out = std.ArrayList(u8).init(std.testing.allocator);
+    var out = std.array_list.Managed(u8).init(std.testing.allocator);
     defer out.deinit();
     try lowerer.lower(&out, .{});
 
