@@ -9,7 +9,7 @@ fn pathFromRoot(b: *std.Build, sub_path: []const u8) []u8 {
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-    const sa_repo_root = b.option([]const u8, "sa-repo-root", "SA repository root used to resolve sa_std imports.") orelse "/home/vscode/projects/sci";
+    const sa_repo_root = b.option([]const u8, "sa-repo-root", "SA repository root used to resolve sa_std imports.") orelse "../sci";
     const sa_bin = b.option([]const u8, "sa-bin", "Path to the SA host binary used for SAX integration tests.") orelse b.pathJoin(&.{ sa_repo_root, "zig-out/bin/sa" });
     const llvm_include_dir = b.option([]const u8, "llvm-include-dir", "LLVM C API include directory.") orelse "/usr/lib/llvm-20/include";
     const llvm_lib_dir = b.option([]const u8, "llvm-lib-dir", "LLVM library directory.") orelse "/usr/lib/llvm-20/lib";
