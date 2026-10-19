@@ -1,4 +1,5 @@
 const std = @import("std");
+const sio = @import("sio");
 const plugin_api = @import("plugin_api");
 const parser = @import("sax/parser.zig");
 const lowerer = @import("sax/lowerer.zig");
@@ -21,11 +22,11 @@ const skills = [_]plugin_api.SkillSection{
 const SaxArtifacts = struct {
     component_name: []const u8,
     root_name: []u8,
-    sa_code: std.ArrayList(u8),
-    airlock_js: std.ArrayList(u8),
-    wgpu_airlock_js: ?std.ArrayList(u8),
-    sa3d_airlock_js: ?std.ArrayList(u8),
-    index_html: std.ArrayList(u8),
+    sa_code: std.array_list.Managed(u8),
+    airlock_js: std.array_list.Managed(u8),
+    wgpu_airlock_js: ?std.array_list.Managed(u8),
+    sa3d_airlock_js: ?std.array_list.Managed(u8),
+    index_html: std.array_list.Managed(u8),
 
     fn deinit(self: *SaxArtifacts, allocator: std.mem.Allocator) void {
         allocator.free(self.root_name);
@@ -39,8 +40,8 @@ const SaxArtifacts = struct {
 };
 
 const SidecarSupport = struct {
-    prelude: std.ArrayList(u8),
-    airlock_js: std.ArrayList(u8),
+    prelude: std.array_list.Managed(u8),
+    airlock_js: std.array_list.Managed(u8),
 
     fn deinit(self: *SidecarSupport) void {
         self.prelude.deinit();
@@ -145,7 +146,7 @@ fn isSaxCliError(err: anyerror) bool {
     };
 }
 
-fn writeSaxCliError(writer: std.io.AnyWriter, argv: []const []const u8, err: anyerror) !void {
+fn writeSaxCliError(writer: *std.Io.Writer, argv: []const []const u8, err: anyerror) !void {
     const sub = if (argv.len >= 3) argv[2] else "";
     const message = switch (err) {
         error.MissingSourcePath => "missing required SAX operand",
@@ -205,19 +206,19 @@ fn lowercaseName(allocator: std.mem.Allocator, text: []const u8) ![]u8 {
 
 fn ensureParentDir(path: []const u8) !void {
     if (std.fs.path.dirname(path)) |dir| {
-        if (dir.len != 0) try std.fs.cwd().makePath(dir);
+        if (dir.len != 0) try sio.cwd().makePath(dir);
     }
 }
 
 fn writeAllFile(path: []const u8, bytes: []const u8) !void {
     try ensureParentDir(path);
-    var file = try std.fs.cwd().createFile(path, .{ .truncate = true });
+    var file = try sio.cwd().createFile(path, .{ .truncate = true });
     defer file.close();
     try file.writeAll(bytes);
 }
 
-fn readSource(allocator: std.mem.Allocator, sax_file: []const u8, stderr: std.io.AnyWriter) ![]u8 {
-    return std.fs.cwd().readFileAlloc(allocator, sax_file, 16 * 1024 * 1024) catch |err| switch (err) {
+fn readSource(allocator: std.mem.Allocator, sax_file: []const u8, stderr: *std.Io.Writer) ![]u8 {
+    return sio.cwd().readFileAlloc(allocator, sax_file, 16 * 1024 * 1024) catch |err| switch (err) {
         error.FileNotFound => return error.FileNotFound,
         error.AccessDenied => return error.AccessDenied,
         error.IsDir => return error.NotDir,
@@ -269,12 +270,12 @@ fn sourceUsesSa3dRenderWgpu(source: []const u8) bool {
 }
 
 fn fileExists(path: []const u8) bool {
-    var file = std.fs.cwd().openFile(path, .{}) catch return false;
+    var file = sio.cwd().openFile(path, .{}) catch return false;
     file.close();
     return true;
 }
 
-fn addOwnedCandidate(candidates: *std.ArrayList([]u8), candidate: []u8) !void {
+fn addOwnedCandidate(candidates: *std.array_list.Managed([]u8), candidate: []u8) !void {
     errdefer candidates.allocator.free(candidate);
     for (candidates.items) |existing| {
         if (std.mem.eql(u8, existing, candidate)) {
@@ -285,16 +286,16 @@ fn addOwnedCandidate(candidates: *std.ArrayList([]u8), candidate: []u8) !void {
     try candidates.append(candidate);
 }
 
-fn addEnvDirCandidate(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), env_name: []const u8) !void {
-    const value = std.process.getEnvVarOwned(allocator, env_name) catch |err| switch (err) {
+fn addEnvDirCandidate(allocator: std.mem.Allocator, candidates: *std.array_list.Managed([]u8), env_name: []const u8) !void {
+    const value = sio.getEnvVarOwned(allocator, env_name) catch |err| switch (err) {
         error.EnvironmentVariableNotFound => return,
         else => return err,
     };
     try addOwnedCandidate(candidates, value);
 }
 
-fn addEnvAirlockDirCandidate(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), env_name: []const u8) !void {
-    const value = std.process.getEnvVarOwned(allocator, env_name) catch |err| switch (err) {
+fn addEnvAirlockDirCandidate(allocator: std.mem.Allocator, candidates: *std.array_list.Managed([]u8), env_name: []const u8) !void {
+    const value = sio.getEnvVarOwned(allocator, env_name) catch |err| switch (err) {
         error.EnvironmentVariableNotFound => return,
         else => return err,
     };
@@ -303,7 +304,7 @@ fn addEnvAirlockDirCandidate(allocator: std.mem.Allocator, candidates: *std.Arra
     try addOwnedCandidate(candidates, try allocator.dupe(u8, dir));
 }
 
-fn addShareDirFromPluginLib(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), spec: SidecarSpec, lib_path: []const u8) !void {
+fn addShareDirFromPluginLib(allocator: std.mem.Allocator, candidates: *std.array_list.Managed([]u8), spec: SidecarSpec, lib_path: []const u8) !void {
     const basename = std.fs.path.basename(lib_path);
     if (!std.mem.eql(u8, basename, spec.lib_name) and !std.mem.containsAtLeast(u8, lib_path, 1, spec.path_token)) return;
     const lib_dir = std.fs.path.dirname(lib_path) orelse return;
@@ -312,10 +313,10 @@ fn addShareDirFromPluginLib(allocator: std.mem.Allocator, candidates: *std.Array
     try addOwnedCandidate(candidates, try std.fs.path.join(allocator, &.{ prefix_dir, "share" }));
 }
 
-fn addInstalledShareCandidate(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), spec: SidecarSpec) !void {
-    const home = std.process.getEnvVarOwned(allocator, "SA_PLUGINS_HOME") catch |home_err| switch (home_err) {
+fn addInstalledShareCandidate(allocator: std.mem.Allocator, candidates: *std.array_list.Managed([]u8), spec: SidecarSpec) !void {
+    const home = sio.getEnvVarOwned(allocator, "SA_PLUGINS_HOME") catch |home_err| switch (home_err) {
         error.EnvironmentVariableNotFound => blk: {
-            const user_home = std.process.getEnvVarOwned(allocator, "HOME") catch |err| switch (err) {
+            const user_home = sio.getEnvVarOwned(allocator, "HOME") catch |err| switch (err) {
                 error.EnvironmentVariableNotFound => return,
                 else => return err,
             };
@@ -328,8 +329,8 @@ fn addInstalledShareCandidate(allocator: std.mem.Allocator, candidates: *std.Arr
     try addOwnedCandidate(candidates, try std.fs.path.join(allocator, &.{ home, "installed", spec.installed_name, "current", "share" }));
 }
 
-fn addPluginPathCandidates(allocator: std.mem.Allocator, candidates: *std.ArrayList([]u8), spec: SidecarSpec) !void {
-    const value = std.process.getEnvVarOwned(allocator, "SA_PLUGINS_PATH") catch |err| switch (err) {
+fn addPluginPathCandidates(allocator: std.mem.Allocator, candidates: *std.array_list.Managed([]u8), spec: SidecarSpec) !void {
+    const value = sio.getEnvVarOwned(allocator, "SA_PLUGINS_PATH") catch |err| switch (err) {
         error.EnvironmentVariableNotFound => return,
         else => return err,
     };
@@ -343,7 +344,7 @@ fn addPluginPathCandidates(allocator: std.mem.Allocator, candidates: *std.ArrayL
 }
 
 fn findSidecarShareDir(allocator: std.mem.Allocator, spec: SidecarSpec) !?[]u8 {
-    var candidates = std.ArrayList([]u8).init(allocator);
+    var candidates = std.array_list.Managed([]u8).init(allocator);
     defer {
         for (candidates.items) |candidate| allocator.free(candidate);
         candidates.deinit();
@@ -374,7 +375,7 @@ fn findSidecarShareDir(allocator: std.mem.Allocator, spec: SidecarSpec) !?[]u8 {
     return null;
 }
 
-fn loadSidecarSupport(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, spec: SidecarSpec) !SidecarSupport {
+fn loadSidecarSupport(allocator: std.mem.Allocator, stderr: *std.Io.Writer, spec: SidecarSpec) !SidecarSupport {
     const share_dir = (try findSidecarShareDir(allocator, spec)) orelse {
         try stderr.print("error[{s}]: {s} SAX source requires sidecar files; install sa_plugin_{s}, set {s}, or include {s} in SA_PLUGINS_PATH\n", .{
             spec.error_tag,
@@ -395,12 +396,12 @@ fn loadSidecarSupport(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, sp
     const airlock_path = try std.fs.path.join(allocator, &.{ share_dir, airlock_file });
     defer allocator.free(airlock_path);
 
-    const sai = try std.fs.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
+    const sai = try sio.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
     defer allocator.free(sai);
-    const sal = try std.fs.cwd().readFileAlloc(allocator, sal_path, 4 * 1024 * 1024);
+    const sal = try sio.cwd().readFileAlloc(allocator, sal_path, 4 * 1024 * 1024);
     defer allocator.free(sal);
 
-    var prelude = std.ArrayList(u8).init(allocator);
+    var prelude = std.array_list.Managed(u8).init(allocator);
     errdefer prelude.deinit();
     try prelude.appendSlice(sai);
     if (prelude.items.len == 0 or prelude.items[prelude.items.len - 1] != '\n') try prelude.append('\n');
@@ -408,16 +409,16 @@ fn loadSidecarSupport(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, sp
     if (prelude.items.len == 0 or prelude.items[prelude.items.len - 1] != '\n') try prelude.append('\n');
     try prelude.append('\n');
 
-    var airlock_js = std.ArrayList(u8).init(allocator);
+    var airlock_js = std.array_list.Managed(u8).init(allocator);
     errdefer airlock_js.deinit();
-    const airlock_bytes = try std.fs.cwd().readFileAlloc(allocator, airlock_path, 4 * 1024 * 1024);
+    const airlock_bytes = try sio.cwd().readFileAlloc(allocator, airlock_path, 4 * 1024 * 1024);
     defer allocator.free(airlock_bytes);
     try airlock_js.appendSlice(airlock_bytes);
 
     return .{ .prelude = prelude, .airlock_js = airlock_js };
 }
 
-fn loadSidecarPrelude(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, spec: SidecarSpec) !std.ArrayList(u8) {
+fn loadSidecarPrelude(allocator: std.mem.Allocator, stderr: *std.Io.Writer, spec: SidecarSpec) !std.array_list.Managed(u8) {
     const share_dir = (try findSidecarShareDir(allocator, spec)) orelse {
         try stderr.print("error[{s}]: {s} SAX source requires sidecar files; install sa_plugin_{s}, set {s}, or include {s} in SA_PLUGINS_PATH\n", .{
             spec.error_tag,
@@ -435,12 +436,12 @@ fn loadSidecarPrelude(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, sp
     const sal_path = try std.fs.path.join(allocator, &.{ share_dir, spec.sal_file });
     defer allocator.free(sal_path);
 
-    const sai = try std.fs.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
+    const sai = try sio.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
     defer allocator.free(sai);
-    const sal = try std.fs.cwd().readFileAlloc(allocator, sal_path, 4 * 1024 * 1024);
+    const sal = try sio.cwd().readFileAlloc(allocator, sal_path, 4 * 1024 * 1024);
     defer allocator.free(sal);
 
-    var prelude = std.ArrayList(u8).init(allocator);
+    var prelude = std.array_list.Managed(u8).init(allocator);
     errdefer prelude.deinit();
     try prelude.appendSlice(sai);
     if (prelude.items.len == 0 or prelude.items[prelude.items.len - 1] != '\n') try prelude.append('\n');
@@ -450,7 +451,7 @@ fn loadSidecarPrelude(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, sp
     return prelude;
 }
 
-fn loadSidecarSai(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, spec: SidecarSpec) !std.ArrayList(u8) {
+fn loadSidecarSai(allocator: std.mem.Allocator, stderr: *std.Io.Writer, spec: SidecarSpec) !std.array_list.Managed(u8) {
     const share_dir = (try findSidecarShareDir(allocator, spec)) orelse {
         try stderr.print("error[{s}]: {s} SAX source requires interface files; install sa_plugin_{s}, set {s}, or include {s} in SA_PLUGINS_PATH\n", .{
             spec.error_tag,
@@ -465,10 +466,10 @@ fn loadSidecarSai(allocator: std.mem.Allocator, stderr: std.io.AnyWriter, spec: 
 
     const sai_path = try std.fs.path.join(allocator, &.{ share_dir, spec.sai_file });
     defer allocator.free(sai_path);
-    const sai = try std.fs.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
+    const sai = try sio.cwd().readFileAlloc(allocator, sai_path, 1024 * 1024);
     defer allocator.free(sai);
 
-    var prelude = std.ArrayList(u8).init(allocator);
+    var prelude = std.array_list.Managed(u8).init(allocator);
     errdefer prelude.deinit();
     try prelude.appendSlice(sai);
     if (prelude.items.len == 0 or prelude.items[prelude.items.len - 1] != '\n') try prelude.append('\n');
@@ -486,7 +487,7 @@ fn parseErrorName(err: parser.ParseError) []const u8 {
     };
 }
 
-fn writeParseError(stderr: std.io.AnyWriter, sax_file: []const u8, err: parser.ParseError) !void {
+fn writeParseError(stderr: *std.Io.Writer, sax_file: []const u8, err: parser.ParseError) !void {
     try stderr.print("error[SA-SAX-CHECK]: {s} while parsing {s}\n", .{ parseErrorName(err), sax_file });
 }
 
@@ -501,7 +502,7 @@ fn validationErrorName(err: ValidationError) []const u8 {
     };
 }
 
-fn writeValidationFailure(stderr: std.io.AnyWriter, failure: ValidationFailure) !void {
+fn writeValidationFailure(stderr: *std.Io.Writer, failure: ValidationFailure) !void {
     try stderr.print("error[SA-SAX-CHECK]: {s} in component {s}", .{
         validationErrorName(failure.err),
         failure.component_name,
@@ -518,7 +519,7 @@ fn sourceLineAt(source: []const u8, wanted_line: u32) []const u8 {
     var idx: usize = 0;
     while (idx <= source.len) : (idx += 1) {
         if (idx == source.len or source[idx] == '\n') {
-            if (line_no == wanted_line) return std.mem.trimRight(u8, source[start..idx], "\r");
+            if (line_no == wanted_line) return std.mem.trimEnd(u8, source[start..idx], "\r");
             line_no += 1;
             start = idx + 1;
         }
@@ -527,7 +528,7 @@ fn sourceLineAt(source: []const u8, wanted_line: u32) []const u8 {
 }
 
 fn writeSlaHandlerCompileFailure(
-    stderr: std.io.AnyWriter,
+    stderr: *std.Io.Writer,
     sax_file: []const u8,
     source: []const u8,
     failure: lowerer.SlaHandlerCompileFailure,
@@ -638,7 +639,7 @@ fn compileSaxArtifacts(
     allocator: std.mem.Allocator,
     sax_file: []const u8,
     source: []const u8,
-    stderr: std.io.AnyWriter,
+    stderr: *std.Io.Writer,
 ) !SaxArtifacts {
     var sax_parser = parser.SaxParser.init(allocator, source);
     var program = sax_parser.parse() catch |err| {
@@ -663,12 +664,12 @@ fn compileSaxArtifacts(
     const uses_sa3d_prelude = sourceUsesSa3dPrelude(source);
     const uses_sa3d_airlock = sourceUsesSa3dAirlock(source);
     const needs_wgpu_prelude = uses_wgpu and !uses_sa3d_prelude;
-    var wgpu_airlock_js: ?std.ArrayList(u8) = null;
+    var wgpu_airlock_js: ?std.array_list.Managed(u8) = null;
     errdefer if (wgpu_airlock_js) |*js| js.deinit();
-    var sa3d_airlock_js: ?std.ArrayList(u8) = null;
+    var sa3d_airlock_js: ?std.array_list.Managed(u8) = null;
     errdefer if (sa3d_airlock_js) |*js| js.deinit();
 
-    var sa_code = std.ArrayList(u8).init(allocator);
+    var sa_code = std.array_list.Managed(u8).init(allocator);
     errdefer sa_code.deinit();
     if (needs_wgpu_prelude) {
         var wgpu_support = try loadSidecarSupport(allocator, stderr, wgpu_sidecar);
@@ -692,10 +693,10 @@ fn compileSaxArtifacts(
         const airlock_file = wgpu_sidecar.airlock_file orelse return error.SaxCheckFailed;
         const airlock_path = try std.fs.path.join(allocator, &.{ share_dir, airlock_file });
         defer allocator.free(airlock_path);
-        const airlock_bytes = try std.fs.cwd().readFileAlloc(allocator, airlock_path, 4 * 1024 * 1024);
+        const airlock_bytes = try sio.cwd().readFileAlloc(allocator, airlock_path, 4 * 1024 * 1024);
         defer allocator.free(airlock_bytes);
 
-        var airlock_js = std.ArrayList(u8).init(allocator);
+        var airlock_js = std.array_list.Managed(u8).init(allocator);
         errdefer airlock_js.deinit();
         try airlock_js.appendSlice(airlock_bytes);
         wgpu_airlock_js = airlock_js;
@@ -730,12 +731,12 @@ fn compileSaxArtifacts(
             },
             else => return err,
         };
-        if (idx + 1 < program.components.len) try sa_code.writer().writeByte('\n');
+        if (idx + 1 < program.components.len) try sa_code.append('\n');
     }
 
     const root_name = try lowercaseName(allocator, program.components[0].name);
     errdefer allocator.free(root_name);
-    try sa_code.writer().print("@export sax_app_init() -> ptr:\nL_ENTRY:\n  ctx = call @sax_{s}_init()\n  return ctx\n\n", .{root_name});
+    try sa_code.print("@export sax_app_init() -> ptr:\nL_ENTRY:\n  ctx = call @sax_{s}_init()\n  return ctx\n\n", .{root_name});
 
     var airlock_generator = airlock_gen.AirlockGenerator.init(allocator);
     const airlock_js = try airlock_generator.generateAirlockJSWithOptions(.{ .wgpu = uses_wgpu, .sa3d = uses_sa3d_airlock });
@@ -774,8 +775,8 @@ fn parseOutDir(argv: []const []const u8, start: usize) !?[]const u8 {
 fn executeSaxCheck(
     ctx: *const plugin_api.Context,
     sax_file: []const u8,
-    stdout: std.io.AnyWriter,
-    stderr: std.io.AnyWriter,
+    stdout: *std.Io.Writer,
+    stderr: *std.Io.Writer,
 ) !u8 {
     const source = try readSource(ctx.allocator, sax_file, stderr);
     defer ctx.allocator.free(source);
@@ -805,8 +806,8 @@ fn executeSaxBuild(
     ctx: *const plugin_api.Context,
     sax_file: []const u8,
     out_dir: []const u8,
-    stdout: std.io.AnyWriter,
-    stderr: std.io.AnyWriter,
+    stdout: *std.Io.Writer,
+    stderr: *std.Io.Writer,
 ) !u8 {
     const source = try readSource(ctx.allocator, sax_file, stderr);
     defer ctx.allocator.free(source);
@@ -862,8 +863,8 @@ fn executeSaxBuild(
     return 0;
 }
 
-fn executeSaxNew(ctx: *const plugin_api.Context, project_name: []const u8, stdout: std.io.AnyWriter) !u8 {
-    try std.fs.cwd().makePath(project_name);
+fn executeSaxNew(ctx: *const plugin_api.Context, project_name: []const u8, stdout: *std.Io.Writer) !u8 {
+    try sio.cwd().makePath(project_name);
 
     const sax_template =
         \\<Component name="App">
@@ -932,7 +933,7 @@ fn executeSaxNew(ctx: *const plugin_api.Context, project_name: []const u8, stdou
     return 0;
 }
 
-fn runSaxCommandImpl(ctx: *const plugin_api.Context, argv: []const []const u8, stdout: std.io.AnyWriter, stderr: std.io.AnyWriter) anyerror!?u8 {
+fn runSaxCommandImpl(ctx: *const plugin_api.Context, argv: []const []const u8, stdout: *std.Io.Writer, stderr: *std.Io.Writer) anyerror!?u8 {
     if (argv.len < 2) return null;
     if (!std.mem.eql(u8, argv[1], "sax")) return null;
     if (argv.len < 3) return error.MissingSourcePath;
@@ -961,16 +962,41 @@ fn runSaxCommandImpl(ctx: *const plugin_api.Context, argv: []const []const u8, s
     return error.UnknownCommand;
 }
 
-fn anyWriterFromHostStream(stream: plugin_api.HostStream, storage: *plugin_api.HostStream) std.io.AnyWriter {
-    storage.* = stream;
-    return .{ .context = storage, .writeFn = struct {
-        fn write(ctx: *const anyopaque, bytes: []const u8) anyerror!usize {
-            const hs = @as(*const plugin_api.HostStream, @ptrCast(@alignCast(ctx)));
-            const write_all = hs.write_all orelse return error.WriteFailed;
-            if (write_all(hs.ctx, bytes.ptr, bytes.len) != @intFromEnum(plugin_api.AbiStatus.ok)) return error.WriteFailed;
-            return bytes.len;
+const StreamWriterCtx = struct {
+    stream: plugin_api.HostStream,
+    io_writer: std.Io.Writer = .{ .buffer = &.{}, .end = 0, .vtable = &vtable },
+    storage: [8192]u8 = std.mem.zeroes([8192]u8),
+
+    const vtable: std.Io.Writer.VTable = .{ .drain = drain };
+
+    fn drain(w: *std.Io.Writer, data: []const []const u8, splat: usize) std.Io.Writer.Error!usize {
+        const self: *StreamWriterCtx = @fieldParentPtr("io_writer", w);
+        const write_all = self.stream.write_all orelse return error.WriteFailed;
+        const ctx = self.stream.ctx;
+        if (w.end != 0) {
+            if (write_all(ctx, w.buffer[0..w.end].ptr, w.end) != @intFromEnum(plugin_api.AbiStatus.ok)) return error.WriteFailed;
+            w.end = 0;
         }
-    }.write };
+        var total: usize = 0;
+        for (data, 0..) |slice, i| {
+            const reps: usize = if (i == data.len - 1) splat else 1;
+            var r: usize = 0;
+            while (r < reps) : (r += 1) {
+                if (slice.len == 0) continue;
+                if (write_all(ctx, slice.ptr, slice.len) != @intFromEnum(plugin_api.AbiStatus.ok)) return error.WriteFailed;
+                total += slice.len;
+            }
+        }
+        return total;
+    }
+};
+
+fn anyWriterFromHostStream(stream: plugin_api.HostStream, storage: *StreamWriterCtx) ?*std.Io.Writer {
+    if (stream.write_all == null or stream.ctx == null) return null;
+    storage.* = .{ .stream = stream };
+    storage.io_writer.buffer = &storage.storage;
+    storage.io_writer.end = 0;
+    return &storage.io_writer;
 }
 
 fn runSaxCommandAbi(ctx: *const plugin_api.Context, argv: [*]const [*:0]const u8, argv_len: usize, stdout: plugin_api.HostStream, stderr: plugin_api.HostStream, out_code: *u8) callconv(.c) u32 {
@@ -981,17 +1007,21 @@ fn runSaxCommandAbi(ctx: *const plugin_api.Context, argv: [*]const [*:0]const u8
     const args = cArgvToSlice(argv, argv_len, allocator) catch return @intFromEnum(plugin_api.AbiStatus.failed);
     defer allocator.free(args);
 
-    var stdout_storage = stdout;
-    var stderr_storage = stderr;
-    const stdout_writer = anyWriterFromHostStream(stdout, &stdout_storage);
-    const stderr_writer = anyWriterFromHostStream(stderr, &stderr_storage);
+    var stdout_storage: StreamWriterCtx = undefined;
+    var stderr_storage: StreamWriterCtx = undefined;
+    const stdout_writer = anyWriterFromHostStream(stdout, &stdout_storage) orelse return @intFromEnum(plugin_api.AbiStatus.failed);
+    const stderr_writer = anyWriterFromHostStream(stderr, &stderr_storage) orelse return @intFromEnum(plugin_api.AbiStatus.failed);
 
     const result = runSaxCommandImpl(&local_ctx, args, stdout_writer, stderr_writer) catch |err| {
         if (!isSaxCliError(err)) return @intFromEnum(plugin_api.AbiStatus.failed);
         writeSaxCliError(stderr_writer, args, err) catch return @intFromEnum(plugin_api.AbiStatus.failed);
+        stdout_writer.flush() catch return @intFromEnum(plugin_api.AbiStatus.failed);
+        stderr_writer.flush() catch return @intFromEnum(plugin_api.AbiStatus.failed);
         out_code.* = saxCliExitCode(err);
         return @intFromEnum(plugin_api.AbiStatus.ok);
     };
+    stdout_writer.flush() catch return @intFromEnum(plugin_api.AbiStatus.failed);
+    stderr_writer.flush() catch return @intFromEnum(plugin_api.AbiStatus.failed);
     if (result) |code| {
         out_code.* = code;
         return @intFromEnum(plugin_api.AbiStatus.ok);
@@ -1017,7 +1047,7 @@ pub export fn saasm_plugin_descriptor_v1_fn(out: *plugin_api.PluginDescriptor) c
 }
 
 const CaptureStream = struct {
-    buffer: *std.ArrayList(u8),
+    buffer: *std.array_list.Managed(u8),
 };
 
 fn captureWriteAll(ctx: ?*anyopaque, bytes: [*]const u8, len: usize) callconv(.c) u32 {
@@ -1038,7 +1068,7 @@ fn dupeZArgs(allocator: std.mem.Allocator, argv: []const []const u8) ![][*:0]con
         for (out[0..copied]) |arg| allocator.free(std.mem.sliceTo(arg, 0));
     }
     for (argv, 0..) |arg, idx| {
-        out[idx] = try allocator.dupeZ(u8, arg);
+        out[idx] = try allocator.dupeSentinel(u8, arg, 0);
         copied += 1;
     }
     return out;
@@ -1049,7 +1079,7 @@ fn freeZArgs(allocator: std.mem.Allocator, argv: [][*:0]const u8) void {
     allocator.free(argv);
 }
 
-fn invokeForTest(argv: []const []const u8, stdout_buffer: *std.ArrayList(u8), stderr_buffer: *std.ArrayList(u8), allocator: std.mem.Allocator) !u8 {
+fn invokeForTest(argv: []const []const u8, stdout_buffer: *std.array_list.Managed(u8), stderr_buffer: *std.array_list.Managed(u8), allocator: std.mem.Allocator) !u8 {
     var ctx = plugin_api.Context{ .allocator = allocator };
     var stdout_ctx = CaptureStream{ .buffer = stdout_buffer };
     var stderr_ctx = CaptureStream{ .buffer = stderr_buffer };
@@ -1083,17 +1113,17 @@ const valid_counter_sax =
 ;
 
 fn expectSaxCheckFailure(source: []const u8, file_name: []const u8, expected_error: []const u8) !void {
-    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    var original_cwd = try sio.cwd().openDir(".", .{});
     defer original_cwd.close();
     var tmp = std.testing.tmpDir(.{ .iterate = true });
     defer tmp.cleanup();
-    try tmp.dir.setAsCwd();
+    try (sio.Dir{ .inner = tmp.dir }).setAsCwd();
     defer original_cwd.setAsCwd() catch {};
 
     try writeAllFile(file_name, source);
-    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stdout_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stdout_buf.deinit();
-    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stderr_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stderr_buf.deinit();
 
     const code = try invokeForTest(&.{ "sa", "sax", "check", file_name }, &stdout_buf, &stderr_buf, std.testing.allocator);
@@ -1103,9 +1133,9 @@ fn expectSaxCheckFailure(source: []const u8, file_name: []const u8, expected_err
 }
 
 fn expectSaxCliFailure(argv: []const []const u8, expected_code: u8, expected_error: []const u8) !void {
-    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stdout_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stdout_buf.deinit();
-    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stderr_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stderr_buf.deinit();
 
     const code = try invokeForTest(argv, &stdout_buf, &stderr_buf, std.testing.allocator);
@@ -1132,24 +1162,24 @@ test "sax plugin abi maps missing source files to io exit code" {
 }
 
 test "sax plugin check parses and lowers a real component" {
-    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    var original_cwd = try sio.cwd().openDir(".", .{});
     defer original_cwd.close();
     var tmp = std.testing.tmpDir(.{ .iterate = true });
     defer tmp.cleanup();
-    try tmp.dir.setAsCwd();
+    try (sio.Dir{ .inner = tmp.dir }).setAsCwd();
     defer original_cwd.setAsCwd() catch {};
 
     try writeAllFile("counter.sax", valid_counter_sax);
-    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stdout_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stdout_buf.deinit();
-    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stderr_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stderr_buf.deinit();
 
     const code = try invokeForTest(&.{ "sa", "sax", "check", "counter.sax" }, &stdout_buf, &stderr_buf, std.testing.allocator);
     try std.testing.expectEqual(@as(u8, 0), code);
     try std.testing.expect(std.mem.containsAtLeast(u8, stdout_buf.items, 1, "SAX check passed"));
     try std.testing.expectEqual(@as(usize, 0), stderr_buf.items.len);
-    try std.testing.expectError(error.FileNotFound, std.fs.cwd().openFile("dist/app.sa", .{}));
+    try std.testing.expectError(error.FileNotFound, sio.cwd().openFile("dist/app.sa", .{}));
 }
 
 test "sax plugin check accepts mixed sa and sla handlers" {
@@ -1174,17 +1204,17 @@ test "sax plugin check accepts mixed sa and sla handlers" {
         \\
     ;
 
-    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    var original_cwd = try sio.cwd().openDir(".", .{});
     defer original_cwd.close();
     var tmp = std.testing.tmpDir(.{ .iterate = true });
     defer tmp.cleanup();
-    try tmp.dir.setAsCwd();
+    try (sio.Dir{ .inner = tmp.dir }).setAsCwd();
     defer original_cwd.setAsCwd() catch {};
 
     try writeAllFile("mixed.sax", mixed_source);
-    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stdout_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stdout_buf.deinit();
-    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stderr_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stderr_buf.deinit();
 
     const code = try invokeForTest(&.{ "sa", "sax", "check", "mixed.sax" }, &stdout_buf, &stderr_buf, std.testing.allocator);
@@ -1215,19 +1245,19 @@ test "sax plugin check resolves sla handler imports relative to sax file" {
         \\
     ;
 
-    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    var original_cwd = try sio.cwd().openDir(".", .{});
     defer original_cwd.close();
     var tmp = std.testing.tmpDir(.{ .iterate = true });
     defer tmp.cleanup();
-    try tmp.dir.setAsCwd();
+    try (sio.Dir{ .inner = tmp.dir }).setAsCwd();
     defer original_cwd.setAsCwd() catch {};
-    try std.fs.cwd().makePath("pages");
+    try sio.cwd().makePath("pages");
 
     try writeAllFile("pages/imported.sax", imported_source);
     try writeAllFile("pages/helpers.sla", helper_source);
-    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stdout_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stdout_buf.deinit();
-    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stderr_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stderr_buf.deinit();
 
     const code = try invokeForTest(&.{ "sa", "sax", "check", "pages/imported.sax" }, &stdout_buf, &stderr_buf, std.testing.allocator);
@@ -1256,17 +1286,17 @@ test "sax plugin check reports sla handler compile failures with source location
 }
 
 test "sax plugin build emits frontend artifacts from real sax source" {
-    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    var original_cwd = try sio.cwd().openDir(".", .{});
     defer original_cwd.close();
     var tmp = std.testing.tmpDir(.{ .iterate = true });
     defer tmp.cleanup();
-    try tmp.dir.setAsCwd();
+    try (sio.Dir{ .inner = tmp.dir }).setAsCwd();
     defer original_cwd.setAsCwd() catch {};
 
     try writeAllFile("counter.sax", valid_counter_sax);
-    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stdout_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stdout_buf.deinit();
-    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stderr_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stderr_buf.deinit();
 
     const code = try invokeForTest(&.{ "sa", "sax", "build", "counter.sax", "--out-dir", "public" }, &stdout_buf, &stderr_buf, std.testing.allocator);
@@ -1275,22 +1305,22 @@ test "sax plugin build emits frontend artifacts from real sax source" {
     try std.testing.expect(!std.mem.containsAtLeast(u8, stdout_buf.items, 1, "sax build:"));
     try std.testing.expectEqual(@as(usize, 0), stderr_buf.items.len);
 
-    const sa = try std.fs.cwd().readFileAlloc(std.testing.allocator, "public/app.sa", 2 * 1024 * 1024);
+    const sa = try sio.cwd().readFileAlloc(std.testing.allocator, "public/app.sa", 2 * 1024 * 1024);
     defer std.testing.allocator.free(sa);
     try std.testing.expect(std.mem.containsAtLeast(u8, sa, 1, "@export sax_counter_init()"));
     try std.testing.expect(std.mem.containsAtLeast(u8, sa, 1, "@export sax_app_init()"));
 
-    const airlock = try std.fs.cwd().readFileAlloc(std.testing.allocator, "public/airlock.js", 2 * 1024 * 1024);
+    const airlock = try sio.cwd().readFileAlloc(std.testing.allocator, "public/airlock.js", 2 * 1024 * 1024);
     defer std.testing.allocator.free(airlock);
     try std.testing.expect(std.mem.containsAtLeast(u8, airlock, 1, "export const sax_airlock"));
     try std.testing.expect(std.mem.containsAtLeast(u8, airlock, 1, "const SAX_WGPU_REQUIRED = false;"));
-    try std.testing.expectError(error.FileNotFound, std.fs.cwd().openFile("public/wgpu_airlock.js", .{}));
+    try std.testing.expectError(error.FileNotFound, sio.cwd().openFile("public/wgpu_airlock.js", .{}));
 
-    const html = try std.fs.cwd().readFileAlloc(std.testing.allocator, "public/index.html", 2 * 1024 * 1024);
+    const html = try sio.cwd().readFileAlloc(std.testing.allocator, "public/index.html", 2 * 1024 * 1024);
     defer std.testing.allocator.free(html);
     try std.testing.expect(std.mem.containsAtLeast(u8, html, 1, "Content-Security-Policy"));
 
-    const wasm = try std.fs.cwd().readFileAlloc(std.testing.allocator, "public/app.wasm", 1024);
+    const wasm = try sio.cwd().readFileAlloc(std.testing.allocator, "public/app.wasm", 1024);
     defer std.testing.allocator.free(wasm);
     try std.testing.expect(wasm.len > 8);
     try std.testing.expectEqualSlices(u8, &.{ 0x00, 'a', 's', 'm', 0x01, 0x00, 0x00, 0x00 }, wasm[0..8]);
@@ -1405,16 +1435,16 @@ test "sax plugin check rejects DOM attrs outside the whitelist" {
 }
 
 test "sax plugin new creates a usable project scaffold" {
-    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    var original_cwd = try sio.cwd().openDir(".", .{});
     defer original_cwd.close();
     var tmp = std.testing.tmpDir(.{ .iterate = true });
     defer tmp.cleanup();
-    try tmp.dir.setAsCwd();
+    try (sio.Dir{ .inner = tmp.dir }).setAsCwd();
     defer original_cwd.setAsCwd() catch {};
 
-    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stdout_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stdout_buf.deinit();
-    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stderr_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stderr_buf.deinit();
 
     const code = try invokeForTest(&.{ "sa", "sax", "new", "demo" }, &stdout_buf, &stderr_buf, std.testing.allocator);
@@ -1422,11 +1452,11 @@ test "sax plugin new creates a usable project scaffold" {
     try std.testing.expect(std.mem.containsAtLeast(u8, stdout_buf.items, 1, "SAX project created"));
     try std.testing.expectEqual(@as(usize, 0), stderr_buf.items.len);
 
-    const app = try std.fs.cwd().readFileAlloc(std.testing.allocator, "demo/app.sax", 1024 * 1024);
+    const app = try sio.cwd().readFileAlloc(std.testing.allocator, "demo/app.sax", 1024 * 1024);
     defer std.testing.allocator.free(app);
     try std.testing.expect(std.mem.containsAtLeast(u8, app, 1, "<Component name=\"App\">"));
 
-    const package_json = try std.fs.cwd().readFileAlloc(std.testing.allocator, "demo/package.json", 1024 * 1024);
+    const package_json = try sio.cwd().readFileAlloc(std.testing.allocator, "demo/package.json", 1024 * 1024);
     defer std.testing.allocator.free(package_json);
     try std.testing.expect(std.mem.containsAtLeast(u8, package_json, 1, "\"build\": \"sa sax build app.sax\""));
 }

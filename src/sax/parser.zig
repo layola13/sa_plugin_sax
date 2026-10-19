@@ -203,7 +203,7 @@ fn trimText(text: []const u8) []const u8 {
 }
 
 fn stripLeadingSpace(text: []const u8) []const u8 {
-    return std.mem.trimLeft(u8, text, " \t");
+    return std.mem.trimStart(u8, text, " \t");
 }
 
 fn splitLines(text: []const u8) std.mem.SplitIterator(u8, .scalar) {
@@ -225,7 +225,7 @@ fn isSupportedAttr(name: []const u8) bool {
 }
 
 fn sanitizeName(allocator: std.mem.Allocator, text: []const u8) ![]const u8 {
-    var out = std.ArrayList(u8).init(allocator);
+    var out = std.array_list.Managed(u8).init(allocator);
     errdefer out.deinit();
 
     for (text, 0..) |c, idx| {
@@ -302,7 +302,7 @@ fn parseTextPieces(allocator: std.mem.Allocator, raw_text: []const u8) ParseErro
     const trimmed = trimText(raw_text);
     if (trimmed.len == 0) return &.{};
 
-    var pieces = std.ArrayList(TextPiece).init(allocator);
+    var pieces = std.array_list.Managed(TextPiece).init(allocator);
     errdefer pieces.deinit();
 
     var cursor: usize = 0;
@@ -337,7 +337,7 @@ fn parseAttrValue(allocator: std.mem.Allocator, text: []const u8) ParseError!Att
 
 fn parseExpr(allocator: std.mem.Allocator, expr: []const u8) ParseError!Expr {
     const expr_copy = try allocator.dupe(u8, expr);
-    var deps = std.ArrayList([]const u8).init(allocator);
+    var deps = std.array_list.Managed([]const u8).init(allocator);
     errdefer deps.deinit();
 
     var tokens = std.mem.tokenizeAny(u8, expr, " \t\r\n()+-*/,%<>!&|^:=.");
@@ -371,14 +371,14 @@ fn hasNativeEscape(text: []const u8) bool {
 const DomBuilder = struct {
     allocator: std.mem.Allocator,
     component_name: []const u8,
-    nodes: std.ArrayList(DomNode),
+    nodes: std.array_list.Managed(DomNode),
     alias_counts: std.StringHashMap(usize),
 
     fn init(allocator: std.mem.Allocator, component_name: []const u8) DomBuilder {
         return .{
             .allocator = allocator,
             .component_name = component_name,
-            .nodes = std.ArrayList(DomNode).init(allocator),
+            .nodes = std.array_list.Managed(DomNode).init(allocator),
             .alias_counts = std.StringHashMap(usize).init(allocator),
         };
     }
@@ -417,7 +417,7 @@ const Parser = struct {
         errdefer arena.deinit();
         const a = arena.allocator();
 
-        var components = std.ArrayList(Component).init(a);
+        var components = std.array_list.Managed(Component).init(a);
         errdefer components.deinit();
 
         var pos: usize = 0;
@@ -444,7 +444,7 @@ const Parser = struct {
         const name = try self.parseQuotedIdent(allocator, pos);
         try self.expectChar(pos, '>');
 
-        var state_vars = std.ArrayList(StateVar).init(allocator);
+        var state_vars = std.array_list.Managed(StateVar).init(allocator);
         defer state_vars.deinit();
         var state_names = std.StringHashMap(void).init(allocator);
         defer state_names.deinit();
@@ -452,26 +452,26 @@ const Parser = struct {
         var dom_builder = DomBuilder.init(allocator, name);
         defer dom_builder.deinit();
 
-        var handlers = std.ArrayList(Handler).init(allocator);
+        var handlers = std.array_list.Managed(Handler).init(allocator);
         defer handlers.deinit();
         var handler_names = std.StringHashMap(void).init(allocator);
         defer handler_names.deinit();
 
-        var lifecycle_hooks = std.ArrayList(LifecycleHook).init(allocator);
+        var lifecycle_hooks = std.array_list.Managed(LifecycleHook).init(allocator);
         defer lifecycle_hooks.deinit();
         var lifecycle_names = std.StringHashMap(void).init(allocator);
         defer lifecycle_names.deinit();
 
-        var route_pages = std.ArrayList(RoutePage).init(allocator);
+        var route_pages = std.array_list.Managed(RoutePage).init(allocator);
         defer route_pages.deinit();
 
-        var release_vars = std.ArrayList([]const u8).init(allocator);
+        var release_vars = std.array_list.Managed([]const u8).init(allocator);
         defer release_vars.deinit();
 
-        var orphan_lines = std.ArrayList(BodyLine).init(allocator);
+        var orphan_lines = std.array_list.Managed(BodyLine).init(allocator);
         defer orphan_lines.deinit();
 
-        var sla_import_lines = std.ArrayList([]const u8).init(allocator);
+        var sla_import_lines = std.array_list.Managed([]const u8).init(allocator);
         defer sla_import_lines.deinit();
 
         self.skipWhitespaceAndComments(pos);
@@ -529,7 +529,7 @@ const Parser = struct {
             if (isSlaFunctionHeader(trimmed)) {
                 var handler = try self.parseSlaHandler(allocator, pos);
                 if (sla_import_lines.items.len != 0) {
-                    var body = std.ArrayList(u8).init(allocator);
+                    var body = std.array_list.Managed(u8).init(allocator);
                     for (sla_import_lines.items) |import_line| {
                         try body.appendSlice(import_line);
                         try body.append('\n');
@@ -593,7 +593,7 @@ const Parser = struct {
         nodes: []const DomNode,
     ) ParseError![]usize {
         _ = self;
-        var roots = std.ArrayList(usize).init(allocator);
+        var roots = std.array_list.Managed(usize).init(allocator);
         defer roots.deinit();
         for (nodes, 0..) |_, idx| {
             var is_child = false;
@@ -616,7 +616,7 @@ const Parser = struct {
         self: *Parser,
         allocator: std.mem.Allocator,
         pos: *usize,
-        state_vars: *std.ArrayList(StateVar),
+        state_vars: *std.array_list.Managed(StateVar),
         state_names: *std.StringHashMap(void),
     ) ParseError!void {
         try self.expectString(pos, "<state>");
@@ -662,7 +662,7 @@ const Parser = struct {
         }
     }
 
-    fn parseDomChunk(self: *Parser, allocator: std.mem.Allocator, builder: *DomBuilder, route_pages: *std.ArrayList(RoutePage), chunk: []const u8) ParseError!void {
+    fn parseDomChunk(self: *Parser, allocator: std.mem.Allocator, builder: *DomBuilder, route_pages: *std.array_list.Managed(RoutePage), chunk: []const u8) ParseError!void {
         var pos: usize = 0;
         while (pos < chunk.len) {
             self.skipChunkWhitespace(chunk, &pos);
@@ -679,7 +679,7 @@ const Parser = struct {
         }
     }
 
-    fn parseDomNode(self: *Parser, allocator: std.mem.Allocator, builder: *DomBuilder, route_pages: *std.ArrayList(RoutePage), chunk: []const u8, pos: *usize) ParseError!usize {
+    fn parseDomNode(self: *Parser, allocator: std.mem.Allocator, builder: *DomBuilder, route_pages: *std.array_list.Managed(RoutePage), chunk: []const u8, pos: *usize) ParseError!usize {
         try self.expectChunkChar(chunk, pos, '<');
         if (pos.* < chunk.len and chunk[pos.*] == '/') return ParseError.InvalidDOMTag;
 
@@ -692,7 +692,7 @@ const Parser = struct {
         if (std.mem.eql(u8, tag, "Page")) return ParseError.InvalidPage;
         const alias = if (std.mem.indexOfScalar(u8, tag, '-') != null) try sanitizeName(allocator, tag) else try builder.makeAlias(tag);
 
-        var attrs = std.ArrayList(Attribute).init(allocator);
+        var attrs = std.array_list.Managed(Attribute).init(allocator);
         defer attrs.deinit();
 
         while (true) {
@@ -728,7 +728,7 @@ const Parser = struct {
         });
         const idx = builder.nodes.items.len - 1;
 
-        var children = std.ArrayList(DomChild).init(allocator);
+        var children = std.array_list.Managed(DomChild).init(allocator);
         defer children.deinit();
 
         while (pos.* < chunk.len) {
@@ -761,7 +761,7 @@ const Parser = struct {
         return idx;
     }
 
-    fn parseRouterBlock(self: *Parser, allocator: std.mem.Allocator, route_pages: *std.ArrayList(RoutePage), chunk: []const u8, pos: *usize) ParseError!void {
+    fn parseRouterBlock(self: *Parser, allocator: std.mem.Allocator, route_pages: *std.array_list.Managed(RoutePage), chunk: []const u8, pos: *usize) ParseError!void {
         self.skipChunkInlineSpace(chunk, pos);
         if (pos.* < chunk.len and chunk[pos.*] == '/') return ParseError.InvalidRouter;
         if (pos.* >= chunk.len or chunk[pos.*] != '>') return ParseError.InvalidRouter;
@@ -784,7 +784,7 @@ const Parser = struct {
         return ParseError.UnexpectedEOF;
     }
 
-    fn parsePageNode(self: *Parser, allocator: std.mem.Allocator, route_pages: *std.ArrayList(RoutePage), chunk: []const u8, pos: *usize) ParseError!void {
+    fn parsePageNode(self: *Parser, allocator: std.mem.Allocator, route_pages: *std.array_list.Managed(RoutePage), chunk: []const u8, pos: *usize) ParseError!void {
         try self.expectChunkChar(chunk, pos, '<');
         const tag = try self.parseChunkIdent(allocator, chunk, pos);
         if (!std.mem.eql(u8, tag, "Page")) return ParseError.InvalidPage;
@@ -988,7 +988,7 @@ const Parser = struct {
         };
     }
 
-    fn parseReleaseLines(self: *Parser, allocator: std.mem.Allocator, pos: *usize, out: *std.ArrayList([]const u8)) ParseError!void {
+    fn parseReleaseLines(self: *Parser, allocator: std.mem.Allocator, pos: *usize, out: *std.array_list.Managed([]const u8)) ParseError!void {
         while (pos.* < self.source.len) {
             const line = trimText(self.peekLine(pos));
             if (line.len == 0) {

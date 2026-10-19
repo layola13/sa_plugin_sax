@@ -23,7 +23,10 @@
       { "op": "write", "path": "$PROJECT/**" },
       { "op": "create", "path": "$PROJECT/**" }
     ],
-    "net": [],
+    "net": [
+      { "url": "http://localhost", "methods": ["GET"] },
+      { "url": "http://127.0.0.1", "methods": ["GET"] }
+    ],
     "env": ["HOME", "PATH", "SA_*"],
     "process": {
       "spawn": true,

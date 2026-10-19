@@ -16,17 +16,17 @@ pub const AirlockGenerator = struct {
     }
 
     /// 生成 airlock.js 胶水层代码
-    pub fn generateAirlockJS(self: *AirlockGenerator) !std.ArrayList(u8) {
+    pub fn generateAirlockJS(self: *AirlockGenerator) !std.array_list.Managed(u8) {
         return self.generateAirlockJSWithOptions(.{});
     }
 
     /// 生成 airlock.js 胶水层代码，可按需要求加载浏览器 sidecar。
-    pub fn generateAirlockJSWithOptions(self: *AirlockGenerator, options: AirlockOptions) !std.ArrayList(u8) {
-        var output = std.ArrayList(u8).init(self.allocator);
+    pub fn generateAirlockJSWithOptions(self: *AirlockGenerator, options: AirlockOptions) !std.array_list.Managed(u8) {
+        var output = std.array_list.Managed(u8).init(self.allocator);
         errdefer output.deinit();
 
-        try output.writer().print("const SAX_WGPU_REQUIRED = {};\n", .{options.wgpu});
-        try output.writer().print("const SAX_SA3D_REQUIRED = {};\n", .{options.sa3d});
+        try output.print("const SAX_WGPU_REQUIRED = {};\n", .{options.wgpu});
+        try output.print("const SAX_SA3D_REQUIRED = {};\n", .{options.sa3d});
 
         const airlock_template =
             \\// airlock.js — SAX 自动生成，请勿手动修改
@@ -459,11 +459,11 @@ pub const AirlockGenerator = struct {
     }
 
     /// 生成 index.html 入口文件
-    pub fn generateIndexHTML(self: *AirlockGenerator, title: []const u8, wasm_file_name: []const u8) !std.ArrayList(u8) {
-        var output = std.ArrayList(u8).init(self.allocator);
+    pub fn generateIndexHTML(self: *AirlockGenerator, title: []const u8, wasm_file_name: []const u8) !std.array_list.Managed(u8) {
+        var output = std.array_list.Managed(u8).init(self.allocator);
         errdefer output.deinit();
 
-        try output.writer().print(
+        try output.print(
             \\<!DOCTYPE html>
             \\<html lang="en">
             \\<head>

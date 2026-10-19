@@ -2,6 +2,7 @@
 // 负责 build/check/new/dev 子命令
 
 const std = @import("std");
+const sio = @import("sio");
 const Allocator = std.mem.Allocator;
 
 const sax = @import("mod.zig");
@@ -27,9 +28,9 @@ pub fn parseSaxCommand(cmd_str: []const u8) ?SaxCommand {
 }
 
 const SaxArtifacts = struct {
-    sa_code: std.ArrayList(u8),
-    airlock_js: std.ArrayList(u8),
-    index_html: std.ArrayList(u8),
+    sa_code: std.array_list.Managed(u8),
+    airlock_js: std.array_list.Managed(u8),
+    index_html: std.array_list.Managed(u8),
 };
 
 const SaxCompilation = struct {
@@ -116,24 +117,24 @@ fn sourceDir(path: []const u8) []const u8 {
 }
 
 fn sourceDirAbs(allocator: Allocator, path: []const u8) ![]const u8 {
-    return try std.fs.cwd().realpathAlloc(allocator, sourceDir(path));
+    return try sio.cwd().realpathAlloc(allocator, sourceDir(path));
 }
 
 fn ensureParentDir(path: []const u8) !void {
     if (std.fs.path.dirname(path)) |dir| {
-        if (dir.len != 0) try std.fs.cwd().makePath(dir);
+        if (dir.len != 0) try sio.cwd().makePath(dir);
     }
 }
 
 fn writeAllFile(path: []const u8, bytes: []const u8) !void {
     try ensureParentDir(path);
-    var file = try std.fs.cwd().createFile(path, .{ .truncate = true });
+    var file = try sio.cwd().createFile(path, .{ .truncate = true });
     defer file.close();
     try file.writeAll(bytes);
 }
 
 fn readSource(allocator: Allocator, sax_file: []const u8, stderr: anytype) ![]u8 {
-    const source = std.fs.cwd().readFileAlloc(allocator, sax_file, 16 * 1024 * 1024) catch |err| {
+    const source = sio.cwd().readFileAlloc(allocator, sax_file, 16 * 1024 * 1024) catch |err| {
         try stderr.print("error: failed to read {s}: {}\n", .{ sax_file, err });
         return error.ReadFailed;
     };
@@ -399,7 +400,7 @@ fn buildDevArtifacts(
 }
 
 fn writeResponse(stream: std.net.Stream, status: std.http.Status, content_type: []const u8, body: []const u8) !void {
-    try stream.writer().print("HTTP/1.1 {d} {s}\r\ncontent-type: {s}\r\ncontent-length: {d}\r\nconnection: close\r\n\r\n", .{
+    try stream.print("HTTP/1.1 {d} {s}\r\ncontent-type: {s}\r\ncontent-length: {d}\r\nconnection: close\r\n\r\n", .{
         @intFromEnum(status),
         status.phrase().?,
         content_type,
@@ -409,7 +410,7 @@ fn writeResponse(stream: std.net.Stream, status: std.http.Status, content_type: 
 }
 
 fn readRequestTarget(stream: std.net.Stream, allocator: Allocator) !?[]u8 {
-    var buf = std.ArrayList(u8).init(allocator);
+    var buf = std.array_list.Managed(u8).init(allocator);
     defer buf.deinit();
     var byte: [1]u8 = undefined;
     while (true) {
@@ -421,7 +422,7 @@ fn readRequestTarget(stream: std.net.Stream, allocator: Allocator) !?[]u8 {
     }
     const request = buf.items;
     const first_line_end = std.mem.indexOfScalar(u8, request, '\n') orelse return null;
-    const first_line = std.mem.trimRight(u8, request[0..first_line_end], "\r");
+    const first_line = std.mem.trimEnd(u8, request[0..first_line_end], "\r");
     const first_space = std.mem.indexOfScalar(u8, first_line, ' ') orelse return null;
     const rest = first_line[first_space + 1..];
     const second_space = std.mem.indexOfScalar(u8, rest, ' ') orelse return null;
@@ -432,7 +433,7 @@ fn serveStaticFile(allocator: Allocator, root_dir: []const u8, target: []const u
     const relative = if (std.mem.eql(u8, target, "/")) "index.html" else if (std.mem.startsWith(u8, target, "/")) target[1..] else target;
     const full_path = try std.fs.path.join(allocator, &.{ root_dir, relative });
     defer allocator.free(full_path);
-    return try std.fs.cwd().readFileAlloc(allocator, full_path, 16 * 1024 * 1024);
+    return try sio.cwd().readFileAlloc(allocator, full_path, 16 * 1024 * 1024);
 }
 
 fn devServerLoop(
@@ -452,7 +453,7 @@ fn devServerLoop(
 
     var last_mtime: ?i128 = null;
     while (!stop_flag.load(.seq_cst)) {
-        const stat = std.fs.cwd().statFile(sax_file) catch |err| {
+        const stat = sio.cwd().statFile(sax_file) catch |err| {
             try stderr.print("error: failed to stat {s}: {}\n", .{ sax_file, err });
             std.Thread.sleep(50 * std.time.ns_per_ms);
             continue;
@@ -626,7 +627,7 @@ pub fn executeSaxNew(
 ) !u8 {
     _ = stderr;
 
-    try std.fs.cwd().makePath(project_name);
+    try sio.cwd().makePath(project_name);
 
     const sax_template =
         \\ <Component name="App">
@@ -652,7 +653,7 @@ pub fn executeSaxNew(
     const sax_path = try std.fmt.allocPrint(allocator, "{s}/app.sax", .{project_name});
     defer allocator.free(sax_path);
     {
-        var file = try std.fs.cwd().createFile(sax_path, .{ .truncate = true });
+        var file = try sio.cwd().createFile(sax_path, .{ .truncate = true });
         defer file.close();
         try file.writeAll(sax_template);
     }
@@ -660,9 +661,9 @@ pub fn executeSaxNew(
     const readme_path = try std.fmt.allocPrint(allocator, "{s}/README.md", .{project_name});
     defer allocator.free(readme_path);
     {
-        var file = try std.fs.cwd().createFile(readme_path, .{ .truncate = true });
+        var file = try sio.cwd().createFile(readme_path, .{ .truncate = true });
         defer file.close();
-        try file.writer().print(
+        try file.print(
             \\ # {s}
             \\ 
             \\ SAX 项目脚手架
@@ -693,9 +694,9 @@ pub fn executeSaxNew(
     const package_path = try std.fmt.allocPrint(allocator, "{s}/package.json", .{project_name});
     defer allocator.free(package_path);
     {
-        var file = try std.fs.cwd().createFile(package_path, .{ .truncate = true });
+        var file = try sio.cwd().createFile(package_path, .{ .truncate = true });
         defer file.close();
-        try file.writer().print(
+        try file.print(
             \\{{
             \\  "name": "{s}",
             \\  "private": true,
@@ -729,7 +730,7 @@ pub fn executeSaxDev(
 
     const dist_dir = try std.fs.path.join(allocator, &.{ project_root, "dist" });
     defer allocator.free(dist_dir);
-    try std.fs.cwd().makePath(dist_dir);
+    try sio.cwd().makePath(dist_dir);
 
     var stop_flag = std.atomic.Value(bool).init(false);
     try devServerLoop(allocator, project_root, sax_file, dist_dir, port, stdout, stderr, &stop_flag);
@@ -737,13 +738,13 @@ pub fn executeSaxDev(
 }
 
 test "sax check reports unknown tag as sax trap" {
-    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    var original_cwd = try sio.cwd().openDir(".", .{});
     defer original_cwd.close();
 
     var tmp = std.testing.tmpDir(.{ .iterate = true });
     defer tmp.cleanup();
 
-    try tmp.dir.setAsCwd();
+    try (sio.Dir{ .inner = tmp.dir }).setAsCwd();
     defer original_cwd.setAsCwd() catch {};
 
     const sax_source =
@@ -751,11 +752,11 @@ test "sax check reports unknown tag as sax trap" {
         \\  <foo></foo>
         \\</Component>
     ;
-    try std.fs.cwd().writeFile(.{ .sub_path = "app.sax", .data = sax_source });
+    try sio.cwd().writeFile(.{ .sub_path = "app.sax", .data = sax_source });
 
-    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stdout_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stdout_buf.deinit();
-    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stderr_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stderr_buf.deinit();
 
     const code = try executeSaxCheck(std.testing.allocator, "app.sax", stdout_buf.writer().any(), stderr_buf.writer().any());
@@ -770,13 +771,13 @@ test "sax check reports unknown tag as sax trap" {
 }
 
 test "sax check reports unknown event as sax trap" {
-    var original_cwd = try std.fs.cwd().openDir(".", .{});
+    var original_cwd = try sio.cwd().openDir(".", .{});
     defer original_cwd.close();
 
     var tmp = std.testing.tmpDir(.{ .iterate = true });
     defer tmp.cleanup();
 
-    try tmp.dir.setAsCwd();
+    try (sio.Dir{ .inner = tmp.dir }).setAsCwd();
     defer original_cwd.setAsCwd() catch {};
 
     const sax_source =
@@ -788,11 +789,11 @@ test "sax check reports unknown event as sax trap" {
         \\  !
         \\</Component>
     ;
-    try std.fs.cwd().writeFile(.{ .sub_path = "app.sax", .data = sax_source });
+    try sio.cwd().writeFile(.{ .sub_path = "app.sax", .data = sax_source });
 
-    var stdout_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stdout_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stdout_buf.deinit();
-    var stderr_buf = std.ArrayList(u8).init(std.testing.allocator);
+    var stderr_buf = std.array_list.Managed(u8).init(std.testing.allocator);
     defer stderr_buf.deinit();
 
     const code = try executeSaxCheck(std.testing.allocator, "app.sax", stdout_buf.writer().any(), stderr_buf.writer().any());

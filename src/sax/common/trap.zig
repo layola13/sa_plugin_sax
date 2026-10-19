@@ -1,4 +1,5 @@
 const std = @import("std");
+const sio = @import("sio");
 
 const upstream = @import("upstream_loc.zig");
 
@@ -62,11 +63,11 @@ pub const TrapReport = struct {
     trap_code: ?u32 = null,
     line: u32,
     source_line: u32,
-    source_text_buf: [256]u8 = [_]u8{0} ** 256,
-    original_text_buf: [256]u8 = [_]u8{0} ** 256,
+    source_text_buf: [256]u8 = std.mem.zeroes([256]u8),
+    original_text_buf: [256]u8 = std.mem.zeroes([256]u8),
     source_text: ?[]const u8 = null,
     original_text: ?[]const u8 = null,
-    register_buf: [64]u8 = [_]u8{0} ** 64,
+    register_buf: [64]u8 = std.mem.zeroes([64]u8),
     register: ?[]const u8 = null,
     registers: []const []const u8 = &.{},
     expected_mask: ?u16 = null,
@@ -74,10 +75,10 @@ pub const TrapReport = struct {
     expected_mask_name: ?[]const u8 = null,
     actual_mask_name: ?[]const u8 = null,
     upstream_loc: ?upstream.UpstreamLoc = null,
-    upstream_file_buf: [128]u8 = [_]u8{0} ** 128,
+    upstream_file_buf: [128]u8 = std.mem.zeroes([128]u8),
     upstream_line: u32 = 0,
     upstream_col: u32 = 0,
-    function_buf: [64]u8 = [_]u8{0} ** 64,
+    function_buf: [64]u8 = std.mem.zeroes([64]u8),
     function: ?[]const u8 = null,
     is_ffi_wrapper: ?bool = null,
     repair_action: ?[]const u8 = null,
@@ -369,7 +370,7 @@ test "trap codes are explicit and stable" {
 }
 
 test "trap json serialization is stable" {
-    var list = std.ArrayList(u8).init(std.testing.allocator);
+    var list = std.array_list.Managed(u8).init(std.testing.allocator);
     defer list.deinit();
 
     const report = TrapReport{
@@ -392,7 +393,7 @@ test "trap json serialization is stable" {
         .hint = "insert explicit release",
     };
 
-    try writeJson(list.writer(), report);
+    try writeJson(sio.managedWriter(&list), report);
     try std.testing.expectEqualStrings(
         "{\"trap\":\"MemoryLeak\",\"trap_code\":11,\"line\":12,\"source_line\":9,\"source_text\":\"result = load node+0 as i32\",\"original_text\":\"result = load node+0 as i32\",\"register\":\"r1\",\"registers\":[\"r1\",\"r2\"],\"expected_mask\":1,\"actual_mask\":8,\"expected_mask_name\":\"Active\",\"actual_mask_name\":\"Consumed\",\"upstream_loc\":{\"file\":\"main.rs\",\"line\":42,\"col\":7},\"function\":\"main\",\"is_ffi_wrapper\":false,\"message\":\"live registers remain at function exit\",\"hint\":\"insert explicit release\"}",
         list.items,
@@ -400,7 +401,7 @@ test "trap json serialization is stable" {
 }
 
 test "trap json serialization emits null for absent optional strings" {
-    var list = std.ArrayList(u8).init(std.testing.allocator);
+    var list = std.array_list.Managed(u8).init(std.testing.allocator);
     defer list.deinit();
 
     const report = TrapReport{
@@ -408,8 +409,8 @@ test "trap json serialization emits null for absent optional strings" {
         .trap_code = 1,
         .line = 1,
         .source_line = 1,
-        .source_text_buf = [_]u8{0} ** 256,
-        .original_text_buf = [_]u8{0} ** 256,
+        .source_text_buf = std.mem.zeroes([256]u8),
+        .original_text_buf = std.mem.zeroes([256]u8),
         .source_text = null,
         .original_text = null,
         .register = null,
@@ -425,7 +426,7 @@ test "trap json serialization emits null for absent optional strings" {
         .hint = null,
     };
 
-    try writeJson(list.writer(), report);
+    try writeJson(sio.managedWriter(&list), report);
     try std.testing.expectEqualStrings(
         "{\"trap\":\"ForbiddenSyntax\",\"trap_code\":1,\"line\":1,\"source_line\":1,\"source_text\":null,\"original_text\":null,\"register\":null,\"registers\":[],\"expected_mask\":null,\"actual_mask\":null,\"expected_mask_name\":null,\"actual_mask_name\":null,\"upstream_loc\":null,\"function\":null,\"is_ffi_wrapper\":null,\"message\":\"forbidden syntax detected during flattening\",\"hint\":null}",
         list.items,
@@ -433,7 +434,7 @@ test "trap json serialization emits null for absent optional strings" {
 }
 
 test "trap json serialization falls back to owned buffers" {
-    var list = std.ArrayList(u8).init(std.testing.allocator);
+    var list = std.array_list.Managed(u8).init(std.testing.allocator);
     defer list.deinit();
 
     var report = TrapReport{
@@ -441,8 +442,8 @@ test "trap json serialization falls back to owned buffers" {
         .trap_code = 1012,
         .line = 12,
         .source_line = 9,
-        .source_text_buf = [_]u8{0} ** 256,
-        .original_text_buf = [_]u8{0} ** 256,
+        .source_text_buf = std.mem.zeroes([256]u8),
+        .original_text_buf = std.mem.zeroes([256]u8),
         .source_text = null,
         .original_text = null,
         .register = null,
@@ -461,7 +462,7 @@ test "trap json serialization falls back to owned buffers" {
     std.mem.copyForwards(u8, report.source_text_buf[0..text.len], text);
     std.mem.copyForwards(u8, report.original_text_buf[0..text.len], text);
 
-    try writeJson(list.writer(), report);
+    try writeJson(sio.managedWriter(&list), report);
     try std.testing.expectEqualStrings(
         "{\"trap\":\"MemoryLeak\",\"trap_code\":1012,\"line\":12,\"source_line\":9,\"source_text\":\"result = load node+0 as i32\",\"original_text\":\"result = load node+0 as i32\",\"register\":null,\"registers\":[],\"expected_mask\":null,\"actual_mask\":null,\"expected_mask_name\":null,\"actual_mask_name\":null,\"upstream_loc\":null,\"function\":null,\"is_ffi_wrapper\":null,\"message\":\"live registers remain at function exit\",\"hint\":null}",
         list.items,
@@ -469,7 +470,7 @@ test "trap json serialization falls back to owned buffers" {
 }
 
 test "trap json serialization emits repair object when present" {
-    var list = std.ArrayList(u8).init(std.testing.allocator);
+    var list = std.array_list.Managed(u8).init(std.testing.allocator);
     defer list.deinit();
 
     const report = TrapReport{
@@ -483,7 +484,7 @@ test "trap json serialization emits repair object when present" {
         .repair_confidence = "high",
     };
 
-    try writeJson(list.writer(), report);
+    try writeJson(sio.managedWriter(&list), report);
     try std.testing.expect(std.mem.containsAtLeast(u8, list.items, 1, "\"repair\":{\"action\":\"rewrite\",\"hint\":\"lower structured control flow into labels, branches, and explicit register moves\",\"confidence\":\"high\"}"));
 }
 

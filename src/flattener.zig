@@ -1,4 +1,5 @@
 const std = @import("std");
+const sio = @import("sio");
 
 const def_dict = @import("flattener/def_dict.zig");
 const classifier = @import("flattener/line_classifier.zig");
@@ -86,9 +87,9 @@ pub fn takeErrorSourceLine(error_ctx: *ErrorContext) ?u32 {
 }
 
 fn appendExpandedLine(
-    out: *std.ArrayList(u8),
-    line_package_identities: *std.ArrayList(?[]const u8),
-    line_package_hashes: *std.ArrayList(?[32]u8),
+    out: *std.array_list.Managed(u8),
+    line_package_identities: *std.array_list.Managed(?[]const u8),
+    line_package_hashes: *std.array_list.Managed(?[32]u8),
     text: []const u8,
     package_identity: ?[]const u8,
     package_hash: ?[32]u8,
@@ -104,10 +105,10 @@ const ImportExpansion = struct {
     active_paths: std.StringHashMap(void),
     seen_paths: std.StringHashMap(void),
     seen_package_identities: std.StringHashMap(void),
-    line_package_identities: std.ArrayList(?[]const u8),
-    line_package_hashes: std.ArrayList(?[32]u8),
-    owned_paths: std.ArrayList([]u8),
-    layout_versions: std.ArrayList(LayoutVersion),
+    line_package_identities: std.array_list.Managed(?[]const u8),
+    line_package_hashes: std.array_list.Managed(?[32]u8),
+    owned_paths: std.array_list.Managed([]u8),
+    layout_versions: std.array_list.Managed(LayoutVersion),
 
     pub fn deinit(self: *ImportExpansion, allocator: std.mem.Allocator) void {
         self.line_package_identities.deinit();
@@ -183,7 +184,7 @@ fn parseTokenList(allocator: std.mem.Allocator, text: []const u8) ![]const []con
         return try allocator.alloc([]const u8, 0);
     }
 
-    var list = std.ArrayList([]const u8).init(allocator);
+    var list = std.array_list.Managed([]const u8).init(allocator);
     errdefer list.deinit();
 
     var it = std.mem.splitScalar(u8, trimmed, ',');
@@ -206,7 +207,7 @@ fn parseMacroParams(allocator: std.mem.Allocator, text: []const u8) !struct { pa
     for (raw_params, 0..) |param, idx| {
         if (std.mem.endsWith(u8, param, "...")) {
             if (idx + 1 != raw_params.len) return error.InvalidMacroInvocation;
-            const base = std.mem.trimRight(u8, param[0 .. param.len - 3], " \t");
+            const base = std.mem.trimEnd(u8, param[0 .. param.len - 3], " \t");
             if (base.len == 0) return error.InvalidMacroInvocation;
             variadic_param = base;
             param_count = idx;
@@ -276,7 +277,7 @@ fn renderWithReplacements(
 
 fn ownText(
     allocator: std.mem.Allocator,
-    owned_text: *std.ArrayList([]const u8),
+    owned_text: *std.array_list.Managed([]const u8),
     text: []const u8,
 ) ![]const u8 {
     const dup = try allocator.dupe(u8, text);
@@ -288,7 +289,7 @@ fn ownText(
 fn ownFoldedText(
     allocator: std.mem.Allocator,
     dict: *DefDict,
-    owned_text: *std.ArrayList([]const u8),
+    owned_text: *std.array_list.Managed([]const u8),
     text: []const u8,
 ) ![]const u8 {
     const folded = try dict.foldText(allocator, text);
@@ -300,7 +301,7 @@ fn ownFoldedText(
 fn stripLeadingPlus(text: []const u8) []const u8 {
     const trimmed = std.mem.trim(u8, text, " \t");
     if (trimmed.len > 0 and trimmed[0] == '+') {
-        return std.mem.trimLeft(u8, trimmed[1..], " \t");
+        return std.mem.trimStart(u8, trimmed[1..], " \t");
     }
     return trimmed;
 }
@@ -315,7 +316,7 @@ fn parseIntAllowLeadingPlus(comptime T: type, text: []const u8) !T {
 fn parseLayoutOffset(
     allocator: std.mem.Allocator,
     dict: *DefDict,
-    owned_text: *std.ArrayList([]const u8),
+    owned_text: *std.array_list.Managed([]const u8),
     current_package_identity: ?[]const u8,
     text: []const u8,
 ) !u64 {
@@ -440,7 +441,7 @@ fn parseSizeOperand(text: []const u8) ?common_instruction.Operand {
 fn resolveOperandText(
     allocator: std.mem.Allocator,
     dict: *DefDict,
-    owned_text: *std.ArrayList([]const u8),
+    owned_text: *std.array_list.Managed([]const u8),
     symbols: *SymbolTable,
     text: []const u8,
 ) !common_instruction.Operand {
@@ -452,7 +453,7 @@ fn resolveOperandText(
 fn resolveSizeOperandText(
     allocator: std.mem.Allocator,
     dict: *DefDict,
-    owned_text: *std.ArrayList([]const u8),
+    owned_text: *std.array_list.Managed([]const u8),
     symbols: *SymbolTable,
     text: []const u8,
 ) !common_instruction.Operand {
@@ -465,7 +466,7 @@ fn resolveSizeOperandText(
 }
 
 fn consumePendingLoc(
-    loc_table: *std.ArrayList(?common_upstream.UpstreamLoc),
+    loc_table: *std.array_list.Managed(?common_upstream.UpstreamLoc),
     pending_loc: *?common_upstream.UpstreamLoc,
 ) !?common_upstream.UpstreamLoc {
     const loc = pending_loc.*;
@@ -482,7 +483,7 @@ fn takePendingLoc(
     return loc;
 }
 
-fn appendNullLoc(loc_table: *std.ArrayList(?common_upstream.UpstreamLoc)) !void {
+fn appendNullLoc(loc_table: *std.array_list.Managed(?common_upstream.UpstreamLoc)) !void {
     try loc_table.append(null);
 }
 
@@ -507,7 +508,7 @@ fn setPendingLoc(
 
 fn recordLayoutVersion(
     allocator: std.mem.Allocator,
-    layout_versions: *std.ArrayList(LayoutVersion),
+    layout_versions: *std.array_list.Managed(LayoutVersion),
     path: []const u8,
     source: []const u8,
 ) !void {
@@ -645,14 +646,14 @@ fn emitParsedLine(
     allocator: std.mem.Allocator,
     dict: *DefDict,
     symbols: *SymbolTable,
-    loc_table: *std.ArrayList(?common_upstream.UpstreamLoc),
+    loc_table: *std.array_list.Managed(?common_upstream.UpstreamLoc),
     pending_loc: *?common_upstream.UpstreamLoc,
     raw_line: []const u8,
     source_line: u32,
-    instructions: *std.ArrayList(Instruction),
-    const_decls: *std.ArrayList(ConstDecl),
-    function_sigs: *std.ArrayList(FunctionSig),
-    owned_text: *std.ArrayList([]const u8),
+    instructions: *std.array_list.Managed(Instruction),
+    const_decls: *std.array_list.Managed(ConstDecl),
+    function_sigs: *std.array_list.Managed(FunctionSig),
+    owned_text: *std.array_list.Managed([]const u8),
     current_package_identity: ?[]const u8,
     current_package_hash: ?[32]u8,
 ) !void {
@@ -1048,12 +1049,12 @@ fn includeFileAsConst(
     source_path: ?[]const u8,
     dict: *DefDict,
     symbols: *SymbolTable,
-    loc_table: *std.ArrayList(?common_upstream.UpstreamLoc),
+    loc_table: *std.array_list.Managed(?common_upstream.UpstreamLoc),
     pending_loc: *?common_upstream.UpstreamLoc,
-    instructions: *std.ArrayList(Instruction),
-    const_decls: *std.ArrayList(ConstDecl),
-    function_sigs: *std.ArrayList(FunctionSig),
-    owned_text: *std.ArrayList([]const u8),
+    instructions: *std.array_list.Managed(Instruction),
+    const_decls: *std.array_list.Managed(ConstDecl),
+    function_sigs: *std.array_list.Managed(FunctionSig),
+    owned_text: *std.array_list.Managed([]const u8),
     current_package_identity: ?[]const u8,
     current_package_hash: ?[32]u8,
 ) !void {
@@ -1071,7 +1072,7 @@ fn includeFileAsConst(
     } else try allocator.dupe(u8, include_path_raw);
     defer allocator.free(resolved_path);
 
-    const file = try std.fs.cwd().openFile(resolved_path, .{});
+    const file = try sio.cwd().openFile(resolved_path, .{});
     defer file.close();
     const bytes = try file.readToEndAlloc(allocator, 1 << 20);
     defer allocator.free(bytes);
@@ -1082,11 +1083,11 @@ fn includeFileAsConst(
     const literal_line = switch (kind) {
         .str => try std.fmt.allocPrint(allocator, "@const {s} = utf8:\"{s}\"", .{ const_name, bytes }),
         .bytes => blk: {
-            var hex = std.ArrayList(u8).init(allocator);
+            var hex = std.array_list.Managed(u8).init(allocator);
             errdefer hex.deinit();
             try hex.appendSlice("hex:");
             for (bytes) |b| {
-                try hex.writer().print("\\x{X:0>2}", .{b});
+                try hex.print("\\x{X:0>2}", .{b});
             }
             break :blk try std.fmt.allocPrint(allocator, "@const {s} = {s}", .{ const_name, hex.items });
         },
@@ -1134,7 +1135,7 @@ fn isFunctionSigDeclared(sigs: []const FunctionSig, name: []const u8) bool {
 }
 
 fn parsePrintArgs(allocator: std.mem.Allocator, text: []const u8) ![][]const u8 {
-    var args = std.ArrayList([]const u8).init(allocator);
+    var args = std.array_list.Managed([]const u8).init(allocator);
     errdefer {
         for (args.items) |arg| allocator.free(arg);
         args.deinit();
@@ -1209,7 +1210,7 @@ const FormatSegment = struct {
 };
 
 fn parseFormatString(allocator: std.mem.Allocator, fmt_str: []const u8) ![]FormatSegment {
-    var segments = std.ArrayList(FormatSegment).init(allocator);
+    var segments = std.array_list.Managed(FormatSegment).init(allocator);
     errdefer {
         for (segments.items) |seg| {
             if (seg.kind == .literal) allocator.free(seg.text);
@@ -1301,13 +1302,13 @@ fn ensureExternSigs(
     allocator: std.mem.Allocator,
     dict: *DefDict,
     symbols: *SymbolTable,
-    loc_table: *std.ArrayList(?common_upstream.UpstreamLoc),
+    loc_table: *std.array_list.Managed(?common_upstream.UpstreamLoc),
     pending_loc: *?common_upstream.UpstreamLoc,
     source_line: u32,
-    instructions: *std.ArrayList(Instruction),
-    const_decls: *std.ArrayList(ConstDecl),
-    function_sigs: *std.ArrayList(FunctionSig),
-    owned_text: *std.ArrayList([]const u8),
+    instructions: *std.array_list.Managed(Instruction),
+    const_decls: *std.array_list.Managed(ConstDecl),
+    function_sigs: *std.array_list.Managed(FunctionSig),
+    owned_text: *std.array_list.Managed([]const u8),
     current_package_identity: ?[]const u8,
     current_package_hash: ?[32]u8,
 ) !void {
@@ -1345,12 +1346,12 @@ fn expandPrintOrFormat(
     source_line: u32,
     dict: *DefDict,
     symbols: *SymbolTable,
-    loc_table: *std.ArrayList(?common_upstream.UpstreamLoc),
+    loc_table: *std.array_list.Managed(?common_upstream.UpstreamLoc),
     pending_loc: *?common_upstream.UpstreamLoc,
-    instructions: *std.ArrayList(Instruction),
-    const_decls: *std.ArrayList(ConstDecl),
-    function_sigs: *std.ArrayList(FunctionSig),
-    owned_text: *std.ArrayList([]const u8),
+    instructions: *std.array_list.Managed(Instruction),
+    const_decls: *std.array_list.Managed(ConstDecl),
+    function_sigs: *std.array_list.Managed(FunctionSig),
+    owned_text: *std.array_list.Managed([]const u8),
     current_package_identity: ?[]const u8,
     current_package_hash: ?[32]u8,
 ) !void {
@@ -1524,7 +1525,7 @@ fn expandPrintOrFormat(
             owned_buf_name: ?[]const u8,
         };
 
-        var segment_datas = std.ArrayList(SegmentData).init(allocator);
+        var segment_datas = std.array_list.Managed(SegmentData).init(allocator);
         defer {
             for (segment_datas.items) |sd| {
                 allocator.free(sd.ptr);
@@ -1778,12 +1779,12 @@ fn emitRange(
     macros: *std.StringHashMap(MacroDef),
     dict: *DefDict,
     symbols: *SymbolTable,
-    loc_table: *std.ArrayList(?common_upstream.UpstreamLoc),
+    loc_table: *std.array_list.Managed(?common_upstream.UpstreamLoc),
     pending_loc: *?common_upstream.UpstreamLoc,
-    instructions: *std.ArrayList(Instruction),
-    const_decls: *std.ArrayList(ConstDecl),
-    function_sigs: *std.ArrayList(FunctionSig),
-    owned_text: *std.ArrayList([]const u8),
+    instructions: *std.array_list.Managed(Instruction),
+    const_decls: *std.array_list.Managed(ConstDecl),
+    function_sigs: *std.array_list.Managed(FunctionSig),
+    owned_text: *std.array_list.Managed([]const u8),
     error_ctx: ?*ErrorContext,
     current_package_identity: ?[]const u8,
     current_package_hash: ?[32]u8,
@@ -1847,12 +1848,12 @@ fn emitRange(
                     defer allocator.free(rep_value);
 
                     const combined = if (replacements.len == 0) blk: {
-                        var list = std.ArrayList(Replacement).init(allocator);
+                        var list = std.array_list.Managed(Replacement).init(allocator);
                         errdefer list.deinit();
                         try list.append(.{ .needle = "%i", .replacement = rep_value });
                         break :blk try list.toOwnedSlice();
                     } else blk: {
-                        var list = std.ArrayList(Replacement).init(allocator);
+                        var list = std.array_list.Managed(Replacement).init(allocator);
                         errdefer list.deinit();
                         try list.appendSlice(replacements);
                         try list.append(.{ .needle = "%i", .replacement = rep_value });
@@ -1958,7 +1959,7 @@ fn emitRange(
                     defer allocator.free(args);
                     if (def.variadic_param) |variadic_param| {
                         if (args.len < def.params.len) return error.InvalidMacroInvocation;
-                        var local_replacements = std.ArrayList(Replacement).init(allocator);
+                        var local_replacements = std.array_list.Managed(Replacement).init(allocator);
                         errdefer local_replacements.deinit();
                         for (def.params, 0..) |param, iarg| {
                             try local_replacements.append(.{ .needle = param, .replacement = args[iarg] });
@@ -1996,7 +1997,7 @@ fn emitRange(
 
                     if (args.len != def.params.len) return error.InvalidMacroInvocation;
 
-                    var local_replacements = std.ArrayList(Replacement).init(allocator);
+                    var local_replacements = std.array_list.Managed(Replacement).init(allocator);
                     errdefer local_replacements.deinit();
                     for (def.params, 0..) |param, iarg| {
                         try local_replacements.append(.{ .needle = param, .replacement = args[iarg] });
@@ -2035,7 +2036,7 @@ fn collectLocTableEntries(
     allocator: std.mem.Allocator,
     instructions: []const Instruction,
 ) !LocTable {
-    var table = std.ArrayList(?common_upstream.UpstreamLoc).init(allocator);
+    var table = std.array_list.Managed(?common_upstream.UpstreamLoc).init(allocator);
     errdefer table.deinit();
 
     for (instructions) |item| {
@@ -2069,7 +2070,7 @@ pub fn scanSource(
     line_package_identities: []const ?[]const u8,
     line_package_hashes: []const ?[32]u8,
 ) ![]SourceLine {
-    var lines = std.ArrayList(SourceLine).init(allocator);
+    var lines = std.array_list.Managed(SourceLine).init(allocator);
     errdefer lines.deinit();
 
     var iterator = std.mem.splitScalar(u8, source, '\n');
@@ -2090,7 +2091,7 @@ pub fn scanSource(
     return try lines.toOwnedSlice();
 }
 
-fn appendOwnedSource(out: *std.ArrayList(u8), source: []const u8) !void {
+fn appendOwnedSource(out: *std.array_list.Managed(u8), source: []const u8) !void {
     if (source.len == 0) return;
     try out.appendSlice(source);
     if (source[source.len - 1] != '\n') try out.append('\n');
@@ -2128,7 +2129,7 @@ fn packageNamespacePrefix(allocator: std.mem.Allocator, package_identity: []cons
     const trimmed = std.mem.trim(u8, package_identity, " \t\r\n");
     if (trimmed.len == 0) return error.InvalidPath;
 
-    var out = std.ArrayList(u8).init(allocator);
+    var out = std.array_list.Managed(u8).init(allocator);
     errdefer out.deinit();
     try out.appendSlice("pkg_");
 
@@ -2145,7 +2146,7 @@ fn packageNamespacePrefix(allocator: std.mem.Allocator, package_identity: []cons
             '~' => try out.appendSlice("_tilde_"),
             else => {
                 try out.appendSlice("_x");
-                try out.writer().print("{X:0>2}_", .{c});
+                try out.print("{X:0>2}_", .{c});
             },
         }
     }
@@ -2179,7 +2180,7 @@ fn rewritePackageLayoutExpr(
     prefix: []const u8,
     local_defs: []const []const u8,
 ) ![]const u8 {
-    var out = std.ArrayList(u8).init(allocator);
+    var out = std.array_list.Managed(u8).init(allocator);
     errdefer out.deinit();
 
     var idx: usize = 0;
@@ -2213,7 +2214,7 @@ fn rewritePackageLayoutSource(
     const prefix = try packageNamespacePrefix(allocator, package_identity);
     defer allocator.free(prefix);
 
-    var local_defs = std.ArrayList([]const u8).init(allocator);
+    var local_defs = std.array_list.Managed([]const u8).init(allocator);
     defer local_defs.deinit();
 
     var collector = std.mem.splitScalar(u8, source, '\n');
@@ -2224,7 +2225,7 @@ fn rewritePackageLayoutSource(
         }
     }
 
-    var out = std.ArrayList(u8).init(allocator);
+    var out = std.array_list.Managed(u8).init(allocator);
     errdefer out.deinit();
 
     var iterator = std.mem.splitScalar(u8, source, '\n');
@@ -2258,15 +2259,15 @@ fn rewritePackageLayoutSource(
 
 fn injectImportedFile(
     allocator: std.mem.Allocator,
-    out: *std.ArrayList(u8),
-    line_package_identities: *std.ArrayList(?[]const u8),
-    line_package_hashes: *std.ArrayList(?[32]u8),
+    out: *std.array_list.Managed(u8),
+    line_package_identities: *std.array_list.Managed(?[]const u8),
+    line_package_hashes: *std.array_list.Managed(?[32]u8),
     imported: *pkg_resolver.ResolvedImport,
     active_paths: *std.StringHashMap(void),
     seen_paths: *std.StringHashMap(void),
     seen_package_identities: *std.StringHashMap(void),
-    owned_paths: *std.ArrayList([]u8),
-    layout_versions: *std.ArrayList(LayoutVersion),
+    owned_paths: *std.array_list.Managed([]u8),
+    layout_versions: *std.array_list.Managed(LayoutVersion),
     error_ctx: ?*ErrorContext,
     current_package_identity: ?[]const u8,
     current_package_hash: ?[32]u8,
@@ -2294,16 +2295,16 @@ fn injectImportedFile(
     const injected_root = struct {
         fn run(
             allocator2: std.mem.Allocator,
-            out2: *std.ArrayList(u8),
-            line_package_identities2: *std.ArrayList(?[]const u8),
-            line_package_hashes2: *std.ArrayList(?[32]u8),
+            out2: *std.array_list.Managed(u8),
+            line_package_identities2: *std.array_list.Managed(?[]const u8),
+            line_package_hashes2: *std.array_list.Managed(?[32]u8),
             base_dir: []const u8,
             file_name: []const u8,
             active_paths2: *std.StringHashMap(void),
             seen_paths2: *std.StringHashMap(void),
             seen_package_identities2: *std.StringHashMap(void),
-            owned_paths2: *std.ArrayList([]u8),
-            layout_versions2: *std.ArrayList(LayoutVersion),
+            owned_paths2: *std.array_list.Managed([]u8),
+            layout_versions2: *std.array_list.Managed(LayoutVersion),
             error_ctx2: ?*ErrorContext,
             current_package_identity2: ?[]const u8,
             current_package_hash2: ?[32]u8,
@@ -2365,7 +2366,7 @@ fn injectImportedFile(
 
     const iface_path = try pathJoin(allocator, &.{ import_dir, iface_name });
     defer allocator.free(iface_path);
-    if (std.fs.cwd().access(iface_path, .{})) |_| {
+    if (sio.cwd().access(iface_path, .{})) |_| {
         try injected_root(
             allocator,
             out,
@@ -2387,7 +2388,7 @@ fn injectImportedFile(
 
     const layout_path = try pathJoin(allocator, &.{ import_dir, layout_name });
     defer allocator.free(layout_path);
-    if (std.fs.cwd().access(layout_path, .{})) |_| {
+    if (sio.cwd().access(layout_path, .{})) |_| {
         try injected_root(
             allocator,
             out,
@@ -2410,16 +2411,16 @@ fn injectImportedFile(
 
 fn expandImportsInto(
     allocator: std.mem.Allocator,
-    out: *std.ArrayList(u8),
-    line_package_identities: *std.ArrayList(?[]const u8),
-    line_package_hashes: *std.ArrayList(?[32]u8),
+    out: *std.array_list.Managed(u8),
+    line_package_identities: *std.array_list.Managed(?[]const u8),
+    line_package_hashes: *std.array_list.Managed(?[32]u8),
     source: []const u8,
     base_dir: []const u8,
     active_paths: *std.StringHashMap(void),
     seen_paths: *std.StringHashMap(void),
     seen_package_identities: *std.StringHashMap(void),
-    owned_paths: *std.ArrayList([]u8),
-    layout_versions: *std.ArrayList(LayoutVersion),
+    owned_paths: *std.array_list.Managed([]u8),
+    layout_versions: *std.array_list.Managed(LayoutVersion),
     error_ctx: ?*ErrorContext,
     current_package_identity: ?[]const u8,
     current_package_hash: ?[32]u8,
@@ -2537,24 +2538,24 @@ pub fn expandImports(
         seen_package_identities.deinit();
     }
 
-    var line_package_identities = std.ArrayList(?[]const u8).init(allocator);
+    var line_package_identities = std.array_list.Managed(?[]const u8).init(allocator);
     errdefer line_package_identities.deinit();
 
-    var line_package_hashes = std.ArrayList(?[32]u8).init(allocator);
+    var line_package_hashes = std.array_list.Managed(?[32]u8).init(allocator);
     errdefer line_package_hashes.deinit();
 
-    var owned_paths = std.ArrayList([]u8).init(allocator);
+    var owned_paths = std.array_list.Managed([]u8).init(allocator);
     errdefer {
         for (owned_paths.items) |path| allocator.free(path);
         owned_paths.deinit();
     }
-    var layout_versions = std.ArrayList(LayoutVersion).init(allocator);
+    var layout_versions = std.array_list.Managed(LayoutVersion).init(allocator);
     errdefer {
         for (layout_versions.items) |*layout_version| layout_version.deinit(allocator);
         layout_versions.deinit();
     }
 
-    var out = std.ArrayList(u8).init(allocator);
+    var out = std.array_list.Managed(u8).init(allocator);
     errdefer out.deinit();
 
     const base_dir = if (source_path) |path| std.fs.path.dirname(path) orelse "." else ".";
@@ -2562,7 +2563,7 @@ pub fn expandImports(
         const source_full = if (std.fs.path.isAbsolute(path))
             try allocator.dupe(u8, path)
         else
-            try std.fs.cwd().realpathAlloc(allocator, path);
+            try sio.cwd().realpathAlloc(allocator, path);
         owned_paths.append(source_full) catch |err| {
             allocator.free(source_full);
             return err;
@@ -2644,24 +2645,24 @@ fn flattenInternal(
     errdefer dict.deinit();
     var symbols = SymbolTable.init(allocator);
     errdefer symbols.deinit();
-    var instructions = std.ArrayList(Instruction).init(allocator);
+    var instructions = std.array_list.Managed(Instruction).init(allocator);
     errdefer instructions.deinit();
-    var const_decls = std.ArrayList(ConstDecl).init(allocator);
+    var const_decls = std.array_list.Managed(ConstDecl).init(allocator);
     errdefer {
         for (const_decls.items) |*decl| decl.deinit(allocator);
         const_decls.deinit();
     }
-    var function_sigs = std.ArrayList(FunctionSig).init(allocator);
+    var function_sigs = std.array_list.Managed(FunctionSig).init(allocator);
     errdefer {
         for (function_sigs.items) |*sig_item| sig_item.deinit(allocator);
         function_sigs.deinit();
     }
-    var owned_text = std.ArrayList([]const u8).init(allocator);
+    var owned_text = std.array_list.Managed([]const u8).init(allocator);
     errdefer {
         for (owned_text.items) |text| allocator.free(text);
         owned_text.deinit();
     }
-    var loc_table = std.ArrayList(?common_upstream.UpstreamLoc).init(allocator);
+    var loc_table = std.array_list.Managed(?common_upstream.UpstreamLoc).init(allocator);
     errdefer {
         for (loc_table.items) |entry| {
             if (entry) |loc| allocator.free(loc.file);
@@ -2715,7 +2716,7 @@ fn flattenInternal(
     const function_sigs_slice = try function_sigs.toOwnedSlice();
 
     // Filter test functions from function_sigs
-    var test_sigs_list = std.ArrayList(FunctionSig).init(allocator);
+    var test_sigs_list = std.array_list.Managed(FunctionSig).init(allocator);
     errdefer test_sigs_list.deinit();
     for (function_sigs_slice) |sig| {
         if (sig.kind == .test_func) {
@@ -2820,7 +2821,7 @@ fn buildMacroPbtProgram(allocator: std.mem.Allocator, random: std.Random, iter: 
     const acc_name = try std.fmt.allocPrint(allocator, "acc_{d}_{d}", .{ iter, salt });
     errdefer allocator.free(acc_name);
 
-    var source = std.ArrayList(u8).init(allocator);
+    var source = std.array_list.Managed(u8).init(allocator);
     errdefer source.deinit();
     const writer = source.writer();
     try writer.writeAll(
@@ -3492,7 +3493,7 @@ test "def dict PBT folds random arithmetic expressions through flatten" {
         const tmp_name = try std.fmt.allocPrint(std.testing.allocator, "tmp_{d}", .{iter});
         defer std.testing.allocator.free(tmp_name);
 
-        var source = std.ArrayList(u8).init(std.testing.allocator);
+        var source = std.array_list.Managed(u8).init(std.testing.allocator);
         errdefer source.deinit();
         const writer = source.writer();
         try writer.writeAll("#def BASE = ");

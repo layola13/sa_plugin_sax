@@ -166,9 +166,9 @@ const ParallelVerifyContext = struct {
 
 const CollectResult = struct {
     symbols: symbol.SymbolTable,
-    sigs: std.ArrayList(sig.FunctionSig),
-    const_vtables: std.ArrayList(ConstVTable),
-    function_starts: std.ArrayList(usize),
+    sigs: std.array_list.Managed(sig.FunctionSig),
+    const_vtables: std.array_list.Managed(ConstVTable),
+    function_starts: std.array_list.Managed(usize),
 };
 
 const FunctionRegScope = struct {
@@ -258,7 +258,7 @@ fn trapCode(kind: trap.Trap) u32 {
 }
 
 fn trimTrailingCr(text: []const u8) []const u8 {
-    return std.mem.trimRight(u8, text, "\r");
+    return std.mem.trimEnd(u8, text, "\r");
 }
 
 fn copyTextBuf(dest: []u8, text: []const u8) void {
@@ -368,7 +368,7 @@ fn isConstDeclText(text: []const u8) bool {
 fn parseConstDeclName(text: []const u8) ?[]const u8 {
     const trimmed = std.mem.trim(u8, text, " \t\r");
     if (!std.mem.startsWith(u8, trimmed, "@const ")) return null;
-    const after = std.mem.trimLeft(u8, trimmed["@const ".len..], " \t\r");
+    const after = std.mem.trimStart(u8, trimmed["@const ".len..], " \t\r");
     const eq = std.mem.indexOfScalar(u8, after, '=') orelse return null;
     const name = std.mem.trim(u8, after[0..eq], " \t\r");
     if (name.len == 0) return null;
@@ -389,7 +389,7 @@ fn parseVtableSlotName(text: []const u8) ?[]const u8 {
 }
 
 fn parseVtableSlots(allocator: std.mem.Allocator, literal: const_decl.VTableLiteral, sigs: []const sig.FunctionSig) ![]ConstVTableSlot {
-    var slots = std.ArrayList(ConstVTableSlot).init(allocator);
+    var slots = std.array_list.Managed(ConstVTableSlot).init(allocator);
     errdefer slots.deinit();
     for (literal.slots) |slot| {
         var sig_match: ?sig.FunctionSig = null;
@@ -413,8 +413,8 @@ fn collectConstVtables(
     allocator: std.mem.Allocator,
     const_decls: []const const_decl.ConstDecl,
     sigs: []const sig.FunctionSig,
-) !std.ArrayList(ConstVTable) {
-    var out = std.ArrayList(ConstVTable).init(allocator);
+) !std.array_list.Managed(ConstVTable) {
+    var out = std.array_list.Managed(ConstVTable).init(allocator);
     errdefer {
         for (out.items) |*item| item.deinit(allocator);
         out.deinit();
@@ -622,7 +622,7 @@ fn captureLabelSnapshot(
     interior_first_child: []const ?u32,
     interior_next_sibling: []const ?u32,
 ) !LabelSnapshot {
-    var changes = std.ArrayList(LabelStateChange).init(allocator);
+    var changes = std.array_list.Managed(LabelStateChange).init(allocator);
     errdefer changes.deinit();
 
     for (state, 0..) |mask, idx| {
@@ -745,7 +745,7 @@ fn replaceLabelStateSnapshot(
     _ = interior_parent;
     _ = interior_first_child;
     _ = interior_next_sibling;
-    var changes = std.ArrayList(LabelStateChange).init(allocator);
+    var changes = std.array_list.Managed(LabelStateChange).init(allocator);
     errdefer changes.deinit();
 
     for (state, 0..) |mask, idx| {
@@ -960,8 +960,8 @@ fn trapReport(
         .trap_code = trapCode(kind),
         .line = item.expanded_line + 1,
         .source_line = item.source_line,
-        .source_text_buf = [_]u8{0} ** 256,
-        .original_text_buf = [_]u8{0} ** 256,
+        .source_text_buf = std.mem.zeroes([256]u8),
+        .original_text_buf = std.mem.zeroes([256]u8),
         .source_text = null,
         .original_text = null,
         .register = null,
@@ -971,7 +971,7 @@ fn trapReport(
         .expected_mask_name = if (expected_mask) |v| cap.maskName(v) else null,
         .actual_mask_name = if (actual_mask) |v| cap.maskName(v) else null,
         .upstream_loc = item.upstream_loc,
-        .upstream_file_buf = [_]u8{0} ** 128,
+        .upstream_file_buf = std.mem.zeroes([128]u8),
         .upstream_line = if (item.upstream_loc) |loc| loc.line else 0,
         .upstream_col = if (item.upstream_loc) |loc| loc.col else 0,
         .function = null,
@@ -1032,8 +1032,8 @@ fn saxTrapReport(
         .trap_code = trapCode(kind),
         .line = item.expanded_line + 1,
         .source_line = item.source_line,
-        .source_text_buf = [_]u8{0} ** 256,
-        .original_text_buf = [_]u8{0} ** 256,
+        .source_text_buf = std.mem.zeroes([256]u8),
+        .original_text_buf = std.mem.zeroes([256]u8),
         .source_text = null,
         .original_text = null,
         .register = null,
@@ -1043,7 +1043,7 @@ fn saxTrapReport(
         .expected_mask_name = if (expected_mask) |v| cap.maskName(v) else null,
         .actual_mask_name = if (actual_mask) |v| cap.maskName(v) else null,
         .upstream_loc = item.upstream_loc,
-        .upstream_file_buf = [_]u8{0} ** 128,
+        .upstream_file_buf = std.mem.zeroes([128]u8),
         .upstream_line = if (item.upstream_loc) |loc| loc.line else 0,
         .upstream_col = if (item.upstream_loc) |loc| loc.col else 0,
         .function = null,
@@ -1092,8 +1092,8 @@ fn trapReportFromText(
         .trap_code = trapCode(kind),
         .line = line,
         .source_line = source_line,
-        .source_text_buf = [_]u8{0} ** 256,
-        .original_text_buf = [_]u8{0} ** 256,
+        .source_text_buf = std.mem.zeroes([256]u8),
+        .original_text_buf = std.mem.zeroes([256]u8),
         .source_text = null,
         .original_text = null,
         .register = null,
@@ -1103,7 +1103,7 @@ fn trapReportFromText(
         .expected_mask_name = null,
         .actual_mask_name = null,
         .upstream_loc = null,
-        .upstream_file_buf = [_]u8{0} ** 128,
+        .upstream_file_buf = std.mem.zeroes([128]u8),
         .upstream_line = 0,
         .upstream_col = 0,
         .function = null,
@@ -1252,7 +1252,7 @@ fn parseDeclKind(kind: inst.InstKind) ?sig.FunctionKind {
 }
 
 fn addScopeReg(
-    reg_ids: *std.ArrayList(u32),
+    reg_ids: *std.array_list.Managed(u32),
     seen: *std.AutoHashMap(u32, void),
     reg_id: u32,
 ) !void {
@@ -1262,8 +1262,8 @@ fn addScopeReg(
 }
 
 fn finalizeFunctionScope(
-    sigs: *std.ArrayList(sig.FunctionSig),
-    reg_ids: *std.ArrayList(u32),
+    sigs: *std.array_list.Managed(sig.FunctionSig),
+    reg_ids: *std.array_list.Managed(u32),
     reg_seen: *std.AutoHashMap(u32, void),
     const_decls: []const const_decl.ConstDecl,
     symbols: *const symbol.SymbolTable,
@@ -1288,7 +1288,7 @@ fn buildFunctionRegScope(
     const_decls: []const const_decl.ConstDecl,
     symbols: *const symbol.SymbolTable,
 ) !FunctionRegScope {
-    var reg_ids = std.ArrayList(u32).init(allocator);
+    var reg_ids = std.array_list.Managed(u32).init(allocator);
     errdefer reg_ids.deinit();
     var seen = std.AutoHashMap(u32, void).init(allocator);
     defer seen.deinit();
@@ -1370,14 +1370,14 @@ fn collectMetadata(
     var symbols = symbol.SymbolTable.init(allocator);
     errdefer symbols.deinit();
 
-    var sigs = std.ArrayList(sig.FunctionSig).init(allocator);
+    var sigs = std.array_list.Managed(sig.FunctionSig).init(allocator);
     errdefer {
         for (sigs.items) |*item| item.deinit(allocator);
         sigs.deinit();
     }
-    var function_starts = std.ArrayList(usize).init(allocator);
+    var function_starts = std.array_list.Managed(usize).init(allocator);
     errdefer function_starts.deinit();
-    var current_reg_ids = std.ArrayList(u32).init(allocator);
+    var current_reg_ids = std.array_list.Managed(u32).init(allocator);
     defer current_reg_ids.deinit();
     var current_reg_seen = std.AutoHashMap(u32, void).init(allocator);
     defer current_reg_seen.deinit();
@@ -1534,7 +1534,7 @@ fn collectMetadata(
                     const part_idx = op_idx + 1;
                     if (part_idx >= classified.part_count) break;
                     switch (item.operands[op_idx]) {
-                        .reg => |_| _ = try symbols.intern(classified.parts[part_idx]),
+                        .reg => _ = try symbols.intern(classified.parts[part_idx]),
                         .text => |text| {
                             if (isIdentLike(text)) _ = try symbols.intern(classified.parts[part_idx]);
                         },
@@ -1908,21 +1908,21 @@ fn updateLabel(
     return null;
 }
 
-fn freeSigs(allocator: std.mem.Allocator, sigs: *std.ArrayList(sig.FunctionSig)) void {
+fn freeSigs(allocator: std.mem.Allocator, sigs: *std.array_list.Managed(sig.FunctionSig)) void {
     for (sigs.items) |*item| item.deinit(allocator);
     sigs.deinit();
 }
 
-fn freeConstVtables(allocator: std.mem.Allocator, const_vtables: *std.ArrayList(ConstVTable)) void {
+fn freeConstVtables(allocator: std.mem.Allocator, const_vtables: *std.array_list.Managed(ConstVTable)) void {
     for (const_vtables.items) |*item| item.deinit(allocator);
     const_vtables.deinit();
 }
 
-fn freeFunctionStarts(starts: *std.ArrayList(usize)) void {
+fn freeFunctionStarts(starts: *std.array_list.Managed(usize)) void {
     starts.deinit();
 }
 
-fn freeAnnotated(allocator: std.mem.Allocator, annotated: *std.ArrayList(AnnotatedInstruction)) void {
+fn freeAnnotated(allocator: std.mem.Allocator, annotated: *std.array_list.Managed(AnnotatedInstruction)) void {
     for (annotated.items) |item| {
         var owned = item;
         owned.deinit(allocator);
@@ -1931,7 +1931,7 @@ fn freeAnnotated(allocator: std.mem.Allocator, annotated: *std.ArrayList(Annotat
 }
 
 fn diffState(allocator: std.mem.Allocator, before: []const u16, after: []const u16) !RegStateDelta {
-    var changes = std.ArrayList(RegStateChange).init(allocator);
+    var changes = std.array_list.Managed(RegStateChange).init(allocator);
     errdefer changes.deinit();
     if (before.len != after.len) return error.InvalidOperand;
     for (before, after, 0..) |prev, next, idx| {
@@ -2020,7 +2020,7 @@ fn verifyBody(
     var defined_labels = std.AutoHashMap(u32, void).init(allocator);
     defer defined_labels.deinit();
 
-    var annotated = std.ArrayList(AnnotatedInstruction).init(allocator);
+    var annotated = std.array_list.Managed(AnnotatedInstruction).init(allocator);
     var completed = false;
     defer {
         if (!completed) {
@@ -2877,7 +2877,7 @@ fn buildVerifyChunks(
         return try allocator.alloc(ParallelFunctionChunk, 0);
     }
 
-    var chunks = std.ArrayList(ParallelFunctionChunk).init(allocator);
+    var chunks = std.array_list.Managed(ParallelFunctionChunk).init(allocator);
     errdefer chunks.deinit();
 
     var current_start: ?usize = null;
@@ -3011,7 +3011,7 @@ fn verifyParallel(
         threads[started_threads].join();
     }
 
-    var annotated = std.ArrayList(AnnotatedInstruction).init(allocator);
+    var annotated = std.array_list.Managed(AnnotatedInstruction).init(allocator);
     errdefer freeAnnotated(allocator, &annotated);
     var gas_alloc_bytes: u64 = 0;
     var gas_steps: u64 = 0;
@@ -4301,7 +4301,7 @@ test "early return leak PBT traps when random live allocations survive the fail 
 
     for (0..32) |_| {
         const extra_count = random.intRangeAtMost(usize, 1, 4);
-        var source = std.ArrayList(u8).init(std.testing.allocator);
+        var source = std.array_list.Managed(u8).init(std.testing.allocator);
         defer source.deinit();
 
         try source.appendSlice(
@@ -4313,7 +4313,7 @@ test "early return leak PBT traps when random live allocations survive the fail 
         try source.append('\n');
 
         for (0..extra_count) |idx| {
-            try source.writer().print("leak_{d} = alloc {d}\n", .{ idx, random.intRangeAtMost(u64, 1, 64) });
+            try source.print("leak_{d} = alloc {d}\n", .{ idx, random.intRangeAtMost(u64, 1, 64) });
         }
 
         try source.appendSlice(
@@ -4595,7 +4595,7 @@ fn snapshotResult(result: VerifyResult) VerifySnapshot {
 }
 
 fn appendOwnedText(
-    texts: *std.ArrayList([]u8),
+    texts: *std.array_list.Managed([]u8),
     allocator: std.mem.Allocator,
     comptime fmt: []const u8,
     args: anytype,
@@ -4611,11 +4611,11 @@ fn buildGasFixture(
     random: std.Random,
     bounded: bool,
 ) !GasFixture {
-    var instructions = std.ArrayList(inst.Instruction).init(allocator);
+    var instructions = std.array_list.Managed(inst.Instruction).init(allocator);
     var instructions_moved = false;
     defer if (!instructions_moved) instructions.deinit();
 
-    var owned_texts = std.ArrayList([]u8).init(allocator);
+    var owned_texts = std.array_list.Managed([]u8).init(allocator);
     var owned_texts_moved = false;
     defer if (!owned_texts_moved) {
         for (owned_texts.items) |text| allocator.free(text);
@@ -4930,7 +4930,7 @@ test "#loc PBT keeps trap upstream locations aligned with loc table entries" {
         const ghost_name = try std.fmt.allocPrint(std.testing.allocator, "ghost_{d}", .{iter});
         defer std.testing.allocator.free(ghost_name);
 
-        var source = std.ArrayList(u8).init(std.testing.allocator);
+        var source = std.array_list.Managed(u8).init(std.testing.allocator);
         errdefer source.deinit();
         const writer = source.writer();
 

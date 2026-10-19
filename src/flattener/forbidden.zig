@@ -23,7 +23,7 @@ fn stripComment(line: []const u8) []const u8 {
     const trimmed = std.mem.trim(u8, line, " \t\r");
     if (trimmed.len == 0 or std.mem.startsWith(u8, trimmed, "//")) return "";
     if (std.mem.indexOf(u8, trimmed, "//")) |idx| {
-        return std.mem.trimRight(u8, trimmed[0..idx], " \t");
+        return std.mem.trimEnd(u8, trimmed[0..idx], " \t");
     }
     return trimmed;
 }
