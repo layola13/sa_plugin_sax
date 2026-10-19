@@ -132,7 +132,9 @@ pub fn argvForWasm(
         owned_args.deinit();
     }
 
-    try argv.appendSlice(&.{ "zig", "build-exe", artifact_path });
+    const zig_exe = sio.resolveHostExe(allocator, "zig") catch null;
+    if (zig_exe) |p| try owned_args.append(p);
+    try argv.appendSlice(&.{ zig_exe orelse "zig", "build-exe", artifact_path });
     if (debug) {
         try argv.append("-g");
     }
